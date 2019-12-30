@@ -55,14 +55,14 @@
         created(){
             this.listen();
             this.getSuppliers();
-        },
-        mounted(){
-            this.initDatable();
-        },
+        },      
         methods:{
             getSuppliers(){
                 axios.get('service-providers')
-                    .then(res => this.tableData = res.data)
+                    .then(res => {
+                        this.tableData = res.data
+                        this.initDatable();
+                    })
                     .catch(error => Exception.handle(error))
             },
             editSupplier(supplier){

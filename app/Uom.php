@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Mechanic extends Model
+class Uom extends Model
 {
-    protected $guarded = [];
+  protected $gurded = [];
 }

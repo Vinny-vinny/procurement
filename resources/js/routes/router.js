@@ -13,6 +13,7 @@ import Project from "../components/projects/Index";
 import Items from "../components/items/Index";
 import Assets from "../components/assets/Index";
 import ServiceProviders from "../components/serviceproviders/ServiceProviders";
+import Budget from "../components/budgets/Index";
 
 
 Vue.use(VueRouter);
@@ -37,6 +38,7 @@ const routes = [
     {path:'/items',component:Items, beforeEnter: guard},
     {path:'/all-assets',component:Assets, beforeEnter: guard},
     {path:'/suppliers',component:ServiceProviders, beforeEnter: guard},
+    {path:'/budget',component:Budget, beforeEnter: guard},
 
 ];
 

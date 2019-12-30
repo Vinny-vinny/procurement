@@ -15,6 +15,13 @@ class CreateDepartmentBudgetsTable extends Migration
     {
         Schema::create('department_budgets', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->integer('department_id');
+            $table->bigInteger('total_amount');
+            $table->date('begins_on');
+            $table->date('ends_on');
+            $table->string('item_type');
+            $table->text('item_stock')->nullable();
+            $table->text('item_asset')->nullable();
             $table->timestamps();
         });
     }

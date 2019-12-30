@@ -6,8 +6,8 @@
             <!-- Default box -->
             <div class="box">
                 <div class="box-header with-border">
-                    <h3 class="box-title">Items</h3>
-                    <button class="btn btn-primary pull-right" @click="add_part=true">Add Part</button>
+                    <h3 class="box-title">Stock Items</h3>
+                    <button class="btn btn-primary pull-right" @click="add_part=true">Add Stock Item</button>
                     <button class="btn btn-success pull-right mr" @click="show_warehouse=true">{{importing ? 'Importing...':'Import from Sage'}}</button>
                     <div class="box-body" v-if="show_warehouse">
                         <form @submit.prevent="importParts()">
@@ -39,8 +39,8 @@
                             <td>{{part.description}}</td>
                             <td>{{part.cost}}</td>
                             <td>
-                                <button class="btn btn-success btn-sm" @click="editPart(part)"><i class="fa fa-edit"></i></button>
-<!--<button class="btn btn-danger btn-sm" @click="deletePart(part.id)"><i class="fa fa-trash"></i></button>-->
+                                <button class="btn btn-success btn-sm" style="display:none" @click="editPart(part)"><i class="fa fa-edit"></i></button>
+<button class="btn btn-danger btn-sm" style="display:none" @click="deletePart(part.id)"><i class="fa fa-trash"></i></button>
                             </td>
                         </tr>
                         </tbody>
@@ -69,14 +69,12 @@
             this.getParts();
             this.getWarehouses();
         },
-        mounted(){
-            this.initDatable();
-        },
+
         methods:{
             getWarehouses(){
               axios.get('warehouse')
                   .then(res => {
-                     this.warehouses = res.data
+                     this.warehouses = res.data;
                   })
             },
             importParts(){
@@ -91,7 +89,10 @@
             },
             getParts(){
                 axios.get('parts')
-                    .then(res => this.tableData = res.data)
+                    .then(res => {
+                        this.tableData = res.data
+                        this.initDatable();
+                    })
                     .catch(error => Exception.handle(error))
             },
             editPart(part){

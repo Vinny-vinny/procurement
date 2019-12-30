@@ -11,8 +11,7 @@ class ItemTypeSeeder extends Seeder
      */
     public function run()
     {
-        \App\ItemType::create(['name' => 'Construction']);
-        \App\ItemType::create(['name' => 'For Sale']);
-        \App\ItemType::create(['name' => 'For Hire']);
+        \App\ItemType::create(['name' => 'Stock Item']);
+        \App\ItemType::create(['name' => 'Asset']);
     }
 }

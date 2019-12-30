@@ -15,7 +15,8 @@ export default new Vuex.Store({
         departments:{},
         item_types:{},
         priorities:{},
-        machines:{}
+        machines:{},
+        budgets:{}
     },
     mutations:{
      pathTo(state, to) {
@@ -52,6 +53,9 @@ export default new Vuex.Store({
         },
         updateMachine(state,asset){
          state.machines = asset;
+        },
+        updateBudget(state,budget){
+         state.budgets = budget;
         }
     },
     actions:{
@@ -87,6 +91,9 @@ export default new Vuex.Store({
         },
         updateMachine({commit},asset){
         commit('updateMachine',asset);
-        }
+        },
+       updateBudget({commit},budget){
+        commit('updateBudget',budget);
+       }
     }
 })

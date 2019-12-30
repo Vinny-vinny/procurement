@@ -1,32 +1,36 @@
 <template>
     <div>
-        <requisition v-if="add_req" :edit="editing"></requisition>
+        <budget v-if="add_budget" :edit="editing"></budget>
         <!-- Main content -->
-        <section class="content" v-if="!add_req">
+        <section class="content" v-if="!add_budget">
             <!-- Default box -->
             <div class="box">
                 <div class="box-header with-border">
-                    <h3 class="box-title">Requisitions</h3>
-                    <button class="btn btn-primary pull-right" @click="add_req=true">Add Requisition</button>
+                    <h3 class="box-title">Department Budgets</h3>
+                    <button class="btn btn-primary pull-right" @click="add_budget=true">Add Department Budget</button>
                 </div>
                 <div class="box-body">
                     <table class="table table-striped dt">
                         <thead>
                         <tr>
-                            <th>#</th>
-                            <th>Date</th>
-                            <th>Description</th>
+                            <th>#</th>                          
+                            <th>Department</th>
+                            <th>Begins On</th>
+                            <th>Ends On</th>
+                            <th>Budget Amount</th>
                             <th>Actions</th>
                         </tr>
                         </thead>
                         <tbody>
-                        <tr v-for="req in tableData">
-                            <td>{{req.req_no}}</td>
-                            <td>{{req.date_requested}}</td>
-                            <td>{{req.description}}</td>
+                        <tr v-for="budget in tableData">
+                            <td>{{budget.id}}</td>
+                            <td>{{budget.department}}</td>
+                            <td>{{budget.start_date}}</td>
+                            <td>{{budget.end_date}}</td>
+                            <td>{{budget.total_amount | number}}</td>
                             <td>
-                                <button class="btn btn-success btn-sm" @click="editReq(req)"><i class="fa fa-edit"></i></button>
-                                <button class="btn btn-danger btn-sm" @click="deleteReq(req.id)"><i class="fa fa-trash"></i></button>
+                                <button class="btn btn-success btn-sm" @click="editBudget(budget)"><i class="fa fa-edit"></i></button>
+                                <!--<button class="btn btn-danger btn-sm" @click="deleteCategory(category.id)"><i class="fa fa-trash"></i></button>-->
                             </td>
                         </tr>
                         </tbody>
@@ -37,37 +41,39 @@
     </div>
 </template>
 <script>
-    import Requisition from "./Requisition";
+    import Budget from "./Budget";
     export default {
         data(){
             return {
                 tableData: [],
-                add_req: false,
+                add_budget: false,
                 editing: false
+
             }
         },
         created(){
             this.listen();
-            this.getRqs();
-        },       
+            this.getBudgets();
+        },
         methods:{
-            getRqs(){
-                axios.get('requisitions')
-                    .then(res => {
-                        this.tableData = res.data.requisitions
+            getBudgets(){
+                axios.get('department-budget')
+                    .then(res =>{
+                        this.tableData = res.data.budgets
+                        console.log()
                         this.initDatable();
                     })
                     .catch(error => Exception.handle(error))
             },
-            editReq(rq){
-                this.$store.dispatch('updateRequisition',rq)
+            editBudget(budget){
+                this.$store.dispatch('updateBudget',budget)
                     .then(() =>{
                         this.editing=true;
-                        this.add_req=true;
+                        this.add_budget=true;
                     })
             },
-            deleteReq(id){
-                axios.delete(`requisitions/${id}`)
+            deleteBudget(id){
+                axios.delete(`department-budget/${id}`)
                     .then(res => {
                         for (let i=0;i<this.tableData.length;i++){
                             if (this.tableData[i].id == res.data){
@@ -78,25 +84,25 @@
                     .catch(error => Exception.handle(error))
             },
             listen(){
-                eventBus.$on('listRequisitions',(rq) =>{
-                    this.tableData.unshift(rq);
-                    this.add_req =false;
+                eventBus.$on('listBudgets',(budget) =>{
+                    this.tableData.unshift(budget);
+                    this.add_budget =false;
                     this.initDatable();
                 });
                 eventBus.$on('cancel',()=>{
-                    this.add_req = false;
+                    this.add_budget = false;
                     this.editing = false;
                     this.initDatable();
                 });
-                eventBus.$on('updateRequisition',(rq)=>{
-                    this.add_req = false;
+                eventBus.$on('updateBudget',(budget)=>{
+                    this.add_budget = false;
                     this.editing = false;
                     for (let i=0;i<this.tableData.length;i++){
-                        if (this.tableData[i].id == rq.id){
+                        if (this.tableData[i].id == budget.id){
                             this.tableData.splice(i,1);
                         }
                     }
-                    this.tableData.unshift(rq);
+                    this.tableData.unshift(budget);
                     this.initDatable();
                 });
             },
@@ -120,7 +126,7 @@
             },
         },
         components:{
-            Requisition
+            Budget
         }
     }
 </script>

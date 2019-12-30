@@ -50,14 +50,14 @@
         created(){
             this.listen();
             this.getCategories();
-        },
-        mounted(){
-            this.initDatable();
-        },
+        },       
         methods:{
             getCategories(){
                 axios.get('categories')
-                    .then(res => this.tableData = res.data)
+                    .then(res => {
+                        this.tableData = res.data
+                        this.initDatable()
+                    })
                     .catch(error => Exception.handle(error))
             },
             editCategory(category){

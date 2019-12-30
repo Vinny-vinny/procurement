@@ -17,7 +17,7 @@ class RequisitionResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'item_type_id' => $this->item_type_id,
+            'item_type' => $this->item_type,
             'requisition_type_id' => $this->requisition_type_id,
             'req_date' => $this->req_date,
             'date_requested' => Carbon::parse($this->req_date)->format('d/m/Y'),
@@ -28,9 +28,9 @@ class RequisitionResource extends JsonResource
             'requisition_by' => $this->requisition_by,
             'person_requested' => $this->user->name,
             'description' => $this->description,
-            'req_no' => $this->req_no,
-            'item_id' => $this->item_id,
-            'is_active' => $this->is_active
+            'req_no' => $this->req_no,         
+            'item_stock' => json_decode($this->item_stock),
+            'item_asset' => json_decode($this->item_asset)
 
         ];
     }

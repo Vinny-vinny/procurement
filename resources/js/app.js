@@ -49,6 +49,12 @@ Vue.filter('number', function(value) {
      return new Intl.NumberFormat().format(value)
 });
 
+import DateConverter from './helpers/DateConverter';
+window.DateConverter = DateConverter;
+
+import Custom from './helpers/Custom';
+window.Custom = Custom;
+
 import Exception from "./helpers/Exception";
 window.Exception = Exception;
 

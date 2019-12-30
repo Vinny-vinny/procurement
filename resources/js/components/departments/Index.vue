@@ -50,13 +50,14 @@
             this.listen();
             this.getDepartments();
         },
-        mounted(){
-            this.initDatable();
-        },
+
         methods:{
             getDepartments(){
                 axios.get('departments')
-                    .then(res => this.tableData = res.data)
+                    .then(res => {
+                        this.tableData = res.data
+                        this.initDatable()
+                    })
                     .catch(error => Exception.handle(error))
             },
             editDepartment(dept){
@@ -64,6 +65,7 @@
                     .then(() =>{
                         this.editing=true;
                         this.add_department=true;
+                        this.initDatable();
                     })
             },
             deleteDepartment(id){
@@ -74,6 +76,7 @@
                                 this.tableData.splice(i,1);
                             }
                         }
+
                     })
                     .catch(error => Exception.handle(error))
             },

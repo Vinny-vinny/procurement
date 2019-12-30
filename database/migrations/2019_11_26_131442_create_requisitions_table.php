@@ -20,12 +20,13 @@ class CreateRequisitionsTable extends Migration
             $table->datetime('req_date');
             $table->integer('department_id');
             $table->integer('project_id');
-            $table->integer('item_type_id');
-            $table->string('item_id');
+            $table->string('item_type');
+            $table->text('item_stock')->nullable();
+            $table->text('item_asset')->nullable();                     
             $table->integer('priority_id');
             $table->integer('requisition_by');
             $table->string('description');
-            $table->string('is_approved')->nullable();
+            $table->string('is_approved')->nullable();      
             $table->integer('modified_by')->nullable();
             $table->text('rejection_reason')->nullable();
             $table->integer('is_active')->default(1);

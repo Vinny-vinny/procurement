@@ -17,7 +17,18 @@
             <!-- Sidebar Menu -->
             <ul class="sidebar-menu" data-widget="tree">
                 <li class="header"></li>
+
                 <!-- Optionally, you can add icons to the links -->
+                    <li class="treeview">
+                    <a href="#"><i class="fa fa-money"></i> <span>Budgeting</span>
+                        <span class="pull-right-container">
+                <i class="fa fa-angle-left pull-right"></i>
+              </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li><router-link to="/budget" class="fa fa-circle-o"> Department Budget</router-link></li>                   
+                    </ul>
+                </li>
                 <li><router-link to="/requisitions"><i class="fa fa-database"></i> <span>Requisitions</span></router-link></li>
                 <li class="treeview">
                     <a href="#"><i class="fa fa-cogs"></i> <span>Settings</span>
@@ -26,14 +37,14 @@
               </span>
                     </a>
                     <ul class="treeview-menu">
-                        <li><router-link to="/users">Users</router-link></li>
-                        <li><router-link to="/categories">Categories</router-link></li>
-                        <li><router-link to="/requisition-type">Requisition Types</router-link></li>
-                        <li><router-link to="/departments">Departments</router-link></li>
-                        <li><router-link to="/item-types">Item Types</router-link></li>
-                        <li><router-link to="/priorities">Priorities</router-link></li>
-                        <li><router-link to="/projects">Projects</router-link></li>
-                        <li><router-link to="/all-assets">Assets</router-link></li>
+                        <li><router-link to="/users" class="fa fa-circle-o"> Users</router-link></li>
+                        <li><router-link to="/categories" class="fa fa-circle-o"> Categories</router-link></li>
+                        <li><router-link to="/requisition-type" class="fa fa-circle-o"> Requisition Types</router-link></li>
+                        <li><router-link to="/departments" class="fa fa-circle-o"> Departments</router-link></li>
+                        <li><router-link to="/priorities" class="fa fa-circle-o"> Priorities</router-link></li>
+                        <li><router-link to="/projects" class="fa fa-circle-o"> Projects</router-link></li>
+                        <li><router-link to="/all-assets" class="fa fa-circle-o"> Assets</router-link></li>
+                        <li><router-link to="/items" class="fa fa-circle-o"> Stock Items</router-link></li>
                     </ul>
                 </li>
             </ul>

@@ -53,14 +53,14 @@
         created(){
             this.listen();
             this.getUsers();
-        },
-        mounted(){
-            this.initDatable();
-        },
+        },     
         methods:{
             getUsers(){
                 axios.get('users')
-                    .then(res => this.tableData = res.data)
+                    .then(res => {
+                        this.tableData = res.data
+                        this.initDatable();
+                    })
                     .catch(error => Exception.handle(error))
             },
             editUser(user){

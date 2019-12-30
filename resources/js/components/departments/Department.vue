@@ -17,17 +17,6 @@
                             <label>Description</label>
                             <input type="text" class="form-control" v-model="form.description" required>
                         </div>
-                        <div class="form-group">
-                            <label>Status</label>
-                            <select v-model="form.is_active" class="form-control" required>
-                                <option value="1">Active</option>
-                                <option value="0">Inactive</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>End date</label>
-                            <datepicker v-model="form.end_date" required></datepicker>
-                        </div>
                         <button type="submit" class="btn btn-primary">{{edit_department ? 'Update' : 'Save'}}</button>
                         <button type="button" class="btn btn-outline-danger" @click="cancel">Cancel</button>
                     </form>
@@ -47,8 +36,6 @@
                 form:{
                     name:'',
                     description:'',
-                    is_active:'',
-                    end_date:'',
                     id:''
                 },
                 edit_department: this.edit
@@ -59,7 +46,6 @@
         },
         methods:{
             saveDepartment(){
-                this.form.end_date = this.convertDate(this.form.end_date);
                 this.edit_department ? this.update() : this.save();
             },
             save(){

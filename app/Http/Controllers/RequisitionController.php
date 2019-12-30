@@ -3,14 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Department;
+use App\DepartmentBudget;
+use App\Http\Resources\DepartmentBudgetResource;
 use App\Http\Resources\RequisitionResource;
-use App\Item;
-use App\ItemType;
+use App\Machine;
 use App\Part;
 use App\Priority;
 use App\Project;
 use App\Requisition;
 use App\RequisitionType;
+use App\Uom;
 use Illuminate\Http\Request;
 
 class RequisitionController extends Controller
@@ -27,9 +29,11 @@ class RequisitionController extends Controller
             'requisition_types' => RequisitionType::all(),
             'projects' => Project::all(),
             'departments' => Department::all(),
-            'item_types' => ItemType::all(),
-            'items' => Part::all(),
-            'priorities' => Priority::all()
+            'budgets' => DepartmentBudgetResource::collection(DepartmentBudget::all()),           
+            'priorities' => Priority::all(),
+            'stock_items' => Part::all(),
+            'assets' => Machine::all(),
+            'uoms' => Uom::all()
         ]);
     }
 
@@ -43,6 +47,8 @@ class RequisitionController extends Controller
     {
         $req = Requisition::count() +1;
         $request['req_no'] = 'REQ00'.$req;
+        $request['item_stock'] = json_encode($request->get('item_stock'));
+        $request['item_asset'] = json_encode($request->get('item_asset'));
         $requisition = Requisition::create($request->all());
         return response()->json(new RequisitionResource($requisition));
     }
@@ -68,6 +74,8 @@ class RequisitionController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $request['item_stock'] = json_encode($request->get('item_stock'));
+        $request['item_asset'] = json_encode($request->get('item_asset'));
         Requisition::find($id)->update($request->except(['date_requested','project','person_requested']));
         return response()->json(new RequisitionResource(Requisition::find($id)));
     }

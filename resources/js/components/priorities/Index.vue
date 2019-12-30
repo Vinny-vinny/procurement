@@ -49,14 +49,14 @@
         created(){
             this.listen();
             this.getPriorities();
-        },
-        mounted(){
-            this.initDatable();
-        },
+        },      
         methods:{
             getPriorities(){
                 axios.get('priorities')
-                    .then(res => this.tableData = res.data)
+                    .then(res => {
+                        this.tableData = res.data
+                        this.initDatable();
+                    })
                     .catch(error => Exception.handle(error))
             },
             editPriority(item){

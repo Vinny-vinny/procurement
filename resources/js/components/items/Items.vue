@@ -5,7 +5,7 @@
             <!-- Default box -->
             <div class="box">
                 <div class="box-header with-border">
-                    <h3 class="box-title">{{edit_part ? 'Update Item' : 'New Item'}}</h3>
+                    <h3 class="box-title">{{edit_part ? 'Update Stock Item' : 'New Stock Item'}}</h3>
                 </div>
                 <div class="box-body">
                     <form @submit.prevent="savePart()">

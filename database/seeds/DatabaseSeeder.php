@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
          $this->call(PrioritySeeder::class);
          $this->call(RequisitionTypeSeeder::class);
          $this->call(CustomerTypesSeeder::class);
+         $this->call(Uomseeder::class);
 
 
     }
