@@ -20,7 +20,7 @@ class DepartmentBudgetResource extends JsonResource
             'department_id' => $this->department_id,
             'department' => $this->department->name,
             'total_amount' => $this->total_amount,
-             'total' => $this->total_amount,
+            'total' => $this->total_amount,
             'begins_on' => $this->begins_on,
             'ends_on' => $this->ends_on,
             'start_date' => Carbon::parse($this->begins_on)->format('d/m/Y'),

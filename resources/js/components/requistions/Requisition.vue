@@ -207,52 +207,60 @@
             },
             fetchItems(){
                 let budget_item ={} ;
-                let stk_items;
-                let asset_item;
+                let stk_items = {};
+                let asset_item = {};
              if (this.form.department_id =='') {
                 this.form.item_type = '';
                 return this.$toastr.e('Please select department first');
-             }
-          
-            for(let i=0;i<this.budgets.length;i++){
-                if (this.budgets[i]['item_type'] == this.form.item_type && this.budgets[i]['department_id'] ==this.form.department_id) {                    
-                  budget_item = this.budgets[i];
-                }                
-            }
-            if (Custom.isEmpty(budget_item)) {                      
-              this.show_asset = false;
-              this.show_stock = false;   
-               this.form.item_stock = [{item_id: '',qty:'',uom: '',scheduled_date:''}];
-               this.form.item_asset = [{item_id: '',qty:'',uom: '',scheduled_date:''}];
-               return this.$toastr.e(`The selected department does not have budgeted ${this.form.item_type} item`);
-            }
-            if (budget_item['item_type'] =='stock') {                          
-                this.show_stock = true;
-                this.show_asset = false;
-                stk_items = budget_item['item_stock'];            
-               this.filtered_stock_items = [];
-                for(let i=0;i<stk_items.length;i++){
-                    for(let j=0;j<this.stock_items.length;j++){                     
-                        if (stk_items[i]['item_id'] == this.stock_items[j]['id']) {
-                            this.filtered_stock_items.push(this.stock_items[j]);
-                        }
-                    }
-                }
+             }                 
 
-            }
-             if (budget_item['item_type'] =='asset') {
+            for(let i=0;i<this.budgets.length;i++){
+                if (this.form.item_type=='asset' && this.budgets[i]['department_id'] ==this.form.department_id) {
+                    if(this.budgets[i]['item_asset'][0]['item_id'] != null){
+                        asset_item = this.budgets[i]['item_asset'];
+                    }
+                     if (Custom.isEmpty(asset_item)) {
+                        this.show_asset = false;
+                        this.show_stock = false;   
+                        this.form.item_stock = [{item_id: '',qty:'',uom: '',scheduled_date:''}];
+                        this.form.item_asset = [{item_id: '',qty:'',uom: '',scheduled_date:''}]; 
+                      return this.$toastr.e(`The selected department does not have budgeted Assets.`);
+                     }  
                 this.show_stock = false;
-                this.show_asset = true;
-               asset_item = budget_item['item_asset'];  
-               this.filtered_assets = [];           
+                this.show_asset = true;              
+                this.filtered_assets = [];           
                for(let i=0;i<asset_item.length;i++){
                 for(let j=0;j<this.assets.length;j++){
                     if (asset_item[i]['item_id'] == this.assets[j]['id']) {
                         this.filtered_assets.push(this.assets[j]);
                     }
                 }
-               }
-            }
+               }               
+                } 
+
+                 if (this.form.item_type=='stock' && this.budgets[i]['department_id'] ==this.form.department_id) {
+                    if(this.budgets[i]['item_stock'][0]['item_id'] != null){
+                        stk_items = this.budgets[i]['item_stock'];
+                    } 
+                     if (Custom.isEmpty(stk_items)) { 
+                        this.show_asset = false;
+                        this.show_stock = false;   
+                        this.form.item_stock = [{item_id: '',qty:'',uom: '',scheduled_date:''}];
+                        this.form.item_asset = [{item_id: '',qty:'',uom: '',scheduled_date:''}];
+                      return this.$toastr.e(`The selected department does not have budgeted Stock Items.`);
+                     }
+                this.show_stock = true;
+                this.show_asset = false;                       
+                this.filtered_stock_items = [];
+                for(let i=0;i<stk_items.length;i++){
+                    for(let j=0;j<this.stock_items.length;j++){                     
+                        if (stk_items[i]['item_id'] == this.stock_items[j]['id']) {
+                            this.filtered_stock_items.push(this.stock_items[j]);
+                        }
+                    }
+                }               
+                }             
+            }           
             },
             getRequisitions(){
               axios.get('requisitions')

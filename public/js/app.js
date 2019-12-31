@@ -2264,19 +2264,15 @@ __webpack_require__.r(__webpack_exports__);
       var total = 0;
 
       if (this.stock_item !== '' && this.stock_item !== '') {
-        if (this.form.item_type == 'stock') {
-          for (var i = 0; i < this.form.item_stock.length; i++) {
-            if (this.form.item_stock[i]['item_id'] !== '' && this.form.item_stock[i]['amount'] !== '') {
-              total += parseFloat(this.form.item_stock[i]['amount']);
-            }
+        for (var i = 0; i < this.form.item_stock.length; i++) {
+          if (this.form.item_stock[i]['item_id'] !== '' && this.form.item_stock[i]['amount'] !== '') {
+            total += parseFloat(this.form.item_stock[i]['amount']);
           }
         }
 
-        if (this.form.item_type == 'asset') {
-          for (var k = 0; k < this.form.item_asset.length; k++) {
-            if (this.form.item_asset[k]['item_id'] !== '' && this.form.item_asset[k]['amount'] !== '') {
-              total += parseFloat(this.form.item_asset[k]['amount']);
-            }
+        for (var k = 0; k < this.form.item_asset.length; k++) {
+          if (this.form.item_asset[k]['item_id'] !== '' && this.form.item_asset[k]['amount'] !== '') {
+            total += parseFloat(this.form.item_asset[k]['amount']);
           }
         }
 
@@ -4460,8 +4456,8 @@ __webpack_require__.r(__webpack_exports__);
     },
     fetchItems: function fetchItems() {
       var budget_item = {};
-      var stk_items;
-      var asset_item;
+      var stk_items = {};
+      var asset_item = {};
 
       if (this.form.department_id == '') {
         this.form.item_type = '';
@@ -4469,54 +4465,74 @@ __webpack_require__.r(__webpack_exports__);
       }
 
       for (var i = 0; i < this.budgets.length; i++) {
-        if (this.budgets[i]['item_type'] == this.form.item_type && this.budgets[i]['department_id'] == this.form.department_id) {
-          budget_item = this.budgets[i];
-        }
-      }
+        if (this.form.item_type == 'asset' && this.budgets[i]['department_id'] == this.form.department_id) {
+          if (this.budgets[i]['item_asset'][0]['item_id'] != null) {
+            asset_item = this.budgets[i]['item_asset'];
+          }
 
-      if (Custom.isEmpty(budget_item)) {
-        this.show_asset = false;
-        this.show_stock = false;
-        this.form.item_stock = [{
-          item_id: '',
-          qty: '',
-          uom: '',
-          scheduled_date: ''
-        }];
-        this.form.item_asset = [{
-          item_id: '',
-          qty: '',
-          uom: '',
-          scheduled_date: ''
-        }];
-        return this.$toastr.e("The selected department does not have budgeted ".concat(this.form.item_type, " item"));
-      }
+          if (Custom.isEmpty(asset_item)) {
+            this.show_asset = false;
+            this.show_stock = false;
+            this.form.item_stock = [{
+              item_id: '',
+              qty: '',
+              uom: '',
+              scheduled_date: ''
+            }];
+            this.form.item_asset = [{
+              item_id: '',
+              qty: '',
+              uom: '',
+              scheduled_date: ''
+            }];
+            return this.$toastr.e("The selected department does not have budgeted Assets.");
+          }
 
-      if (budget_item['item_type'] == 'stock') {
-        this.show_stock = true;
-        this.show_asset = false;
-        stk_items = budget_item['item_stock'];
-        this.filtered_stock_items = [];
+          this.show_stock = false;
+          this.show_asset = true;
+          this.filtered_assets = [];
 
-        for (var _i = 0; _i < stk_items.length; _i++) {
-          for (var j = 0; j < this.stock_items.length; j++) {
-            if (stk_items[_i]['item_id'] == this.stock_items[j]['id']) {
-              this.filtered_stock_items.push(this.stock_items[j]);
+          for (var _i = 0; _i < asset_item.length; _i++) {
+            for (var j = 0; j < this.assets.length; j++) {
+              if (asset_item[_i]['item_id'] == this.assets[j]['id']) {
+                this.filtered_assets.push(this.assets[j]);
+              }
             }
           }
         }
-      }
 
-      if (budget_item['item_type'] == 'asset') {
-        this.show_stock = false;
-        this.show_asset = true;
-        asset_item = budget_item['item_asset'];
-        this.filtered_assets = [];
+        if (this.form.item_type == 'stock' && this.budgets[i]['department_id'] == this.form.department_id) {
+          if (this.budgets[i]['item_stock'][0]['item_id'] != null) {
+            stk_items = this.budgets[i]['item_stock'];
+          }
 
-        for (var _i2 = 0; _i2 < asset_item.length; _i2++) {
-          for (var _j = 0; _j < this.assets.length; _j++) {
-            if (asset_item[_i2]['item_id'] == this.assets[_j]['id']) {
-              this.filtered_assets.push(this.assets[_j]);
+          if (Custom.isEmpty(stk_items)) {
+            this.show_asset = false;
+            this.show_stock = false;
+            this.form.item_stock = [{
+              item_id: '',
+              qty: '',
+              uom: '',
+              scheduled_date: ''
+            }];
+            this.form.item_asset = [{
+              item_id: '',
+              qty: '',
+              uom: '',
+              scheduled_date: ''
+            }];
+            return this.$toastr.e("The selected department does not have budgeted Stock Items.");
+          }
+
+          this.show_stock = true;
+          this.show_asset = false;
+          this.filtered_stock_items = [];
+
+          for (var _i2 = 0; _i2 < stk_items.length; _i2++) {
+            for (var _j = 0; _j < this.stock_items.length; _j++) {
+              if (stk_items[_i2]['item_id'] == this.stock_items[_j]['id']) {
+                this.filtered_stock_items.push(this.stock_items[_j]);
+              }
             }
           }
         }
@@ -27095,7 +27111,7 @@ var render = function() {
     [
       _c("strong", [
         _vm._v("Copyright © " + _vm._s(_vm.date()) + " "),
-        _c("a", { attrs: { href: "#" } }, [_vm._v("Logistics")]),
+        _c("a", { attrs: { href: "#" } }, [_vm._v("ESL")]),
         _vm._v(".")
       ]),
       _vm._v(" All rights reserved.\n")

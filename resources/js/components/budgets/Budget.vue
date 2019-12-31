@@ -144,22 +144,19 @@
         watch:{
        budgeting(){ 
        let total =0;  
-        if (this.stock_item !=='' && this.stock_item !=='') {     
-         if (this.form.item_type =='stock') {         
+        if (this.stock_item !=='' && this.stock_item !=='') {             
          for(let i=0;i<this.form.item_stock.length;i++){         
             if (this.form.item_stock[i]['item_id'] !=='' && this.form.item_stock[i]['amount'] !=='') {
                 total+=parseFloat(this.form.item_stock[i]['amount']);
             }   
          }
-     }
-        if (this.form.item_type =='asset') {            
+          
             for(let k=0;k<this.form.item_asset.length;k++){         
             if (this.form.item_asset[k]['item_id'] !=='' && this.form.item_asset[k]['amount'] !=='') {
                 total+=parseFloat(this.form.item_asset[k]['amount']);
             }   
          }
-     }
-        
+             
         this.form.total_amount = total;
         }      
        
