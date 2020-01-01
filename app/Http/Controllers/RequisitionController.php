@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Department;
 use App\DepartmentBudget;
+use Carbon\Carbon;
 use App\Http\Resources\DepartmentBudgetResource;
 use App\Http\Resources\RequisitionResource;
 use App\Machine;
@@ -64,7 +65,14 @@ class RequisitionController extends Controller
         //
     }
 
+//requistions between dates
+    public function customRequisitions(Request $request){
+        $from = Carbon::parse($request->from)->startOfDay()->format('Y-m-d H:m:s');
+        $to = Carbon::parse($request->to)->endOfDay()->format('Y-m-d H:m:s');    
+        $requsitions = RequisitionResource::collection(Requisition::whereBetween('req_date',[$from,$to])->get());
+        return response()->json($requsitions);
 
+    }
     /**
      * Update the specified resource in storage.
      *

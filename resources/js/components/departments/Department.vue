@@ -92,7 +92,7 @@
         border-color: #d2d6de;
         display: block;
         width: 100%;
-        height: 34px;
+        height: calc(2.25rem + 2px);
         padding: 6px 12px;
         font-size: 14px;
         line-height: 1.42857143;

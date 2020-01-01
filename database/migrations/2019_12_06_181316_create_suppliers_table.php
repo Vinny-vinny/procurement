@@ -15,14 +15,13 @@ class CreateSuppliersTable extends Migration
     {
         Schema::create('suppliers', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('Account');
-            $table->string('Name');
-            $table->string('Email')->unique();
-            $table->string('Physical_Address');
-            $table->string('TaxNumber');
-            $table->integer('Telephone');
-            $table->string('ContactPerson');
-            $table->integer('CurrencyId');
+            $table->string('account');
+            $table->string('name');
+            $table->integer('dc_link')->nullable();
+            $table->string('email')->nullable();
+            $table->string('physical_address')->nullable();
+            $table->string('tax_no')->nullable();
+            $table->string('phone')->nullable();                 
             $table->timestamps();
         });
     }

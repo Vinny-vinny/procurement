@@ -14,12 +14,20 @@
                             <input type="text" class="form-control" v-model="form.name" required>
                         </div>
                         <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" class="form-control" v-model="form.email" required>
+                        </div>
+                        <div class="form-group">
                             <label>Account</label>
                             <input type="text" class="form-control" v-model="form.account" required>
                         </div>
                         <div class="form-group">
                             <label>Phone</label>
                             <input type="text" class="form-control" v-model="form.phone" required>
+                        </div>
+                          <div class="form-group">
+                            <label>Physical Address</label>
+                            <input type="text" class="form-control" v-model="form.physical_address" required>
                         </div>
                         <div class="form-group">
                             <label>Tax No</label>
@@ -42,7 +50,9 @@
             return {
                 form:{
                     name:'',
+                    email:'',
                     phone:'',
+                    physical_address:'',
                     account:'',
                     tax_no:'',
                     id:''

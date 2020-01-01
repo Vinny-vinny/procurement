@@ -12,8 +12,9 @@ import Priority from "../components/priorities/Index";
 import Project from "../components/projects/Index";
 import Items from "../components/items/Index";
 import Assets from "../components/assets/Index";
-import ServiceProviders from "../components/serviceproviders/ServiceProviders";
+import ServiceProviders from "../components/suppliers/Index";
 import Budget from "../components/budgets/Index";
+import Enquiry from "../components/pos/enquiries/Enquiry";
 
 
 Vue.use(VueRouter);
@@ -39,6 +40,7 @@ const routes = [
     {path:'/all-assets',component:Assets, beforeEnter: guard},
     {path:'/suppliers',component:ServiceProviders, beforeEnter: guard},
     {path:'/budget',component:Budget, beforeEnter: guard},
+    {path:'/enquiry',component:Enquiry, beforeEnter: guard},
 
 ];
 

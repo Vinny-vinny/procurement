@@ -38,6 +38,7 @@
                     </a>
                     <ul class="treeview-menu">
                         <li><router-link to="/users" class="fa fa-circle-o"> Users</router-link></li>
+                          <li><router-link to="/suppliers" class="fa fa-circle-o"> Suppliers</router-link></li>
                         <li><router-link to="/categories" class="fa fa-circle-o"> Categories</router-link></li>
                         <li><router-link to="/requisition-type" class="fa fa-circle-o"> Requisition Types</router-link></li>
                         <li><router-link to="/departments" class="fa fa-circle-o"> Departments</router-link></li>

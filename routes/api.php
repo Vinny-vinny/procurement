@@ -27,6 +27,7 @@ Route::apiResource('projects','ProjectController');
 Route::apiResource('customers','CustomerController');
 Route::apiResource('customer-types','CustomerTypeController');
 Route::apiResource('requisitions','RequisitionController');
+Route::post('custom-requistions','RequisitionController@customRequisitions');
 Route::get('import-projects','ProjectController@importProjects');
 Route::get('import-customers','CustomerController@importCustomers');
 ///
@@ -35,6 +36,9 @@ Route::apiResource('departments','DepartmentController');
 Route::apiResource('department-budget','DepartmentBudgetController');
 Route::apiResource('item-types','ItemTypesController');
 Route::apiResource('priorities','PriorityController');
+Route::apiResource('suppliers','SupplierController');
+Route::get('import-suppliers','SupplierController@importSuppliers');
+Route::apiResource('enquiry','EnquiryController');
 
 Route::group([
     'middleware' => 'api',

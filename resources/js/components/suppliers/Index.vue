@@ -1,6 +1,6 @@
 <template>
     <div>
-        <service-providers v-if="add_supplier" :edit="editing"></service-providers>
+        <suppliers v-if="add_supplier" :edit="editing"></suppliers>
         <!-- Main content -->
         <section class="content" v-if="!add_supplier">
             <!-- Default box -->
@@ -18,7 +18,7 @@
                             <th>Name</th>
                             <th>Account</th>
                             <th>Phone</th>
-                            <th>Tax #</th>
+                            <th>Email</th>
                             <th>Actions</th>
                         </tr>
                         </thead>
@@ -28,7 +28,7 @@
                             <td>{{supplier.name}}</td>
                             <td>{{supplier.account}}</td>
                             <td>{{supplier.phone}}</td>
-                            <td>{{supplier.tax_no}}</td>
+                            <td>{{supplier.email}}</td>
                             <td>
                                 <button class="btn btn-success btn-sm" @click="editSupplier(supplier)"><i class="fa fa-edit"></i></button>
                                 <button class="btn btn-danger btn-sm" @click="deleteSupplier(supplier.id)"><i class="fa fa-trash"></i></button>
@@ -42,7 +42,7 @@
     </div>
 </template>
 <script>
-    import ServiceProviders from "./ServiceProviders";
+    import Suppliers from "./Supplier";
     export default {
         data(){
             return {
@@ -58,7 +58,7 @@
         },      
         methods:{
             getSuppliers(){
-                axios.get('service-providers')
+                axios.get('suppliers')
                     .then(res => {
                         this.tableData = res.data
                         this.initDatable();
@@ -73,7 +73,7 @@
                     })
             },
             deleteSupplier(id){
-                axios.delete(`service-providers/${id}`)
+                axios.delete(`suppliers/${id}`)
                     .then(res => {
                         for (let i=0;i<this.tableData.length;i++){
                             if (this.tableData[i].id == res.data){
@@ -85,15 +85,15 @@
             },
             importSuppliers(){
                 this.importing = true;
-                   axios.get('import-providers')
+                   axios.get('import-suppliers')
                   .then(suppliers => {
                       console.log(suppliers.data.length)
                         if(suppliers.data.length){
-                         this.getSuppliers();
-                         this.initDatable();
+                         this.getSuppliers();                         
                          }
                     this.$toastr.s('Suppliers successfully imported.')
                     this.importing=false;
+                    this.$router.go();
                   })
             },
             listen(){
@@ -139,7 +139,7 @@
             },
         },
         components:{
-            ServiceProviders
+            Suppliers
         }
     }
 </script>
