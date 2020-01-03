@@ -30,6 +30,18 @@
                     </ul>
                 </li>
                 <li><router-link to="/requisitions"><i class="fa fa-database"></i> <span>Requisitions</span></router-link></li>
+
+                 <li class="treeview">
+                    <a href="#"><i class="fa fa-shopping-basket"></i> <span>Purchases</span>
+                        <span class="pull-right-container">
+                <i class="fa fa-angle-left pull-right"></i>
+              </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li><router-link to="/enquiry" class="fa fa-circle-o"> Purchase Enquiry</router-link></li>                   
+                    </ul>
+                </li>
+
                 <li class="treeview">
                     <a href="#"><i class="fa fa-cogs"></i> <span>Settings</span>
                         <span class="pull-right-container">

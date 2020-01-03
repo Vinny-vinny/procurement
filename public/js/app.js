@@ -2263,21 +2263,23 @@ __webpack_require__.r(__webpack_exports__);
     budgeting: function budgeting() {
       var total = 0;
 
-      if (this.stock_item !== '' && this.stock_item !== '') {
+      if (Object.values(this.form.item_stock[0])[0] !== '' && Object.values(this.form.item_stock[0])[0] !== null || Object.values(this.form.item_stock[0])[1] !== '' && Object.values(this.form.item_stock[0])[1] !== null) {
         for (var i = 0; i < this.form.item_stock.length; i++) {
           if (this.form.item_stock[i]['item_id'] !== '' && this.form.item_stock[i]['amount'] !== '') {
             total += parseFloat(this.form.item_stock[i]['amount']);
           }
         }
+      }
 
+      if (Object.values(this.form.item_asset[0])[0] !== '' && Object.values(this.form.item_asset[0])[0] !== null || Object.values(this.form.item_asset[0])[1] !== '' && Object.values(this.form.item_asset[0])[1] !== null) {
         for (var k = 0; k < this.form.item_asset.length; k++) {
           if (this.form.item_asset[k]['item_id'] !== '' && this.form.item_asset[k]['amount'] !== '') {
             total += parseFloat(this.form.item_asset[k]['amount']);
           }
         }
-
-        this.form.total_amount = total;
       }
+
+      this.form.total_amount = total;
     }
   },
   computed: {
@@ -2368,9 +2370,8 @@ __webpack_require__.r(__webpack_exports__);
     },
     listen: function listen() {
       if (this.edit) {
-        this.form = this.$store.state.budgets;
-        this.form.total_amount = this.$store.state.budgets.total;
-        console.log(this.form);
+        this.form = this.$store.state.budgets; // this.form.total_amount = this.$store.state.budgets.total_amount;                
+
         this.itemType();
       }
     }
@@ -3661,6 +3662,18 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   methods: {
     username: function username() {
@@ -3908,6 +3921,10 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
 
 
 
@@ -3919,6 +3936,7 @@ __webpack_require__.r(__webpack_exports__);
         title: '',
         description: '',
         supplier_id: [],
+        enquiry_date: '',
         req_date_from: '',
         req_date_to: '',
         item_type: '',
@@ -3945,10 +3963,38 @@ __webpack_require__.r(__webpack_exports__);
       show_stock: false,
       uoms: {},
       filtered_assets: [],
-      filtered_stocks: []
+      filtered_stocks: [],
+      stk_id: '',
+      sch_date: '',
+      qty: ''
     };
   },
   watch: {
+    reqs: function reqs() {
+      for (var i = 0; i < this.filtered_assets.length; i++) {
+        if (Object.values(this.form.item_asset[0])[0] !== '') {
+          for (var j = 0; j < this.form.item_asset.length; j++) {
+            if (this.form.item_asset[j]['item_id'] == this.filtered_assets[i]['id']) {
+              this.form.item_asset[j]['qty'] = this.filtered_assets[i]['qty'];
+              this.form.item_asset[j]['uom'] = this.filtered_assets[i]['uom'];
+              this.form.item_asset[j]['scheduled_date'] = this.filtered_assets[i]['scheduled_date'];
+            }
+          }
+        }
+      }
+
+      for (var _i = 0; _i < this.filtered_stocks.length; _i++) {
+        if (Object.values(this.form.item_stock[0])[0] !== '') {
+          for (var _j = 0; _j < this.form.item_stock.length; _j++) {
+            if (this.form.item_stock[_j]['item_id'] == this.filtered_stocks[_i]['id']) {
+              this.form.item_stock[_j]['qty'] = this.filtered_stocks[_i]['qty'];
+              this.form.item_stock[_j]['uom'] = this.filtered_stocks[_i]['uom'];
+              this.form.item_stock[_j]['scheduled_date'] = this.filtered_stocks[_i]['scheduled_date'];
+            }
+          }
+        }
+      }
+    },
     req_dates: function req_dates() {
       var _this = this;
 
@@ -3969,16 +4015,16 @@ __webpack_require__.r(__webpack_exports__);
           to: DateConverter.convertDate(this.form.req_date_to)
         }).then(function (res) {
           if (res.data.length > 0) {
-            for (var i = 0; i < res.data.length; i++) {
+            for (var _i2 = 0; _i2 < res.data.length; _i2++) {
               if (_this.form.item_type == 'asset') {
-                if (res.data[i]['item_asset'][0]['item_id'] != null) {
-                  assets.push(res.data[i]);
+                if (res.data[_i2]['item_asset'][0]['item_id'] != null) {
+                  assets.push(res.data[_i2]);
                 }
               }
 
               if (_this.form.item_type == 'stock') {
-                if (res.data[i]['item_stock'][0]['item_id'] != null) {
-                  stocks.push(res.data[i]);
+                if (res.data[_i2]['item_stock'][0]['item_id'] != null) {
+                  stocks.push(res.data[_i2]);
                 }
               }
             }
@@ -3997,39 +4043,51 @@ __webpack_require__.r(__webpack_exports__);
             }
 
             if (assets.length > 0) {
-              _this.show_asset = true;
-              _this.show_stock = false;
-              _this.filtered_assets = [];
+              var p;
 
-              for (var _i = 0; _i < assets.length; _i++) {
-                asset_items.push(assets[_i]['item_asset']);
-              }
+              (function () {
+                _this.show_asset = true;
+                _this.show_stock = false;
+                _this.filtered_assets = [];
 
-              for (var _i2 = 0; _i2 < asset_items.length; _i2++) {
-                for (var k = 0; k < asset_items[_i2].length; k++) {
-                  asset_items_2.push(asset_items[_i2][k]);
+                for (var _i3 = 0; _i3 < assets.length; _i3++) {
+                  asset_items.push(assets[_i3]['item_asset']);
                 }
-              }
 
-              var _loop = function _loop(p) {
-                for (var q = 0; q < _this.assets.length; q++) {
-                  if (asset_items_2[p]['item_id'] === _this.assets[q]['id']) {
-                    _this.filtered_assets.push({
-                      'id': asset_items_2[p]['item_id'],
-                      'qty': asset_items_2[p]['qty'],
-                      'uom': _this.uoms.find(function (u) {
-                        return u.id == asset_items_2[p]['uom'];
-                      }).name,
-                      'scheduled_date': DateConverter.conversion(asset_items_2[p]['scheduled_date']),
-                      'description': "".concat(_this.assets[q]['code'], "-").concat(_this.assets[q]['description'])
-                    });
+                for (var _i4 = 0; _i4 < asset_items.length; _i4++) {
+                  for (var k = 0; k < asset_items[_i4].length; k++) {
+                    asset_items_2.push(asset_items[_i4][k]);
                   }
                 }
-              };
 
-              for (var p = 0; p < asset_items_2.length; p++) {
-                _loop(p);
-              }
+                var asset_obj = {};
+
+                for (var _i5 = 0; _i5 < asset_items_2.length; _i5++) {
+                  if (!asset_obj[asset_items_2[_i5]['item_id']]) {
+                    asset_obj[asset_items_2[_i5]['item_id']] = asset_items_2[_i5];
+                  } else if (asset_obj[asset_items_2[_i5]['item_id']]) {
+                    asset_obj[asset_items_2[_i5]['item_id']]['qty'] = parseFloat(asset_obj[asset_items_2[_i5]['item_id']]['qty']) + parseFloat(asset_items_2[_i5]['qty']);
+                  }
+                }
+
+                for (p in asset_obj) {
+                  if (asset_obj.hasOwnProperty(p)) {
+                    for (var q = 0; q < _this.assets.length; q++) {
+                      if (asset_obj[p]['item_id'] === _this.assets[q]['id']) {
+                        _this.filtered_assets.push({
+                          'id': asset_obj[p]['item_id'],
+                          'qty': asset_obj[p]['qty'],
+                          'uom': _this.uoms.find(function (u) {
+                            return u.id == asset_obj[p]['uom'];
+                          }).name,
+                          'scheduled_date': DateConverter.conversion(asset_obj[p]['scheduled_date']),
+                          'description': "".concat(_this.assets[q]['code'], "-").concat(_this.assets[q]['description'])
+                        });
+                      }
+                    }
+                  }
+                }
+              })();
             }
           }
 
@@ -4041,39 +4099,51 @@ __webpack_require__.r(__webpack_exports__);
             }
 
             if (stocks.length > 0) {
-              _this.show_asset = false;
-              _this.show_stock = true;
-              _this.filtered_stocks = [];
+              var i;
 
-              for (var _i3 = 0; _i3 < stocks.length; _i3++) {
-                stk_items.push(stocks[_i3]['item_stock']);
-              }
+              (function () {
+                _this.show_asset = false;
+                _this.show_stock = true;
+                _this.filtered_stocks = [];
 
-              for (var _i4 = 0; _i4 < stk_items.length; _i4++) {
-                for (var _k = 0; _k < stk_items[_i4].length; _k++) {
-                  stk_items_2.push(stk_items[_i4][_k]);
+                for (var _i6 = 0; _i6 < stocks.length; _i6++) {
+                  stk_items.push(stocks[_i6]['item_stock']);
                 }
-              }
 
-              var _loop2 = function _loop2(_i5) {
-                for (var j = 0; j < _this.stocks.length; j++) {
-                  if (stk_items_2[_i5]['item_id'] == _this.stocks[j]['id']) {
-                    _this.filtered_stocks.push({
-                      'id': _this.stocks[j]['id'],
-                      'qty': stk_items_2[_i5]['qty'],
-                      'uom': _this.uoms.find(function (u) {
-                        return u.id == stk_items_2[_i5]['uom'];
-                      }).name,
-                      'scheduled_date': DateConverter.conversion(stk_items_2[_i5]['scheduled_date']),
-                      'description': "".concat(_this.stocks[j]['code'], "-").concat(_this.stocks[j]['description'])
-                    });
+                for (var _i7 = 0; _i7 < stk_items.length; _i7++) {
+                  for (var k = 0; k < stk_items[_i7].length; k++) {
+                    stk_items_2.push(stk_items[_i7][k]);
                   }
                 }
-              };
 
-              for (var _i5 = 0; _i5 < stk_items_2.length; _i5++) {
-                _loop2(_i5);
-              }
+                var stk_obj = {};
+
+                for (var _i8 = 0; _i8 < stk_items_2.length; _i8++) {
+                  if (!stk_obj[stk_items_2[_i8]['item_id']]) {
+                    stk_obj[stk_items_2[_i8]['item_id']] = stk_items_2[_i8];
+                  } else if (stk_obj[stk_items_2[_i8]['item_id']]) {
+                    stk_obj[stk_items_2[_i8]['item_id']]['qty'] = parseFloat(stk_obj[stk_items_2[_i8]['item_id']]['qty']) + parseFloat(stk_items_2[_i8]['qty']);
+                  }
+                }
+
+                for (i in stk_obj) {
+                  if (stk_obj.hasOwnProperty(i)) {
+                    for (var j = 0; j < _this.stocks.length; j++) {
+                      if (stk_obj[i]['item_id'] == _this.stocks[j]['id']) {
+                        _this.filtered_stocks.push({
+                          'id': _this.stocks[j]['id'],
+                          'qty': stk_obj[i]['qty'],
+                          'uom': _this.uoms.find(function (u) {
+                            return u.id == stk_obj[i]['uom'];
+                          }).name,
+                          'scheduled_date': DateConverter.conversion(stk_obj[i]['scheduled_date']),
+                          'description': "".concat(_this.stocks[j]['code'], "-").concat(_this.stocks[j]['description'])
+                        });
+                      }
+                    }
+                  }
+                }
+              })();
             }
           }
         });
@@ -4087,6 +4157,9 @@ __webpack_require__.r(__webpack_exports__);
   computed: {
     req_dates: function req_dates() {
       return [this.form.req_date_from, this.form.req_date_to, this.form.item_type].join();
+    },
+    reqs: function reqs() {
+      return [this.stk_id, this.form.item_stock, this.form.item_asset].join();
     }
   },
   methods: {
@@ -4123,6 +4196,7 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     updateSuppliers: function updateSuppliers(value) {
+      console.log(value);
       var suppliers = [];
       value.forEach(function (val) {
         suppliers.push(val.id);
@@ -4135,10 +4209,10 @@ __webpack_require__.r(__webpack_exports__);
     saveEnquiry: function saveEnquiry() {
       this.form.req_date_from = DateConverter.convertDate(this.form.req_date_from);
       this.form.req_date_to = DateConverter.convertDate(this.form.req_date_to);
+      this.form.enquiry_date = DateConverter.convertDate(this.form.enquiry_date);
       this.edit_enquiry ? this.update() : this.save();
     },
     save: function save() {
-      return console.log(this.form);
       delete this.form.id;
       axios.post('enquiry', this.form).then(function (res) {
         eventBus.$emit('listEnquiry', res.data);
@@ -4160,8 +4234,19 @@ __webpack_require__.r(__webpack_exports__);
       eventBus.$emit('cancel');
     },
     listen: function listen() {
+      var _this4 = this;
+
       if (this.edit) {
         this.form = this.$store.state.enquiries;
+        setTimeout(function () {
+          for (var i = 0; i < _this4.form.supplier_id.length; i++) {
+            for (var j = 0; j < _this4.suppliers.length; j++) {
+              if (_this4.form.supplier_id[i] == _this4.suppliers[j]['id']) {
+                _this4.value.push(_this4.suppliers[i]);
+              }
+            }
+          }
+        }, 1000);
       }
     }
   },
@@ -4493,6 +4578,336 @@ __webpack_require__.r(__webpack_exports__);
         });
       }, 1000);
     }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/quotations/Quotation.vue?vue&type=script&lang=js&":
+/*!*******************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/quotations/Quotation.vue?vue&type=script&lang=js& ***!
+  \*******************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var vuejs_datepicker__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! vuejs-datepicker */ "./node_modules/vuejs-datepicker/dist/vuejs-datepicker.esm.js");
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  props: ['edit'],
+  data: function data() {
+    return {
+      form: {
+        quote_date: '',
+        description: '',
+        supplier_id: '',
+        enquiry_id: '',
+        item_type: '',
+        item_stock: [{
+          item_id: '',
+          qty: '',
+          uom: '',
+          scheduled_date: '',
+          rate: '',
+          delivery_date: '',
+          max_qty: ''
+        }],
+        item_asset: [{
+          item_id: '',
+          qty: '',
+          uom: '',
+          scheduled_date: '',
+          rate: '',
+          delivery_date: '',
+          max_qty: ''
+        }],
+        id: ''
+      },
+      edit_quotation: this.edit,
+      quotations: {},
+      show_stock: false,
+      show_asset: false,
+      supplers: {},
+      enquiries: {},
+      filtered_suppliers: [],
+      filtered_assets: {},
+      filtered_stocks: {}
+    };
+  },
+  created: function created() {
+    this.listen();
+    this.getQuotations();
+  },
+  methods: {
+    getItems: function getItems() {
+      if (this.form.enquiry_id !== '') {
+        this.form.item_type == '';
+        return this.$toastr.e('Please select Enquiry No first.');
+      }
+
+      if (this.form.item_type == 'asset') {
+        if (Custom.isEmpty(this.filtered_assets)) {
+          this.show_asset = false;
+          this.show_stock = false;
+          return this.$toastr.e('Sorry,you do not have assets for the selected Enquiry No.');
+        }
+
+        this.show_asset = true;
+        this.show_stock = false;
+      }
+
+      if (this.form.item_type == 'stock') {
+        if (Custom.isEmpty(this.filtered_stocks)) {
+          this.show_asset = false;
+          this.show_stock = false;
+          return this.$toastr.e('Sorry,you do not have stock items for the selected Enquiry No.');
+        }
+
+        this.show_asset = false;
+        this.show_stock = true;
+      }
+    },
+    getSuppliers: function getSuppliers() {
+      var _this = this;
+
+      var enquiry = this.enquiries.find(function (e) {
+        return e.id == _this.form.enquiry_id;
+      });
+      console.log(enquiry);
+
+      for (var i = 0; i < enquiry.supplier_id.length; i++) {
+        for (var j = 0; j < this.suppliers.length; j++) {
+          if (enquiry.supplier_id[i] == this.suppliers[j]['id']) {
+            this.filtered_suppliers.push(this.suppliers[j]);
+          }
+        }
+      }
+
+      if (enquiry.item_asset[0]['item_id'] !== null) {
+        this.filtered_assets = enquiry.item_asset[0];
+      }
+
+      if (enquiry.item_stock[0]['item_id'] !== null) {
+        this.filtered_stocks = enquiry.item_stock[0];
+      }
+    },
+    getQuotations: function getQuotations() {
+      var _this2 = this;
+
+      axios.get('quotations').then(function (res) {
+        _this2.quotations = res.data.quotations;
+        _this2.suppliers = res.data.suppliers;
+        _this2.enquiries = res.data.enquiries;
+      });
+    },
+    addItem: function addItem(i) {
+      this.form.item_stock.push({
+        item_id: '',
+        qty: '',
+        uom: '',
+        scheduled_date: '',
+        rate: '',
+        delivery_date: '',
+        max_qty: ''
+      });
+    },
+    removeItem: function removeItem(i) {
+      this.form.item_stock.splice(i, 1);
+    },
+    addAsset: function addAsset(i) {
+      this.form.item_asset.push({
+        item_id: '',
+        qty: '',
+        uom: '',
+        scheduled_date: '',
+        rate: '',
+        delivery_date: '',
+        max_qty: ''
+      });
+    },
+    removeAsset: function removeAsset(i) {
+      this.form.item_asset.splice(i, 1);
+    },
+    saveQuotation: function saveQuotation() {
+      this.edit_quotation ? this.update() : this.save();
+    },
+    save: function save() {
+      delete this.form.id;
+      axios.post('quotations', this.form).then(function (res) {
+        eventBus.$emit('listQuotations', res.data);
+      })["catch"](function (error) {
+        return error.response;
+      });
+    },
+    update: function update() {
+      var _this3 = this;
+
+      axios.patch("quotations/".concat(this.form.id), this.form).then(function (res) {
+        _this3.edit_quotation = false;
+        eventBus.$emit('updateQuotation', res.data);
+      })["catch"](function (error) {
+        return error.response;
+      });
+    },
+    cancel: function cancel() {
+      eventBus.$emit('cancel');
+    },
+    listen: function listen() {
+      if (this.edit) {
+        this.form = this.$store.state.quotations;
+      }
+    }
+  },
+  components: {
+    datepicker: vuejs_datepicker__WEBPACK_IMPORTED_MODULE_0__["default"]
   }
 });
 
@@ -27928,6 +28343,27 @@ var render = function() {
                       "router-link",
                       {
                         staticClass: "fa fa-circle-o",
+                        attrs: { to: "/enquiry" }
+                      },
+                      [_vm._v(" Purchase Enquiry")]
+                    )
+                  ],
+                  1
+                )
+              ])
+            ]),
+            _vm._v(" "),
+            _c("li", { staticClass: "treeview" }, [
+              _vm._m(4),
+              _vm._v(" "),
+              _c("ul", { staticClass: "treeview-menu" }, [
+                _c(
+                  "li",
+                  [
+                    _c(
+                      "router-link",
+                      {
+                        staticClass: "fa fa-circle-o",
                         attrs: { to: "/users" }
                       },
                       [_vm._v(" Users")]
@@ -28095,6 +28531,20 @@ var staticRenderFns = [
       _c("i", { staticClass: "fa fa-money" }),
       _vm._v(" "),
       _c("span", [_vm._v("Budgeting")]),
+      _vm._v(" "),
+      _c("span", { staticClass: "pull-right-container" }, [
+        _c("i", { staticClass: "fa fa-angle-left pull-right" })
+      ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("a", { attrs: { href: "#" } }, [
+      _c("i", { staticClass: "fa fa-shopping-basket" }),
+      _vm._v(" "),
+      _c("span", [_vm._v("Purchases")]),
       _vm._v(" "),
       _c("span", { staticClass: "pull-right-container" }, [
         _c("i", { staticClass: "fa fa-angle-left pull-right" })
@@ -28296,6 +28746,26 @@ var render = function() {
             [
               _c("div", { staticClass: "row" }, [
                 _c("div", { staticClass: "col-md-12" }, [
+                  _c(
+                    "div",
+                    { staticClass: "form-group" },
+                    [
+                      _c("label", [_vm._v("Enquiry Date")]),
+                      _vm._v(" "),
+                      _c("datepicker", {
+                        attrs: { required: "" },
+                        model: {
+                          value: _vm.form.enquiry_date,
+                          callback: function($$v) {
+                            _vm.$set(_vm.form, "enquiry_date", $$v)
+                          },
+                          expression: "form.enquiry_date"
+                        }
+                      })
+                    ],
+                    1
+                  ),
+                  _vm._v(" "),
                   _c("div", { staticClass: "form-group" }, [
                     _c("label", [_vm._v("Enquiry Title")]),
                     _vm._v(" "),
@@ -28503,29 +28973,34 @@ var render = function() {
                                       staticClass: "form-control item",
                                       attrs: { placeholder: "Stock Item" },
                                       on: {
-                                        change: function($event) {
-                                          var $$selectedVal = Array.prototype.filter
-                                            .call(
-                                              $event.target.options,
-                                              function(o) {
-                                                return o.selected
-                                              }
+                                        change: [
+                                          function($event) {
+                                            var $$selectedVal = Array.prototype.filter
+                                              .call(
+                                                $event.target.options,
+                                                function(o) {
+                                                  return o.selected
+                                                }
+                                              )
+                                              .map(function(o) {
+                                                var val =
+                                                  "_value" in o
+                                                    ? o._value
+                                                    : o.value
+                                                return val
+                                              })
+                                            _vm.$set(
+                                              m,
+                                              "item_id",
+                                              $event.target.multiple
+                                                ? $$selectedVal
+                                                : $$selectedVal[0]
                                             )
-                                            .map(function(o) {
-                                              var val =
-                                                "_value" in o
-                                                  ? o._value
-                                                  : o.value
-                                              return val
-                                            })
-                                          _vm.$set(
-                                            m,
-                                            "item_id",
-                                            $event.target.multiple
-                                              ? $$selectedVal
-                                              : $$selectedVal[0]
-                                          )
-                                        }
+                                          },
+                                          function($event) {
+                                            _vm.stk_id = m.item_id
+                                          }
+                                        ]
                                       }
                                     },
                                     [
@@ -28567,7 +29042,8 @@ var render = function() {
                                     staticClass: "form-control cost",
                                     attrs: {
                                       type: "number",
-                                      placeholder: "Qty"
+                                      placeholder: "Qty",
+                                      disabled: ""
                                     },
                                     domProps: { value: m.qty },
                                     on: {
@@ -28582,85 +29058,56 @@ var render = function() {
                                 ]),
                                 _vm._v(" "),
                                 _c("td", [
-                                  _c(
-                                    "select",
-                                    {
-                                      directives: [
-                                        {
-                                          name: "model",
-                                          rawName: "v-model",
-                                          value: m.uom,
-                                          expression: "m.uom"
-                                        }
-                                      ],
-                                      staticClass: "form-control item",
-                                      attrs: { placeholder: "UOM" },
-                                      on: {
-                                        change: function($event) {
-                                          var $$selectedVal = Array.prototype.filter
-                                            .call(
-                                              $event.target.options,
-                                              function(o) {
-                                                return o.selected
-                                              }
-                                            )
-                                            .map(function(o) {
-                                              var val =
-                                                "_value" in o
-                                                  ? o._value
-                                                  : o.value
-                                              return val
-                                            })
-                                          _vm.$set(
-                                            m,
-                                            "uom",
-                                            $event.target.multiple
-                                              ? $$selectedVal
-                                              : $$selectedVal[0]
-                                          )
-                                        }
+                                  _c("input", {
+                                    directives: [
+                                      {
+                                        name: "model",
+                                        rawName: "v-model",
+                                        value: m.uom,
+                                        expression: "m.uom"
                                       }
-                                    },
-                                    [
-                                      _c(
-                                        "option",
-                                        {
-                                          attrs: { selected: "", disabled: "" }
-                                        },
-                                        [_vm._v("Select UOM")]
-                                      ),
-                                      _vm._v(" "),
-                                      _vm._l(_vm.uoms, function(u) {
-                                        return _c(
-                                          "option",
-                                          {
-                                            key: u.id,
-                                            domProps: { value: u.id }
-                                          },
-                                          [_vm._v(_vm._s(u.name))]
-                                        )
-                                      })
                                     ],
-                                    2
-                                  )
+                                    staticClass: "form-control item",
+                                    attrs: { type: "text", disabled: "" },
+                                    domProps: { value: m.uom },
+                                    on: {
+                                      input: function($event) {
+                                        if ($event.target.composing) {
+                                          return
+                                        }
+                                        _vm.$set(m, "uom", $event.target.value)
+                                      }
+                                    }
+                                  })
                                 ]),
                                 _vm._v(" "),
-                                _c(
-                                  "td",
-                                  [
-                                    _c("datepicker", {
-                                      attrs: { placeholder: "Scheduled Date" },
-                                      model: {
+                                _c("td", [
+                                  _c("input", {
+                                    directives: [
+                                      {
+                                        name: "model",
+                                        rawName: "v-model",
                                         value: m.scheduled_date,
-                                        callback: function($$v) {
-                                          _vm.$set(m, "scheduled_date", $$v)
-                                        },
                                         expression: "m.scheduled_date"
                                       }
-                                    })
-                                  ],
-                                  1
-                                ),
+                                    ],
+                                    staticClass: "form-control item",
+                                    attrs: { type: "text", disabled: "" },
+                                    domProps: { value: m.scheduled_date },
+                                    on: {
+                                      input: function($event) {
+                                        if ($event.target.composing) {
+                                          return
+                                        }
+                                        _vm.$set(
+                                          m,
+                                          "scheduled_date",
+                                          $event.target.value
+                                        )
+                                      }
+                                    }
+                                  })
+                                ]),
                                 _vm._v(" "),
                                 _c("td", [
                                   _c("i", {
@@ -28738,29 +29185,34 @@ var render = function() {
                                       staticClass: "form-control item",
                                       attrs: { placeholder: "Asset" },
                                       on: {
-                                        change: function($event) {
-                                          var $$selectedVal = Array.prototype.filter
-                                            .call(
-                                              $event.target.options,
-                                              function(o) {
-                                                return o.selected
-                                              }
+                                        change: [
+                                          function($event) {
+                                            var $$selectedVal = Array.prototype.filter
+                                              .call(
+                                                $event.target.options,
+                                                function(o) {
+                                                  return o.selected
+                                                }
+                                              )
+                                              .map(function(o) {
+                                                var val =
+                                                  "_value" in o
+                                                    ? o._value
+                                                    : o.value
+                                                return val
+                                              })
+                                            _vm.$set(
+                                              m,
+                                              "item_id",
+                                              $event.target.multiple
+                                                ? $$selectedVal
+                                                : $$selectedVal[0]
                                             )
-                                            .map(function(o) {
-                                              var val =
-                                                "_value" in o
-                                                  ? o._value
-                                                  : o.value
-                                              return val
-                                            })
-                                          _vm.$set(
-                                            m,
-                                            "item_id",
-                                            $event.target.multiple
-                                              ? $$selectedVal
-                                              : $$selectedVal[0]
-                                          )
-                                        }
+                                          },
+                                          function($event) {
+                                            _vm.stk_id = m.item_id
+                                          }
+                                        ]
                                       }
                                     },
                                     [
@@ -28802,7 +29254,8 @@ var render = function() {
                                     staticClass: "form-control cost",
                                     attrs: {
                                       type: "number",
-                                      placeholder: "Qty"
+                                      placeholder: "Qty",
+                                      disabled: ""
                                     },
                                     domProps: { value: m.qty },
                                     on: {
@@ -28817,86 +29270,56 @@ var render = function() {
                                 ]),
                                 _vm._v(" "),
                                 _c("td", [
-                                  _c(
-                                    "select",
-                                    {
-                                      directives: [
-                                        {
-                                          name: "model",
-                                          rawName: "v-model",
-                                          value: m.uom,
-                                          expression: "m.uom"
-                                        }
-                                      ],
-                                      staticClass: "form-control item",
-                                      attrs: { placeholder: "UOM" },
-                                      on: {
-                                        change: function($event) {
-                                          var $$selectedVal = Array.prototype.filter
-                                            .call(
-                                              $event.target.options,
-                                              function(o) {
-                                                return o.selected
-                                              }
-                                            )
-                                            .map(function(o) {
-                                              var val =
-                                                "_value" in o
-                                                  ? o._value
-                                                  : o.value
-                                              return val
-                                            })
-                                          _vm.$set(
-                                            m,
-                                            "uom",
-                                            $event.target.multiple
-                                              ? $$selectedVal
-                                              : $$selectedVal[0]
-                                          )
-                                        }
+                                  _c("input", {
+                                    directives: [
+                                      {
+                                        name: "model",
+                                        rawName: "v-model",
+                                        value: m.uom,
+                                        expression: "m.uom"
                                       }
-                                    },
-                                    [
-                                      _c(
-                                        "option",
-                                        {
-                                          attrs: { selected: "", disabled: "" }
-                                        },
-                                        [_vm._v("Select UOM")]
-                                      ),
-                                      _vm._v(" "),
-                                      _vm._l(_vm.uoms, function(u) {
-                                        return _c(
-                                          "option",
-                                          {
-                                            key: u.id,
-                                            domProps: { value: u.id }
-                                          },
-                                          [_vm._v(_vm._s(u.name))]
-                                        )
-                                      })
                                     ],
-                                    2
-                                  )
+                                    staticClass: "form-control item",
+                                    attrs: { type: "text", disabled: "" },
+                                    domProps: { value: m.uom },
+                                    on: {
+                                      input: function($event) {
+                                        if ($event.target.composing) {
+                                          return
+                                        }
+                                        _vm.$set(m, "uom", $event.target.value)
+                                      }
+                                    }
+                                  })
                                 ]),
                                 _vm._v(" "),
-                                _c(
-                                  "td",
-                                  [
-                                    _c("datepicker", {
-                                      attrs: { placeholder: "Scheduled Date" },
-                                      model: {
+                                _c("td", [
+                                  _c("input", {
+                                    directives: [
+                                      {
+                                        name: "model",
+                                        rawName: "v-model",
                                         value: m.scheduled_date,
-                                        callback: function($$v) {
-                                          _vm.$set(m, "scheduled_date", $$v)
-                                        },
                                         expression: "m.scheduled_date"
                                       }
-                                    })
-                                  ],
-                                  1
-                                ),
-                                _vm._v(" "),
+                                    ],
+                                    staticClass: "form-control item",
+                                    attrs: { type: "text", disabled: "" },
+                                    domProps: { value: m.scheduled_date },
+                                    on: {
+                                      input: function($event) {
+                                        if ($event.target.composing) {
+                                          return
+                                        }
+                                        _vm.$set(
+                                          m,
+                                          "scheduled_date",
+                                          $event.target.value
+                                        )
+                                      }
+                                    }
+                                  })
+                                ]),
                                 _c("td", [
                                   _c("i", {
                                     directives: [
@@ -29305,6 +29728,952 @@ var staticRenderFns = [
         _vm._v(" "),
         _c("th", [_vm._v("Description")])
       ])
+    ])
+  }
+]
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/quotations/Quotation.vue?vue&type=template&id=6a974c8f&scoped=true&":
+/*!***********************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/quotations/Quotation.vue?vue&type=template&id=6a974c8f&scoped=true& ***!
+  \***********************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", [
+    _c("section", { staticClass: "content" }, [
+      _c("div", { staticClass: "box" }, [
+        _c("div", { staticClass: "box-header with-border" }, [
+          _c("h3", { staticClass: "box-title" }, [
+            _vm._v(
+              _vm._s(_vm.edit_quotation ? "Update Quotation" : "New Quotation")
+            )
+          ])
+        ]),
+        _vm._v(" "),
+        _c("div", { staticClass: "box-body" }, [
+          _c(
+            "form",
+            {
+              on: {
+                submit: function($event) {
+                  $event.preventDefault()
+                  return _vm.saveQuotation()
+                }
+              }
+            },
+            [
+              _c(
+                "div",
+                { staticClass: "form-group" },
+                [
+                  _c("label", [_vm._v("Quotation Date")]),
+                  _vm._v(" "),
+                  _c("datepicker", {
+                    attrs: { required: "" },
+                    model: {
+                      value: _vm.form.quote_date,
+                      callback: function($$v) {
+                        _vm.$set(_vm.form, "quote_date", $$v)
+                      },
+                      expression: "form.quote_date"
+                    }
+                  })
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c("div", { staticClass: "form-group" }, [
+                _c("label", [_vm._v("Enquiry Number")]),
+                _vm._v(" "),
+                _c(
+                  "select",
+                  {
+                    directives: [
+                      {
+                        name: "model",
+                        rawName: "v-model",
+                        value: _vm.form.enquiry_id,
+                        expression: "form.enquiry_id"
+                      }
+                    ],
+                    staticClass: "form-control",
+                    attrs: { required: "" },
+                    on: {
+                      change: [
+                        function($event) {
+                          var $$selectedVal = Array.prototype.filter
+                            .call($event.target.options, function(o) {
+                              return o.selected
+                            })
+                            .map(function(o) {
+                              var val = "_value" in o ? o._value : o.value
+                              return val
+                            })
+                          _vm.$set(
+                            _vm.form,
+                            "enquiry_id",
+                            $event.target.multiple
+                              ? $$selectedVal
+                              : $$selectedVal[0]
+                          )
+                        },
+                        function($event) {
+                          return _vm.getSuppliers()
+                        }
+                      ]
+                    }
+                  },
+                  _vm._l(_vm.enquiries, function(enq) {
+                    return _c(
+                      "option",
+                      { key: enq.id, domProps: { value: enq.id } },
+                      [_vm._v(_vm._s(enq.enquiry_no))]
+                    )
+                  }),
+                  0
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "form-group" }, [
+                _c("label", [_vm._v("Quotation Description")]),
+                _vm._v(" "),
+                _c("input", {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.form.description,
+                      expression: "form.description"
+                    }
+                  ],
+                  staticClass: "form-control",
+                  attrs: { type: "text", required: "" },
+                  domProps: { value: _vm.form.description },
+                  on: {
+                    input: function($event) {
+                      if ($event.target.composing) {
+                        return
+                      }
+                      _vm.$set(_vm.form, "description", $event.target.value)
+                    }
+                  }
+                })
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "form-group" }, [
+                _c("label", [_vm._v("Supplier")]),
+                _vm._v(" "),
+                _c(
+                  "select",
+                  {
+                    directives: [
+                      {
+                        name: "model",
+                        rawName: "v-model",
+                        value: _vm.form.supplier_id,
+                        expression: "form.supplier_id"
+                      }
+                    ],
+                    staticClass: "form-control",
+                    attrs: { required: "" },
+                    on: {
+                      change: function($event) {
+                        var $$selectedVal = Array.prototype.filter
+                          .call($event.target.options, function(o) {
+                            return o.selected
+                          })
+                          .map(function(o) {
+                            var val = "_value" in o ? o._value : o.value
+                            return val
+                          })
+                        _vm.$set(
+                          _vm.form,
+                          "supplier_id",
+                          $event.target.multiple
+                            ? $$selectedVal
+                            : $$selectedVal[0]
+                        )
+                      }
+                    }
+                  },
+                  _vm._l(_vm.filtered_suppliers, function(supplier) {
+                    return _c(
+                      "option",
+                      { key: supplier.id, domProps: { value: supplier.id } },
+                      [_vm._v(_vm._s(supplier.name))]
+                    )
+                  }),
+                  0
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "form-group" }, [
+                _c("label", [_vm._v("Item Type")]),
+                _vm._v(" "),
+                _c(
+                  "select",
+                  {
+                    directives: [
+                      {
+                        name: "model",
+                        rawName: "v-model",
+                        value: _vm.form.item_type,
+                        expression: "form.item_type"
+                      }
+                    ],
+                    staticClass: "form-control",
+                    attrs: { required: "" },
+                    on: {
+                      change: [
+                        function($event) {
+                          var $$selectedVal = Array.prototype.filter
+                            .call($event.target.options, function(o) {
+                              return o.selected
+                            })
+                            .map(function(o) {
+                              var val = "_value" in o ? o._value : o.value
+                              return val
+                            })
+                          _vm.$set(
+                            _vm.form,
+                            "item_type",
+                            $event.target.multiple
+                              ? $$selectedVal
+                              : $$selectedVal[0]
+                          )
+                        },
+                        function($event) {
+                          return _vm.getItems()
+                        }
+                      ]
+                    }
+                  },
+                  [
+                    _c("option", { attrs: { value: "stock" } }, [
+                      _vm._v("Stock")
+                    ]),
+                    _vm._v(" "),
+                    _c("option", { attrs: { value: "asset" } }, [
+                      _vm._v("Asset")
+                    ])
+                  ]
+                )
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "row" }, [
+                _c("div", { staticClass: "col-md-12" }, [
+                  _vm.show_stock
+                    ? _c("div", { staticClass: "form-group" }, [
+                        _c("label", [_vm._v("Stock Items")]),
+                        _vm._v(" "),
+                        _c(
+                          "table",
+                          { staticStyle: { width: "100%" } },
+                          [
+                            _vm._m(0),
+                            _vm._v(" "),
+                            _vm._l(_vm.form.item_stock, function(m, i) {
+                              return _c("tr", [
+                                _c("td", [
+                                  _c(
+                                    "select",
+                                    {
+                                      directives: [
+                                        {
+                                          name: "model",
+                                          rawName: "v-model",
+                                          value: m.item_id,
+                                          expression: "m.item_id"
+                                        }
+                                      ],
+                                      staticClass: "form-control item",
+                                      attrs: { placeholder: "Stock Item" },
+                                      on: {
+                                        change: function($event) {
+                                          var $$selectedVal = Array.prototype.filter
+                                            .call(
+                                              $event.target.options,
+                                              function(o) {
+                                                return o.selected
+                                              }
+                                            )
+                                            .map(function(o) {
+                                              var val =
+                                                "_value" in o
+                                                  ? o._value
+                                                  : o.value
+                                              return val
+                                            })
+                                          _vm.$set(
+                                            m,
+                                            "item_id",
+                                            $event.target.multiple
+                                              ? $$selectedVal
+                                              : $$selectedVal[0]
+                                          )
+                                        }
+                                      }
+                                    },
+                                    [
+                                      _c(
+                                        "option",
+                                        {
+                                          attrs: { selected: "", disabled: "" }
+                                        },
+                                        [_vm._v("Select Stock Item")]
+                                      ),
+                                      _vm._v(" "),
+                                      _vm._l(_vm.filtered_stock_items, function(
+                                        stock
+                                      ) {
+                                        return _c(
+                                          "option",
+                                          {
+                                            key: stock.id,
+                                            domProps: { value: stock.id }
+                                          },
+                                          [
+                                            _vm._v(
+                                              _vm._s(stock.code) +
+                                                "-" +
+                                                _vm._s(stock.description)
+                                            )
+                                          ]
+                                        )
+                                      })
+                                    ],
+                                    2
+                                  )
+                                ]),
+                                _vm._v(" "),
+                                _c("td", [
+                                  _c("input", {
+                                    directives: [
+                                      {
+                                        name: "model",
+                                        rawName: "v-model",
+                                        value: m.qty,
+                                        expression: "m.qty"
+                                      }
+                                    ],
+                                    staticClass: "form-control cost",
+                                    attrs: {
+                                      type: "number",
+                                      placeholder: "Qty"
+                                    },
+                                    domProps: { value: m.qty },
+                                    on: {
+                                      input: function($event) {
+                                        if ($event.target.composing) {
+                                          return
+                                        }
+                                        _vm.$set(m, "qty", $event.target.value)
+                                      }
+                                    }
+                                  })
+                                ]),
+                                _vm._v(" "),
+                                _c("td", [
+                                  _c(
+                                    "select",
+                                    {
+                                      directives: [
+                                        {
+                                          name: "model",
+                                          rawName: "v-model",
+                                          value: m.uom,
+                                          expression: "m.uom"
+                                        }
+                                      ],
+                                      staticClass: "form-control item",
+                                      attrs: { placeholder: "UOM" },
+                                      on: {
+                                        change: function($event) {
+                                          var $$selectedVal = Array.prototype.filter
+                                            .call(
+                                              $event.target.options,
+                                              function(o) {
+                                                return o.selected
+                                              }
+                                            )
+                                            .map(function(o) {
+                                              var val =
+                                                "_value" in o
+                                                  ? o._value
+                                                  : o.value
+                                              return val
+                                            })
+                                          _vm.$set(
+                                            m,
+                                            "uom",
+                                            $event.target.multiple
+                                              ? $$selectedVal
+                                              : $$selectedVal[0]
+                                          )
+                                        }
+                                      }
+                                    },
+                                    [
+                                      _c(
+                                        "option",
+                                        {
+                                          attrs: { selected: "", disabled: "" }
+                                        },
+                                        [_vm._v("Select UOM")]
+                                      ),
+                                      _vm._v(" "),
+                                      _vm._l(_vm.uoms, function(u) {
+                                        return _c(
+                                          "option",
+                                          {
+                                            key: u.id,
+                                            domProps: { value: u.id }
+                                          },
+                                          [_vm._v(_vm._s(u.name))]
+                                        )
+                                      })
+                                    ],
+                                    2
+                                  )
+                                ]),
+                                _vm._v(" "),
+                                _c(
+                                  "td",
+                                  [
+                                    _c("datepicker", {
+                                      attrs: { placeholder: "Scheduled Date" },
+                                      model: {
+                                        value: m.scheduled_date,
+                                        callback: function($$v) {
+                                          _vm.$set(m, "scheduled_date", $$v)
+                                        },
+                                        expression: "m.scheduled_date"
+                                      }
+                                    })
+                                  ],
+                                  1
+                                ),
+                                _vm._v(" "),
+                                _c("td", [
+                                  _c("input", {
+                                    directives: [
+                                      {
+                                        name: "model",
+                                        rawName: "v-model",
+                                        value: m.rate,
+                                        expression: "m.rate"
+                                      }
+                                    ],
+                                    staticClass: "form-control cost",
+                                    attrs: {
+                                      type: "number",
+                                      placeholder: "Delivery Rate"
+                                    },
+                                    domProps: { value: m.rate },
+                                    on: {
+                                      input: function($event) {
+                                        if ($event.target.composing) {
+                                          return
+                                        }
+                                        _vm.$set(m, "rate", $event.target.value)
+                                      }
+                                    }
+                                  })
+                                ]),
+                                _vm._v(" "),
+                                _c(
+                                  "td",
+                                  [
+                                    _c("datepicker", {
+                                      attrs: { placeholder: "Delivery Date" },
+                                      model: {
+                                        value: m.delivery_date,
+                                        callback: function($$v) {
+                                          _vm.$set(m, "delivery_date", $$v)
+                                        },
+                                        expression: "m.delivery_date"
+                                      }
+                                    })
+                                  ],
+                                  1
+                                ),
+                                _vm._v(" "),
+                                _c("td", [
+                                  _c("input", {
+                                    directives: [
+                                      {
+                                        name: "model",
+                                        rawName: "v-model",
+                                        value: m.max_qty,
+                                        expression: "m.max_qty"
+                                      }
+                                    ],
+                                    staticClass: "form-control cost",
+                                    attrs: {
+                                      type: "number",
+                                      placeholder: "Max. Delivery Qty"
+                                    },
+                                    domProps: { value: m.max_qty },
+                                    on: {
+                                      input: function($event) {
+                                        if ($event.target.composing) {
+                                          return
+                                        }
+                                        _vm.$set(
+                                          m,
+                                          "max_qty",
+                                          $event.target.value
+                                        )
+                                      }
+                                    }
+                                  })
+                                ]),
+                                _vm._v(" "),
+                                _c("td", [
+                                  _c("i", {
+                                    directives: [
+                                      {
+                                        name: "show",
+                                        rawName: "v-show",
+                                        value:
+                                          i ||
+                                          (!i &&
+                                            _vm.form.item_stock.length > 1),
+                                        expression:
+                                          "i || (!i && form.item_stock.length > 1)"
+                                      }
+                                    ],
+                                    staticClass: "fa fa-minus-circle remove",
+                                    on: {
+                                      click: function($event) {
+                                        return _vm.removeItem(i)
+                                      }
+                                    }
+                                  }),
+                                  _vm._v(" "),
+                                  _c("i", {
+                                    directives: [
+                                      {
+                                        name: "show",
+                                        rawName: "v-show",
+                                        value:
+                                          i == _vm.form.item_stock.length - 1,
+                                        expression:
+                                          "i == form.item_stock.length -1"
+                                      }
+                                    ],
+                                    staticClass: "fa fa-plus-circle add",
+                                    on: {
+                                      click: function($event) {
+                                        return _vm.addItem(i)
+                                      }
+                                    }
+                                  })
+                                ])
+                              ])
+                            })
+                          ],
+                          2
+                        )
+                      ])
+                    : _vm._e(),
+                  _vm._v(" "),
+                  _vm.show_asset
+                    ? _c("div", { staticClass: "form-group" }, [
+                        _c("label", [_vm._v("Assets")]),
+                        _vm._v(" "),
+                        _c(
+                          "table",
+                          { staticStyle: { width: "100%" } },
+                          [
+                            _vm._m(1),
+                            _vm._v(" "),
+                            _vm._l(_vm.form.item_asset, function(m, i) {
+                              return _c("tr", [
+                                _c("td", [
+                                  _c(
+                                    "select",
+                                    {
+                                      directives: [
+                                        {
+                                          name: "model",
+                                          rawName: "v-model",
+                                          value: m.item_id,
+                                          expression: "m.item_id"
+                                        }
+                                      ],
+                                      staticClass: "form-control item",
+                                      attrs: { placeholder: "Asset" },
+                                      on: {
+                                        change: function($event) {
+                                          var $$selectedVal = Array.prototype.filter
+                                            .call(
+                                              $event.target.options,
+                                              function(o) {
+                                                return o.selected
+                                              }
+                                            )
+                                            .map(function(o) {
+                                              var val =
+                                                "_value" in o
+                                                  ? o._value
+                                                  : o.value
+                                              return val
+                                            })
+                                          _vm.$set(
+                                            m,
+                                            "item_id",
+                                            $event.target.multiple
+                                              ? $$selectedVal
+                                              : $$selectedVal[0]
+                                          )
+                                        }
+                                      }
+                                    },
+                                    [
+                                      _c(
+                                        "option",
+                                        {
+                                          attrs: { selected: "", disabled: "" }
+                                        },
+                                        [_vm._v("Select Asset")]
+                                      ),
+                                      _vm._v(" "),
+                                      _vm._l(_vm.filtered_assets, function(
+                                        asset
+                                      ) {
+                                        return _c(
+                                          "option",
+                                          {
+                                            key: asset.id,
+                                            domProps: { value: asset.id }
+                                          },
+                                          [
+                                            _vm._v(
+                                              _vm._s(asset.code) +
+                                                "-" +
+                                                _vm._s(asset.description)
+                                            )
+                                          ]
+                                        )
+                                      })
+                                    ],
+                                    2
+                                  )
+                                ]),
+                                _vm._v(" "),
+                                _c("td", [
+                                  _c("input", {
+                                    directives: [
+                                      {
+                                        name: "model",
+                                        rawName: "v-model",
+                                        value: m.qty,
+                                        expression: "m.qty"
+                                      }
+                                    ],
+                                    staticClass: "form-control cost",
+                                    attrs: {
+                                      type: "number",
+                                      placeholder: "Qty"
+                                    },
+                                    domProps: { value: m.qty },
+                                    on: {
+                                      input: function($event) {
+                                        if ($event.target.composing) {
+                                          return
+                                        }
+                                        _vm.$set(m, "qty", $event.target.value)
+                                      }
+                                    }
+                                  })
+                                ]),
+                                _vm._v(" "),
+                                _c("td", [
+                                  _c(
+                                    "select",
+                                    {
+                                      directives: [
+                                        {
+                                          name: "model",
+                                          rawName: "v-model",
+                                          value: m.uom,
+                                          expression: "m.uom"
+                                        }
+                                      ],
+                                      staticClass: "form-control item",
+                                      attrs: { placeholder: "UOM" },
+                                      on: {
+                                        change: function($event) {
+                                          var $$selectedVal = Array.prototype.filter
+                                            .call(
+                                              $event.target.options,
+                                              function(o) {
+                                                return o.selected
+                                              }
+                                            )
+                                            .map(function(o) {
+                                              var val =
+                                                "_value" in o
+                                                  ? o._value
+                                                  : o.value
+                                              return val
+                                            })
+                                          _vm.$set(
+                                            m,
+                                            "uom",
+                                            $event.target.multiple
+                                              ? $$selectedVal
+                                              : $$selectedVal[0]
+                                          )
+                                        }
+                                      }
+                                    },
+                                    [
+                                      _c(
+                                        "option",
+                                        {
+                                          attrs: { selected: "", disabled: "" }
+                                        },
+                                        [_vm._v("Select UOM")]
+                                      ),
+                                      _vm._v(" "),
+                                      _vm._l(_vm.uoms, function(u) {
+                                        return _c(
+                                          "option",
+                                          {
+                                            key: u.id,
+                                            domProps: { value: u.id }
+                                          },
+                                          [_vm._v(_vm._s(u.name))]
+                                        )
+                                      })
+                                    ],
+                                    2
+                                  )
+                                ]),
+                                _vm._v(" "),
+                                _c(
+                                  "td",
+                                  [
+                                    _c("datepicker", {
+                                      attrs: { placeholder: "Scheduled Date" },
+                                      model: {
+                                        value: m.scheduled_date,
+                                        callback: function($$v) {
+                                          _vm.$set(m, "scheduled_date", $$v)
+                                        },
+                                        expression: "m.scheduled_date"
+                                      }
+                                    })
+                                  ],
+                                  1
+                                ),
+                                _vm._v(" "),
+                                _c("td", [
+                                  _c("input", {
+                                    directives: [
+                                      {
+                                        name: "model",
+                                        rawName: "v-model",
+                                        value: m.rate,
+                                        expression: "m.rate"
+                                      }
+                                    ],
+                                    staticClass: "form-control cost",
+                                    attrs: {
+                                      type: "number",
+                                      placeholder: "Delivery Rate"
+                                    },
+                                    domProps: { value: m.rate },
+                                    on: {
+                                      input: function($event) {
+                                        if ($event.target.composing) {
+                                          return
+                                        }
+                                        _vm.$set(m, "rate", $event.target.value)
+                                      }
+                                    }
+                                  })
+                                ]),
+                                _vm._v(" "),
+                                _c(
+                                  "td",
+                                  [
+                                    _c("datepicker", {
+                                      attrs: { placeholder: "Delivery Date" },
+                                      model: {
+                                        value: m.delivery_date,
+                                        callback: function($$v) {
+                                          _vm.$set(m, "delivery_date", $$v)
+                                        },
+                                        expression: "m.delivery_date"
+                                      }
+                                    })
+                                  ],
+                                  1
+                                ),
+                                _vm._v(" "),
+                                _c("td", [
+                                  _c("input", {
+                                    directives: [
+                                      {
+                                        name: "model",
+                                        rawName: "v-model",
+                                        value: m.max_qty,
+                                        expression: "m.max_qty"
+                                      }
+                                    ],
+                                    staticClass: "form-control cost",
+                                    attrs: {
+                                      type: "number",
+                                      placeholder: "Max. Delivery Qty"
+                                    },
+                                    domProps: { value: m.max_qty },
+                                    on: {
+                                      input: function($event) {
+                                        if ($event.target.composing) {
+                                          return
+                                        }
+                                        _vm.$set(
+                                          m,
+                                          "max_qty",
+                                          $event.target.value
+                                        )
+                                      }
+                                    }
+                                  })
+                                ]),
+                                _vm._v(" "),
+                                _c("td", [
+                                  _c("i", {
+                                    directives: [
+                                      {
+                                        name: "show",
+                                        rawName: "v-show",
+                                        value:
+                                          i ||
+                                          (!i &&
+                                            _vm.form.item_asset.length > 1),
+                                        expression:
+                                          "i || (!i && form.item_asset.length > 1)"
+                                      }
+                                    ],
+                                    staticClass: "fa fa-minus-circle remove",
+                                    on: {
+                                      click: function($event) {
+                                        return _vm.removeAsset(i)
+                                      }
+                                    }
+                                  }),
+                                  _vm._v(" "),
+                                  _c("i", {
+                                    directives: [
+                                      {
+                                        name: "show",
+                                        rawName: "v-show",
+                                        value:
+                                          i == _vm.form.item_asset.length - 1,
+                                        expression:
+                                          "i == form.item_asset.length -1"
+                                      }
+                                    ],
+                                    staticClass: "fa fa-plus-circle add",
+                                    on: {
+                                      click: function($event) {
+                                        return _vm.addAsset(i)
+                                      }
+                                    }
+                                  })
+                                ])
+                              ])
+                            })
+                          ],
+                          2
+                        )
+                      ])
+                    : _vm._e()
+                ])
+              ]),
+              _vm._v(" "),
+              _c(
+                "button",
+                { staticClass: "btn btn-primary", attrs: { type: "submit" } },
+                [_vm._v(_vm._s(_vm.edit_quotation ? "Update" : "Save"))]
+              ),
+              _vm._v(" "),
+              _c(
+                "button",
+                {
+                  staticClass: "btn btn-outline-danger",
+                  attrs: { type: "button" },
+                  on: { click: _vm.cancel }
+                },
+                [_vm._v("Cancel")]
+              )
+            ]
+          )
+        ])
+      ])
+    ])
+  ])
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("tr", [
+      _c("th", [_vm._v("Item")]),
+      _vm._v(" "),
+      _c("th", [_vm._v("Qty")]),
+      _vm._v(" "),
+      _c("th", [_vm._v("Uom")]),
+      _vm._v(" "),
+      _c("th", [_vm._v("Scheduled Date")]),
+      _vm._v(" "),
+      _c("th", [_vm._v("Supplier Quote Rate")]),
+      _vm._v(" "),
+      _c("th", [_vm._v("Supplier Delivery Date")]),
+      _vm._v(" "),
+      _c("th", [_vm._v("Max. Delivery Qty")]),
+      _vm._v(" "),
+      _c("th")
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("tr", [
+      _c("th", [_vm._v("Item")]),
+      _vm._v(" "),
+      _c("th", [_vm._v("Qty")]),
+      _vm._v(" "),
+      _c("th", [_vm._v("Uom")]),
+      _vm._v(" "),
+      _c("th", [_vm._v("Supplier Quote Rate")]),
+      _vm._v(" "),
+      _c("th", [_vm._v("Supplier Delivery Date")]),
+      _vm._v(" "),
+      _c("th", [_vm._v("Max. Delivery Qty")]),
+      _vm._v(" "),
+      _c("th", [_vm._v("Scheduled Date")]),
+      _vm._v(" "),
+      _c("th")
     ])
   }
 ]
@@ -52497,6 +53866,75 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./resources/js/components/quotations/Quotation.vue":
+/*!**********************************************************!*\
+  !*** ./resources/js/components/quotations/Quotation.vue ***!
+  \**********************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _Quotation_vue_vue_type_template_id_6a974c8f_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Quotation.vue?vue&type=template&id=6a974c8f&scoped=true& */ "./resources/js/components/quotations/Quotation.vue?vue&type=template&id=6a974c8f&scoped=true&");
+/* harmony import */ var _Quotation_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Quotation.vue?vue&type=script&lang=js& */ "./resources/js/components/quotations/Quotation.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _Quotation_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _Quotation_vue_vue_type_template_id_6a974c8f_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _Quotation_vue_vue_type_template_id_6a974c8f_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  "6a974c8f",
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/quotations/Quotation.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/quotations/Quotation.vue?vue&type=script&lang=js&":
+/*!***********************************************************************************!*\
+  !*** ./resources/js/components/quotations/Quotation.vue?vue&type=script&lang=js& ***!
+  \***********************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Quotation_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib??ref--4-0!../../../../node_modules/vue-loader/lib??vue-loader-options!./Quotation.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/quotations/Quotation.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Quotation_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/quotations/Quotation.vue?vue&type=template&id=6a974c8f&scoped=true&":
+/*!*****************************************************************************************************!*\
+  !*** ./resources/js/components/quotations/Quotation.vue?vue&type=template&id=6a974c8f&scoped=true& ***!
+  \*****************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Quotation_vue_vue_type_template_id_6a974c8f_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../node_modules/vue-loader/lib??vue-loader-options!./Quotation.vue?vue&type=template&id=6a974c8f&scoped=true& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/quotations/Quotation.vue?vue&type=template&id=6a974c8f&scoped=true&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Quotation_vue_vue_type_template_id_6a974c8f_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Quotation_vue_vue_type_template_id_6a974c8f_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
 /***/ "./resources/js/components/requistions/Index.vue":
 /*!*******************************************************!*\
   !*** ./resources/js/components/requistions/Index.vue ***!
@@ -53161,6 +54599,37 @@ function () {
 
       return true;
     }
+  }, {
+    key: "find_duplicate_in_array",
+    value: function find_duplicate_in_array(arra1) {
+      var object = {};
+      var result = [];
+      arra1.forEach(function (item) {
+        if (!object[item.id]) object[item.id] = 0;
+        object[item.id] += 1;
+      });
+
+      for (var prop in object) {
+        if (object[prop] >= 2) {
+          result.push(prop);
+        }
+      }
+
+      return result;
+    }
+  }, {
+    key: "ObjectLength",
+    value: function ObjectLength(object) {
+      var length = 0;
+
+      for (var key in object) {
+        if (object.hasOwnProperty(key)) {
+          ++length;
+        }
+      }
+
+      return length;
+    }
   }]);
 
   return Custom;
@@ -53464,6 +54933,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _components_suppliers_Index__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ../components/suppliers/Index */ "./resources/js/components/suppliers/Index.vue");
 /* harmony import */ var _components_budgets_Index__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ../components/budgets/Index */ "./resources/js/components/budgets/Index.vue");
 /* harmony import */ var _components_pos_enquiries_Enquiry__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ../components/pos/enquiries/Enquiry */ "./resources/js/components/pos/enquiries/Enquiry.vue");
+/* harmony import */ var _components_quotations_Quotation__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ../components/quotations/Quotation */ "./resources/js/components/quotations/Quotation.vue");
+
 
 
 
@@ -53549,6 +55020,10 @@ var routes = [{
   path: '/enquiry',
   component: _components_pos_enquiries_Enquiry__WEBPACK_IMPORTED_MODULE_16__["default"],
   beforeEnter: guard
+}, {
+  path: '/quotations',
+  component: _components_quotations_Quotation__WEBPACK_IMPORTED_MODULE_17__["default"],
+  beforeEnter: guard
 }];
 /* harmony default export */ __webpack_exports__["default"] = (new vue_router__WEBPACK_IMPORTED_MODULE_1__["default"]({
   routes: routes,
@@ -53586,7 +55061,8 @@ vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(vuex__WEBPACK_IMPORTED_MODULE_1__
     priorities: {},
     machines: {},
     budgets: {},
-    enquiries: {}
+    enquiries: {},
+    quotations: {}
   },
   mutations: {
     pathTo: function pathTo(state, to) {
@@ -53627,6 +55103,9 @@ vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(vuex__WEBPACK_IMPORTED_MODULE_1__
     },
     updateEnquiry: function updateEnquiry(state, enquiry) {
       state.enquiries = enquiry;
+    },
+    updateQuotation: function updateQuotation(state, quotation) {
+      state.quotations = quotation;
     }
   },
   actions: {
@@ -53681,6 +55160,10 @@ vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(vuex__WEBPACK_IMPORTED_MODULE_1__
     updateEnquiry: function updateEnquiry(_ref13, enquiry) {
       var commit = _ref13.commit;
       commit('updateEnquiry', enquiry);
+    },
+    updateQuotation: function updateQuotation(_ref14, quotation) {
+      var commit = _ref14.commit;
+      commit('updateQuotation', quotation);
     }
   }
 }));

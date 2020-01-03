@@ -22,6 +22,7 @@ class CreateEnquiriesTable extends Migration
             $table->string('supplier_id');
             $table->date('req_date_from');
             $table->date('req_date_to');
+            $table->string('item_type');
             $table->text('item_stock')->nullable();
             $table->text('item_asset')->nullable(); 
             $table->timestamps();

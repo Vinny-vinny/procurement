@@ -16,14 +16,16 @@ class CreateQuotationsTable extends Migration
         Schema::create('quotations', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('quote_no');
-            $table->date('date');
+            $table->string('item_type');
+            $table->date('quote_date');
             $table->integer('supplier_id');
-            $table->integer('inquiry_id');
+            $table->integer('enquiry_id');
             $table->string('description');
             $table->string('file')->nullable();
             $table->string('reject_reason')->nullable();
-            $table->integer('status')->nullable();
-            $table->date('end_date');
+            $table->integer('status')->nullable();     
+            $table->text('item_stock')->nullable();
+            $table->text('item_asset')->nullable(); 
             $table->timestamps();
         });
     }

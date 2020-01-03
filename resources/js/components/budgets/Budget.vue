@@ -143,24 +143,23 @@
         },
         watch:{
        budgeting(){ 
-       let total =0;  
-        if (this.stock_item !=='' && this.stock_item !=='') {             
-         for(let i=0;i<this.form.item_stock.length;i++){         
+       let total =0;        
+         if ((Object.values(this.form.item_stock[0])[0] !== '' && Object.values(this.form.item_stock[0])[0] !== null) || (Object.values(this.form.item_stock[0])[1] !== '' && Object.values(this.form.item_stock[0])[1] !== null)) {
+                    for(let i=0;i<this.form.item_stock.length;i++){         
             if (this.form.item_stock[i]['item_id'] !=='' && this.form.item_stock[i]['amount'] !=='') {
                 total+=parseFloat(this.form.item_stock[i]['amount']);
             }   
-         }
-          
-            for(let k=0;k<this.form.item_asset.length;k++){         
+         }  
+         } 
+          if ((Object.values(this.form.item_asset[0])[0] !== '' && Object.values(this.form.item_asset[0])[0] !== null) || (Object.values(this.form.item_asset[0])[1] !== '' && Object.values(this.form.item_asset[0])[1] !== null)) {               
+            for(let k=0;k<this.form.item_asset.length;k++){  
             if (this.form.item_asset[k]['item_id'] !=='' && this.form.item_asset[k]['amount'] !=='') {
                 total+=parseFloat(this.form.item_asset[k]['amount']);
-            }   
+            }        
+         } 
          }
-             
-        this.form.total_amount = total;
-        }      
-       
-     }
+        this.form.total_amount = total; 
+        }
     },
         computed:{
         budgeting(){
@@ -241,9 +240,9 @@
             listen(){
                 if (this.edit){                
                     this.form = this.$store.state.budgets; 
-                    this.form.total_amount = this.$store.state.budgets.total; 
-                         console.log(this.form);                   
-                    this.itemType();
+                   // this.form.total_amount = this.$store.state.budgets.total_amount;                
+                     this.itemType();
+                   
 
                 }
             },

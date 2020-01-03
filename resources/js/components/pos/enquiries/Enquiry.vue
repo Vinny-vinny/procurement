@@ -12,6 +12,10 @@
                      <div class="row">
                           <div class="col-md-12">
                                 <div class="form-group">
+                            <label>Enquiry Date</label>
+                            <datepicker v-model="form.enquiry_date" required></datepicker>
+                        </div>
+                         <div class="form-group">
                             <label>Enquiry Title</label>
                             <input type="text" class="form-control" v-model="form.title" required>
                         </div>
@@ -71,23 +75,23 @@
                                             <th>Scheduled Date</th> 
                                             <th></th>                                            
                                         </tr>
-                                        <tr v-for="(m,i) in form.item_stock">                 
+                                        <tr v-for="(m,i) in form.item_stock">               
 
                                             <td><select class="form-control item" v-model="m.item_id"
-                                                        placeholder="Stock Item">
+                                                        placeholder="Stock Item" @change="stk_id = m.item_id">
                                                 <option selected disabled>Select Stock Item</option>
                                                 <option :value="stock.id" v-for="stock in filtered_stocks" :key="stock.id">{{stock.description}}</option>
                                             </select></td>                                          
 
                                             <td><input type="number" class="form-control cost" v-model="m.qty"
-                                                       placeholder="Qty">                                                
+                                                       placeholder="Qty" disabled>                                                
                                                    </td>
-                                            <td><select class="form-control item" v-model="m.uom"
-                                                        placeholder="UOM">
-                                                <option selected disabled>Select UOM</option>
-                                                <option :value="u.id" v-for="u in uoms" :key="u.id">{{u.name}}</option>
-                                            </select></td>                                    
-                                                       <td><datepicker v-model="m.scheduled_date" placeholder="Scheduled Date"></datepicker></td>
+                                            <td>
+                                              <input type="text" class="form-control item" v-model="m.uom" disabled>
+                                              </td>                                    
+                                                       <td>
+                                                <input type="text" class="form-control item" v-model="m.scheduled_date" disabled>
+                                                       </td>
                                             <td>
                                                 <i class="fa fa-minus-circle remove" @click="removeItem(i)"
                                                    v-show="i || (!i && form.item_stock.length > 1)"></i>
@@ -110,19 +114,19 @@
                                         </tr>
                                         <tr v-for="(m,i) in form.item_asset">                           
                                             <td><select class="form-control item" v-model="m.item_id"
-                                                        placeholder="Asset">
+                                                        placeholder="Asset" @change="stk_id = m.item_id">
                                                 <option selected disabled>Select Asset</option>
                                                 <option :value="asset.id" v-for="asset in filtered_assets" :key="asset.id">{{asset.description}}</option>
                                             </select></td>
                                             <td><input type="number" class="form-control cost" v-model="m.qty"
-                                                       placeholder="Qty">                                                
+                                                       placeholder="Qty" disabled>                                                
                                                    </td>
-                                            <td><select class="form-control item" v-model="m.uom"
-                                                        placeholder="UOM">
-                                                <option selected disabled>Select UOM</option>
-                                                <option :value="u.id" v-for="u in uoms" :key="u.id">{{u.name}}</option>
-                                            </select></td>                                    
-                                                       <td><datepicker v-model="m.scheduled_date" placeholder="Scheduled Date"></datepicker></td>
+                                            <td>
+                                                <input type="text" class="form-control item" v-model="m.uom" disabled>
+                                                </td>                                    
+                                                       <td> 
+                                                        <input type="text" class="form-control item" v-model="m.scheduled_date" disabled>
+                                                       
                                             <td>
                                             <i class="fa fa-minus-circle remove" @click="removeAsset(i)"
                                                    v-show="i || (!i && form.item_asset.length > 1)"></i>
@@ -157,6 +161,7 @@
                     title:'',
                     description:'',
                     supplier_id:[],
+                    enquiry_date:'',
                     req_date_from:'',
                     req_date_to:'',
                     item_type:'',
@@ -173,11 +178,41 @@
                 show_stock:false,
                 uoms:{},
                 filtered_assets:[],
-                filtered_stocks:[]
+                filtered_stocks:[],
+                stk_id:'',
+                sch_date:'',
+                qty:''
 
             }
         },
         watch:{
+            reqs(){      
+            for(let i=0;i<this.filtered_assets.length;i++){
+               if (Object.values(this.form.item_asset[0])[0] !== '') {
+                    for (let j = 0; j < this.form.item_asset.length; j++) {
+                        if (this.form.item_asset[j]['item_id'] == this.filtered_assets[i]['id']) {
+                            this.form.item_asset[j]['qty'] = this.filtered_assets[i]['qty']
+                            this.form.item_asset[j]['uom'] = this.filtered_assets[i]['uom'] 
+                            this.form.item_asset[j]['scheduled_date'] = this.filtered_assets[i]['scheduled_date']  
+                        }
+                    }
+                }                
+               
+            }
+
+            for(let i=0;i<this.filtered_stocks.length;i++){
+               if (Object.values(this.form.item_stock[0])[0] !== '') {
+                    for (let j = 0; j < this.form.item_stock.length; j++) {
+                        if (this.form.item_stock[j]['item_id'] == this.filtered_stocks[i]['id']) {
+                            this.form.item_stock[j]['qty'] = this.filtered_stocks[i]['qty']
+                            this.form.item_stock[j]['uom'] = this.filtered_stocks[i]['uom'] 
+                            this.form.item_stock[j]['scheduled_date'] = this.filtered_stocks[i]['scheduled_date']  
+                        }
+                    }
+                }                 
+               
+            }
+            },
         req_dates(){            
             let assets = [];
             let stocks = [];
@@ -203,6 +238,7 @@
                         stocks.push(res.data[i]);
                         }                                            
                     }
+                    
                   }
                 }   
             let stk_items = [];
@@ -216,7 +252,7 @@
                         this.show_stock = false;
                     return this.$toastr.e('Sorry, you do not have Asset requisitions between the selected dates.')
                     }                
-                if (assets.length > 0) {
+                if (assets.length > 0){
                         this.show_asset = true;
                         this.show_stock = false;
                         this.filtered_assets = [];
@@ -228,18 +264,31 @@
                             asset_items_2.push(asset_items[i][k]);
                         }
                     }
-                    for(let p=0;p<asset_items_2.length;p++){
-                       for(let q=0;q<this.assets.length;q++){
-                        if (asset_items_2[p]['item_id'] === this.assets[q]['id']) {
+
+                    let asset_obj = {};                   
+                    for(let i=0;i<asset_items_2.length;i++){
+                       if (!asset_obj[asset_items_2[i]['item_id']]) {
+                        asset_obj[asset_items_2[i]['item_id']] = asset_items_2[i]; 
+                       }
+                       else if (asset_obj[asset_items_2[i]['item_id']]) { 
+                         asset_obj[asset_items_2[i]['item_id']]['qty'] =parseFloat(asset_obj[asset_items_2[i]['item_id']]['qty']) + parseFloat(asset_items_2[i]['qty'])                                       
+                       }
+                    }
+
+                    for(var p in asset_obj){
+                      if(asset_obj.hasOwnProperty(p)){
+                      for(let q=0;q<this.assets.length;q++){
+                        if (asset_obj[p]['item_id'] === this.assets[q]['id']) {
                           this.filtered_assets.push({
-                            'id':asset_items_2[p]['item_id'],
-                            'qty':asset_items_2[p]['qty'],
-                            'uom':this.uoms.find(u => u.id == asset_items_2[p]['uom']).name,
-                            'scheduled_date':DateConverter.conversion(asset_items_2[p]['scheduled_date']),
+                            'id':asset_obj[p]['item_id'],
+                            'qty':asset_obj[p]['qty'],
+                            'uom':this.uoms.find(u => u.id == asset_obj[p]['uom']).name,
+                            'scheduled_date':DateConverter.conversion(asset_obj[p]['scheduled_date']),
                             'description':`${this.assets[q]['code']}-${this.assets[q]['description']}`
                           });
                         }                       
                        }
+                      }                       
                     }
                 }
              
@@ -258,25 +307,39 @@
                     for(let i=0;i<stocks.length;i++){                       
                      stk_items.push(stocks[i]['item_stock']);                     
                     }
+
                     for(let i=0;i<stk_items.length;i++){
-                        for(let k=0;k<stk_items[i].length;k++){
+                        for(let k=0;k<stk_items[i].length;k++){                          
                             stk_items_2.push(stk_items[i][k]);
                         }
                     }
+
+                    let stk_obj = {};                   
                     for(let i=0;i<stk_items_2.length;i++){
-                       for(let j=0;j<this.stocks.length;j++){
-                        if (stk_items_2[i]['item_id'] == this.stocks[j]['id']) {
+                       if (!stk_obj[stk_items_2[i]['item_id']]) {
+                        stk_obj[stk_items_2[i]['item_id']] = stk_items_2[i]; 
+                       }
+                       else if (stk_obj[stk_items_2[i]['item_id']]) { 
+                         stk_obj[stk_items_2[i]['item_id']]['qty'] =parseFloat(stk_obj[stk_items_2[i]['item_id']]['qty']) + parseFloat(stk_items_2[i]['qty'])                                       
+                       }
+                    }
+
+                      for(var i in stk_obj){
+                        if(stk_obj.hasOwnProperty(i)){
+                        for(let j=0;j<this.stocks.length;j++){
+                        if (stk_obj[i]['item_id'] == this.stocks[j]['id']) {                        
                           this.filtered_stocks.push({
                             'id':this.stocks[j]['id'],
-                            'qty':stk_items_2[i]['qty'],
-                            'uom':this.uoms.find(u => u.id == stk_items_2[i]['uom']).name,
-                            'scheduled_date':DateConverter.conversion(stk_items_2[i]['scheduled_date']),
+                            'qty':stk_obj[i]['qty'],
+                            'uom':this.uoms.find(u => u.id == stk_obj[i]['uom']).name,
+                            'scheduled_date':DateConverter.conversion(stk_obj[i]['scheduled_date']),
                             'description':`${this.stocks[j]['code']}-${this.stocks[j]['description']}`
                         });
                         }                       
                        }
-                    }
-                }              
+                      }                       
+                    }                 
+                 }              
               }
               })
 
@@ -290,7 +353,10 @@
         computed:{
        req_dates(){
         return [this.form.req_date_from,this.form.req_date_to,this.form.item_type].join();
-       }
+       },
+        reqs(){
+        return [this.stk_id,this.form.item_stock,this.form.item_asset].join();
+        }
         },
         methods:{
             addItem(i) {
@@ -315,6 +381,7 @@
           })
            },
            updateSuppliers(value){
+            console.log(value)
              let suppliers = [];
            value.forEach((val) =>  {
                suppliers.push(val.id);
@@ -327,10 +394,10 @@
           saveEnquiry(){
             this.form.req_date_from = DateConverter.convertDate(this.form.req_date_from);
             this.form.req_date_to = DateConverter.convertDate(this.form.req_date_to);
+            this.form.enquiry_date = DateConverter.convertDate(this.form.enquiry_date);
                 this.edit_enquiry ? this.update() : this.save();
             },
-            save(){
-                return console.log(this.form);
+            save(){               
                 delete this.form.id;
                 axios.post('enquiry',this.form)
                     .then(res => {
@@ -351,7 +418,18 @@
             },
             listen(){
                 if (this.edit){
-                    this.form = this.$store.state.enquiries
+                    this.form = this.$store.state.enquiries;                   
+                    setTimeout(()=>{
+                        for(let i=0;i<this.form.supplier_id.length;i++){
+                          for(let j=0;j<this.suppliers.length;j++){
+                            if(this.form.supplier_id[i] == this.suppliers[j]['id']){
+                                this.value.push(this.suppliers[i]);
+                            }
+                          }
+                        }                    
+                    
+                    },1000)                    
+
                 }
             },
         },

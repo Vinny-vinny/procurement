@@ -1,7 +1,10 @@
 <?php
-
 namespace App\Http\Controllers;
-
+use App\Quotation;
+use App\Http\Resources\QuotationResource;
+use App\Supplier;
+use App\Enquiry;
+use App\Http\Resources\EnquiryResource;
 use Illuminate\Http\Request;
 
 class QuotationController extends Controller
@@ -13,19 +16,12 @@ class QuotationController extends Controller
      */
     public function index()
     {
-        //
+        return response()->json([
+            'quotations' => QuotationResource::collection(Quotation::all()),
+            'suppliers' => Supplier::all(),
+            'enquiries' => EnquiryResource::collection(Enquiry::all())
+        ]); 
     }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
     /**
      * Store a newly created resource in storage.
      *
@@ -34,7 +30,10 @@ class QuotationController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request['item_stock'] = json_encode($request->get('item_stock'));
+        $request['item_asset'] = json_encode($request->get('item_asset'));
+        $quotation = Quotation::create($request->all());
+        return response()->json(new QuotationResource($quotation));
     }
 
     /**
@@ -49,17 +48,6 @@ class QuotationController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -68,7 +56,10 @@ class QuotationController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $request['item_stock'] = json_encode($request->get('item_stock'));
+        $request['item_asset'] = json_encode($request->get('item_asset'));
+        Quotation::find($id)->update($request->all());
+        return response()->json(new QuotationResource(Quotation::find($id)));
     }
 
     /**
@@ -79,6 +70,7 @@ class QuotationController extends Controller
      */
     public function destroy($id)
     {
-        //
+        Quotaion::destroy($id);
+        return response()->json($id);
     }
 }

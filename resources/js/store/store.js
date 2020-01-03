@@ -17,13 +17,13 @@ export default new Vuex.Store({
         priorities:{},
         machines:{},
         budgets:{},
-        enquiries:{}
+        enquiries:{},
+        quotations:{}
     },
     mutations:{
      pathTo(state, to) {
      state.path_to = to;
      },
-
         updateSupplier(state,supplier){
          state.supplier = supplier;
         },
@@ -60,6 +60,9 @@ export default new Vuex.Store({
         },
         updateEnquiry(state,enquiry){
         state.enquiries = enquiry;
+        },
+        updateQuotation(state,quotation){
+        state.quotations = quotation;
         }
     },
     actions:{
@@ -101,6 +104,9 @@ export default new Vuex.Store({
        },
        updateEnquiry({commit},enquiry){
         commit('updateEnquiry',enquiry);
+       },
+       updateQuotation({commit},quotation){
+      commit('updateQuotation',quotation);
        }
     }
 })
