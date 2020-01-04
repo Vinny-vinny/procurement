@@ -25,7 +25,7 @@
                             <td>{{quote.quote_no}}</td>
                             <td>{{quote.quotation_date}}</td>
                             <td>{{quote.description}}</td>
-                             <td>{{quote.supplier}}</td
+                             <td>{{quote.supplier}}</td>
                             <td>
                                 <button class="btn btn-success btn-sm" @click="editQuotation(quote)"><i class="fa fa-edit"></i></button>
                                 <button class="btn btn-danger btn-sm" @click="deleteQuotation(quote.id)"><i class="fa fa-trash"></i></button>

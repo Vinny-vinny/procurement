@@ -47,28 +47,28 @@
                                             <th>Qty</th>
                                             <th>Uom</th>    
                                             <th>Scheduled Date</th>
-                                            <th>Supplier Quote Rate</th> 
-                                            <th>Supplier Delivery Date</th> 
+                                            <th>Quote Rate</th> 
+                                            <th>Delivery Date</th> 
                                             <th>Max. Delivery Qty</th>  
                                             <th></th>                                            
                                         </tr>
                                         <tr v-for="(m,i) in form.item_stock">                 
 
                                             <td><select class="form-control item" v-model="m.item_id"
-                                                        placeholder="Stock Item">
+                                                        placeholder="Stock Item" @change="stk_id = m.item_id">
                                                 <option selected disabled>Select Stock Item</option>
-                                                <option :value="stock.id" v-for="stock in filtered_stock_items" :key="stock.id">{{stock.code}}-{{stock.description}}</option>
+                                                <option :value="stock.id" v-for="stock in filtered_stocks" :key="stock.id">{{stock.description}}</option>
                                             </select></td>                                          
 
                                             <td><input type="number" class="form-control cost" v-model="m.qty"
-                                                       placeholder="Qty">                                                
+                                                       placeholder="Qty" disabled>                                                
                                                    </td>
-                                            <td><select class="form-control item" v-model="m.uom"
-                                                        placeholder="UOM">
-                                                <option selected disabled>Select UOM</option>
-                                                <option :value="u.id" v-for="u in uoms" :key="u.id">{{u.name}}</option>
-                                            </select></td>                                    
-                                                       <td><datepicker v-model="m.scheduled_date" placeholder="Scheduled Date"></datepicker></td>
+                                            <td>
+                                                <input type="text" class="form-control" v-model="m.uom" placeholder="UOM" disabled>
+                                              </td>                                    
+                                                       <td>
+                                                       <input type="text" class="form-control" v-model="m.scheduled_date" disabled placeholder="Scheduled Date">
+                                                       </td>
                                                      <td><input type="number" class="form-control cost" v-model="m.rate"
                                                        placeholder="Delivery Rate">                                                
                                                    </td>
@@ -91,33 +91,32 @@
                                     <label>Assets</label>
                                     <table style="width:100%">
                                         <tr>
-                                            <th>Item</th>
+                                             <th>Item</th>
                                             <th>Qty</th>
-                                            <th>Uom</th>   
-                                            <th>Supplier Quote Rate</th> 
-                                            <th>Supplier Delivery Date</th> 
-                                            <th>Max. Delivery Qty</th>   
-                                            <th>Scheduled Date</th> 
+                                            <th>Uom</th>    
+                                            <th>Scheduled Date</th>
+                                            <th>Quote Rate</th> 
+                                            <th>Delivery Date</th> 
+                                            <th>Max. Delivery Qty</th>  
                                             <th></th>                         
                                         </tr>
                                         <tr v-for="(m,i) in form.item_asset">                           
                                             <td><select class="form-control item" v-model="m.item_id"
-                                                        placeholder="Asset">
+                                                        placeholder="Asset" @change="stk_id = m.item_id">
                                                 <option selected disabled>Select Asset</option>
-                                                <option :value="asset.id" v-for="asset in filtered_assets" :key="asset.id">{{asset.code}}-{{asset.description}}</option>
+                                                <option :value="asset.id" v-for="asset in filtered_assets" :key="asset.id">{{asset.description}}</option>
                                             </select></td>
                                             <td><input type="number" class="form-control cost" v-model="m.qty"
-                                                       placeholder="Qty">                                                
+                                                       placeholder="Qty" disabled>                                               
                                                    </td>
-                                            <td><select class="form-control item" v-model="m.uom"
-                                                        placeholder="UOM">
-                                                <option selected disabled>Select UOM</option>
-                                                <option :value="u.id" v-for="u in uoms" :key="u.id">{{u.name}}</option>
-                                            </select></td>                                    
-                                                       <td><datepicker v-model="m.scheduled_date" placeholder="Scheduled Date"></datepicker></td>
-                                                         <td><input type="number" class="form-control cost" v-model="m.rate"
+                                            <td>
+                                                 <input type="text" class="form-control" v-model="m.uom" placeholder="UOM" disabled>
+                                            </td>                                    
+                                              <td><input type="text" class="form-control" v-model="m.scheduled_date" disabled placeholder="Scheduled Date">
+                                              </td>
+                                               <td><input type="number" class="form-control cost" v-model="m.rate"
                                                        placeholder="Delivery Rate">                                                
-                                                   </td>
+                                               </td>
                                                     <td><datepicker v-model="m.delivery_date" placeholder="Delivery Date"></datepicker>                 
                                                    </td>
                                                     <td><input type="number" class="form-control cost" v-model="m.max_qty"
@@ -168,44 +167,91 @@
                 supplers:{},
                 enquiries:{},
                 filtered_suppliers:[],
-                filtered_assets:{},
-                filtered_stocks:{}
+                filtered_assets:[],
+                filtered_stocks:[],
+                stocks:{},
+                assets:{},
+                stk_id:''
             }
         },
+
         created(){
             this.listen();
             this.getQuotations();
         },
+        watch:{
+        reqs(){      
+            for(let i=0;i<this.filtered_assets.length;i++){
+               if (Object.values(this.form.item_asset[0])[0] !== '') {
+                    for (let j = 0; j < this.form.item_asset.length; j++) {
+                        if (this.form.item_asset[j]['item_id'] == this.filtered_assets[i]['id']) {
+                            this.form.item_asset[j]['qty'] = this.filtered_assets[i]['qty']
+                            this.form.item_asset[j]['uom'] = this.filtered_assets[i]['uom'] 
+                            this.form.item_asset[j]['scheduled_date'] = this.filtered_assets[i]['scheduled_date']  
+                        }
+                    }
+                }                
+               
+            }
+
+            for(let i=0;i<this.filtered_stocks.length;i++){
+               if (Object.values(this.form.item_stock[0])[0] !== '') {
+                    for (let j = 0; j < this.form.item_stock.length; j++) {
+                        if (this.form.item_stock[j]['item_id'] == this.filtered_stocks[i]['id']) {
+                            this.form.item_stock[j]['qty'] = this.filtered_stocks[i]['qty']
+                            this.form.item_stock[j]['uom'] = this.filtered_stocks[i]['uom'] 
+                            this.form.item_stock[j]['scheduled_date'] = this.filtered_stocks[i]['scheduled_date']  
+                        }
+                    }
+                }                 
+               
+            }
+            },
+        },
+        computed:{
+         reqs(){
+        return [this.stk_id,this.form.item_stock,this.form.item_asset].join();
+        }
+        },
         methods:{
-            getItems(){
-            if (this.form.enquiry_id !=='') {
+            getItems(){          
+            if (this.form.enquiry_id =='') {                
              this.form.item_type =='';
              return this.$toastr.e('Please select Enquiry No first.');
             }
             if (this.form.item_type =='asset') {
-             if (Custom.isEmpty(this.filtered_assets)) {
+                setTimeout(()=>{
+                if (Custom.isEmpty(this.filtered_assets)) {
                 this.show_asset = false;
                 this.show_stock = false;
               return this.$toastr.e('Sorry,you do not have assets for the selected Enquiry No.');
-             }   
-             this.show_asset = true;
+             }
+             },500)
+              setTimeout(()=>{
+              this.show_asset = true;
              this.show_stock = false;
+                },501)            
+            
             }
-
              if (this.form.item_type =='stock') {
-             if (Custom.isEmpty(this.filtered_stocks)) {
+               setTimeout(()=>{
+                if (Custom.isEmpty(this.filtered_stocks)) {
                 this.show_asset = false;
                 this.show_stock = false;
               return this.$toastr.e('Sorry,you do not have stock items for the selected Enquiry No.');
-             }   
+             } 
+               },500)
+              setTimeout(()=>{
              this.show_asset = false;
-             this.show_stock = true;
+             this.show_stock = true; 
+              },501) 
+            
             }
             
             },
-            getSuppliers(){         
-            let enquiry = this.enquiries.find(e => e.id ==this.form.enquiry_id);
-            console.log(enquiry)
+            getSuppliers(){   
+            this.filtered_suppliers = [];      
+            let enquiry = this.enquiries.find(e => e.id ==this.form.enquiry_id);          
             for(let i=0;i<enquiry.supplier_id.length;i++){
            for(let j=0;j<this.suppliers.length;j++){            
             if (enquiry.supplier_id[i] == this.suppliers[j]['id']) {
@@ -213,12 +259,48 @@
             }
            }
            }
-          
+            let filtered_assets = [];
+            let filtered_stocks = [];
+            this.filtered_assets = [];
+            this.filtered_stocks = [];
             if (enquiry.item_asset[0]['item_id'] !==null) {
-              this.filtered_assets = enquiry.item_asset[0];
+                for(let i=0;i<enquiry.item_asset.length;i++){
+                filtered_assets.push(enquiry.item_asset[i]) 
+                } 
+                for(let i=0;i<filtered_assets.length;i++){
+                    for(let j=0;j<this.assets.length;j++){
+                        if (filtered_assets[i]['item_id'] == this.assets[j]['id']) {
+                            this.filtered_assets.push({
+                                'id' : filtered_assets[i]['item_id'],
+                                'qty' : filtered_assets[i]['qty'],
+                                'uom' : filtered_assets[i]['uom'],
+                                'scheduled_date' : filtered_assets[i]['scheduled_date'],
+                                'description' : this.assets[j]['code'] +'-'+ this.assets[j]['description'] 
+                            })
+                        }
+                    }
+                }
+             
             }
             if (enquiry.item_stock[0]['item_id'] !==null) {
-             this.filtered_stocks = enquiry.item_stock[0];
+                for(let i=0;i<enquiry.item_stock.length;i++){
+                filtered_stocks.push(enquiry.item_stock[i]);
+                }  
+             
+                for(let k=0;k<filtered_stocks.length;k++){
+                    for(let j=0;j<this.stocks.length;j++){
+                        if (filtered_stocks[k]['item_id'] == this.stocks[j]['id']) {
+                            this.filtered_stocks.push({
+                                'id' : filtered_stocks[k]['item_id'],
+                                'qty' : filtered_stocks[k]['qty'],
+                                'uom' : filtered_stocks[k]['uom'],
+                                'scheduled_date' : filtered_stocks[k]['scheduled_date'],
+                                'description' : this.stocks[j]['code'] +'-'+ this.stocks[j]['description'] 
+                            })
+                        }
+                    }
+                } 
+          
             }
             },
             getQuotations(){
@@ -227,6 +309,8 @@
                 this.quotations = res.data.quotations;
                 this.suppliers = res.data.suppliers;
                 this.enquiries =  res.data.enquiries;
+                this.stocks = res.data.stock_items;
+                this.assets = res.data.assets;
             })
             },
              addItem(i) {
@@ -242,6 +326,22 @@
             this.form.item_asset.splice(i,1);
             },
             saveQuotation(){
+                 if (Object.values(this.form.item_stock[0])[0] !== '' || Object.values(this.form.item_stock[0])[1] !== '' || Object.values(this.form.item_stock[0])[2] !== '' || Object.values(this.form.item_stock[0])[3] !== '' || Object.values(this.form.item_stock[0])[4] !== '' || Object.values(this.form.item_stock[0])[5] !== '' || Object.values(this.form.item_stock[0])[6] !== '') {
+                    for (let i = 0; i < this.form.item_stock.length; i++) {
+                        if (this.form.item_stock[i]['item_id'] === '' || this.form.item_stock[i]['rate'] === '' || this.form.item_stock[i]['delivery_date'] === '' || this.form.item_stock[i]['max_qty'] === '') {
+                            return this.$toastr.e('Please all Stock Items fields are required.');
+                        }
+                    }
+                }
+
+                 if (Object.values(this.form.item_asset[0])[0] !== '' || Object.values(this.form.item_asset[0])[1] !== '' || Object.values(this.form.item_asset[0])[2] !== '' || Object.values(this.form.item_asset[0])[3] !== '' || Object.values(this.form.item_asset[0])[4] !== '' || Object.values(this.form.item_asset[0])[4] !== '' || Object.values(this.form.item_asset[0])[5] !== '' || Object.values(this.form.item_asset[0])[6] !== '') {
+                    for (let i = 0; i < this.form.item_asset.length; i++) {
+                        if (this.form.item_asset[i]['item_id'] === '' || this.form.item_asset[i]['rate'] === '' || this.form.item_asset[i]['delivery_date'] === '' || this.form.item_asset[i]['max_qty'] === '') {
+                            return this.$toastr.e('Please all Assets fields are required.');
+                        }
+                    }
+                } 
+                this.form.quote_date = DateConverter.convertDate(this.form.quote_date);
                 this.edit_quotation ? this.update() : this.save();
             },
             save(){
@@ -266,6 +366,10 @@
             listen(){
                 if (this.edit){
                     this.form = this.$store.state.quotations
+                    setTimeout(()=>{
+                    this.getItems();
+                    this.getSuppliers();
+                    },1000)
                 }
             },
         },

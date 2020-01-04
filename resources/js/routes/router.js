@@ -14,8 +14,8 @@ import Items from "../components/items/Index";
 import Assets from "../components/assets/Index";
 import ServiceProviders from "../components/suppliers/Index";
 import Budget from "../components/budgets/Index";
-import Enquiry from "../components/pos/enquiries/Enquiry";
-import Quotation from "../components/quotations/Quotation";
+import Enquiry from "../components/pos/enquiries/Index";
+import Quotation from "../components/quotations/Index";
 
 
 Vue.use(VueRouter);

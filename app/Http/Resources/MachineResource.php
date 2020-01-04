@@ -23,7 +23,7 @@ class MachineResource extends JsonResource
             'year_of_reg' => $this->year_of_reg,
             'chasis_no' => $this->chasis_no,
             'engine_no' => $this->engine_no,
-            'assign_to_id' => $this->user->name,
+            'assign_to_id' => $this->user ? $this->user->name : '',
             'assign_to' => $this->user->id,
             'track_by_id' => $this->track->id,
             'track_name' => $this->track->name,

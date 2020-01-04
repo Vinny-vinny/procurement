@@ -271,7 +271,7 @@
                         asset_obj[asset_items_2[i]['item_id']] = asset_items_2[i]; 
                        }
                        else if (asset_obj[asset_items_2[i]['item_id']]) { 
-                         asset_obj[asset_items_2[i]['item_id']]['qty'] =parseFloat(asset_obj[asset_items_2[i]['item_id']]['qty']) + parseFloat(asset_items_2[i]['qty'])                                       
+                         asset_obj[asset_items_2[i]['item_id']]['qty'] =parseFloat(asset_obj[asset_items_2[i]['item_id']]['qty']) + parseFloat(asset_items_2[i]['qty'])                                
                        }
                     }
 
@@ -323,7 +323,6 @@
                          stk_obj[stk_items_2[i]['item_id']]['qty'] =parseFloat(stk_obj[stk_items_2[i]['item_id']]['qty']) + parseFloat(stk_items_2[i]['qty'])                                       
                        }
                     }
-
                       for(var i in stk_obj){
                         if(stk_obj.hasOwnProperty(i)){
                         for(let j=0;j<this.stocks.length;j++){

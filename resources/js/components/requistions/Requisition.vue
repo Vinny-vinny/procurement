@@ -221,9 +221,7 @@
                     }
                      if (Custom.isEmpty(asset_item)) {
                         this.show_asset = false;
-                        this.show_stock = false;   
-                        this.form.item_stock = [{item_id: '',qty:'',uom: '',scheduled_date:''}];
-                        this.form.item_asset = [{item_id: '',qty:'',uom: '',scheduled_date:''}]; 
+                        this.show_stock = false;                
                       return this.$toastr.e(`The selected department does not have budgeted Assets.`);
                      }  
                 this.show_stock = false;
@@ -244,9 +242,7 @@
                     } 
                      if (Custom.isEmpty(stk_items)) { 
                         this.show_asset = false;
-                        this.show_stock = false;   
-                        this.form.item_stock = [{item_id: '',qty:'',uom: '',scheduled_date:''}];
-                        this.form.item_asset = [{item_id: '',qty:'',uom: '',scheduled_date:''}];
+                        this.show_stock = false;                       
                       return this.$toastr.e(`The selected department does not have budgeted Stock Items.`);
                      }
                 this.show_stock = true;
