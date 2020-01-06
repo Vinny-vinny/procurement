@@ -22,6 +22,11 @@ class CreateDepartmentBudgetsTable extends Migration
             $table->string('item_type');
             $table->text('item_stock')->nullable();
             $table->text('item_asset')->nullable();
+            $table->string('renewal_type')->nullable();
+            $table->string('frequency_type')->nullable();
+            $table->integer('period')->nullable();
+            $table->date('start_date')->nullable();
+            $table->date('end_date')->nullable();
             $table->timestamps();
         });
     }

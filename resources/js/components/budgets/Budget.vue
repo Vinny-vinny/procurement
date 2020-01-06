@@ -9,20 +9,83 @@
                 </div>
                 <div class="box-body">
                     <form @submit.prevent="saveBudget()">
-                        <div class="form-group">
+                        
+                           <fieldset class="the-fieldset">
+                            <legend class="the-legend"><label class="fyr">FINANCIAL YEAR</label></legend>
+                             <div class="row">
+                             <div class="col-md-6">
+                             <div class="form-group">
+                           <label>Begins On</label>
+                           <datepicker v-model="form.begins_on" required></datepicker>
+                                                   
+                            </div> 
+                                </div>
+                                 <div class="col-md-6">
+                                   <div class="form-group">
+                            <label>Ends On</label>
+                            <datepicker v-model="form.ends_on" required disabled></datepicker>
+                        </div>  
+                                 </div>
+                            </div>                        
+                           
+                         </fieldset>    
+                       <br>
+                         <fieldset class="the-fieldset">
+                            <legend class="the-legend"><label class="fyr">BUDGET FREQUENCY</label></legend>
+                           <div class="fy">
+                            <div class="row bf">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Type</label>
+                                    <select class="form-control" v-model="form.frequency_type">
+                                        <option value="weeks">Weeks</option>
+                                        <option value="months">Months</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Period</label>
+                                    <input type="number" v-model="form.period" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Start Date</label>
+                                    <datepicker v-model="form.start_date" ref="start_date"></datepicker>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>End Date</label>
+                                    <datepicker v-model="form.end_date" ref="end_date"></datepicker>
+                                </div>
+                            </div>
+                        </div> 
+                           </div>                           
+                         </fieldset>                           
+                        <br>
+                        <div class="row">
+                            <div class="col-md-6">                                        
+                            <div class="form-group">
                             <label>Department</label>
                             <select class="form-control" v-model="form.department_id" required>
                                 <option :value="department.id" v-for="department in departments" :key="department.id">{{department.name}}</option>
                             </select>
                         </div>
-                       <div class="form-group">
-                           <label>Begins On</label>
-                           <datepicker v-model="form.begins_on" required></datepicker>
-                       </div>
-                        <div class="form-group">
-                            <label>Ends On</label>
-                            <datepicker v-model="form.ends_on" required></datepicker>
-                        </div>                      
+                        </div>
+                             <div class="col-md-6">                       
+                            <div class="form-group">
+                            <label>Budget Renewal Type</label>
+                            <select v-model="form.renewal_type" class="form-control" required>
+                                <option value="carried_forward">Budget Carried Forward</option>
+                                <option value="recurring_budget">Recurring Budget</option>
+                                <option value="relapses">Budget Replapses</option>
+                            </select>
+                        </div> 
+                            </div>
+                        </div>  
+                                     
                            <div class="form-group">
                             <label>Item Type</label>
                             <select class="form-control" v-model="form.item_type"
@@ -108,7 +171,6 @@
         </section>
     </div>
 </template>
-
 <script>
     import datepicker from 'vuejs-datepicker';
     export default {
@@ -121,6 +183,13 @@
                     begins_on:'',
                     ends_on:'',
                     item_type:'',
+                    renewal_type:'',
+                    frequency_type:'',
+                    period:'',
+                    start_date:'',
+                    end_date:'',
+                    fr_end_date:'',
+                    ending_date:'',
                     item_stock: [{item_id: '',amount: ''}],
                     item_asset: [{item_id: '',amount: ''}],
                     id:''
@@ -134,6 +203,7 @@
                 show_asset:false,
                 budget_amount:'',
                 stock_item:''
+               
             }
         },
         created(){
@@ -142,28 +212,71 @@
            
         },
         watch:{
+            budget_frq(){
+                if (this.form.period !=='' && this.form.frequency_type !=='' && this.form.begins_on !=='' && this.form.start_date !=='') {                                          
+                       if ((DateConverter.convertDate(this.form.start_date) > DateConverter.convertDate(this.form.ends_on)) || (DateConverter.convertDate(this.form.start_date) < DateConverter.convertDate(this.form.begins_on))) {
+                        this.$refs.start_date.clearDate();
+                        this.form.start_date = '';
+                        return this.$toastr.e('Sorry,Start date should be within the financial year.')
+                       }
+                       if (this.form.frequency_type =='weeks') {                       
+                       let now = new Date(this.form.begins_on);
+                       now.setDate(now.getDate() + this.form.period * 7);
+                       this.form.end_date = now;                                        
+                    }
+             else if (this.form.frequency_type=='months') {   
+          var CurrentDate = new Date();
+         CurrentDate.setMonth(CurrentDate.getMonth() + this.form.period);
+         this.form.end_date = CurrentDate;
+                    }
+                    if (DateConverter.convertDate(this.form.end_date) > DateConverter.convertDate(this.form.ends_on)) {
+                        this.$refs.start_date.clearDate();
+                        this.$refs.end_date.clearDate();
+                        this.form.start_date = '';
+                        this.form.end_date = '';
+                        return this.$toastr.e('Sorry,End date should be within the financial year.')
+                       } 
+
+                }        
+              
+            },
+            start_end(){
+            if(this.form.begins_on !==''){          
+             var aYearFromNow = new Date(this.form.begins_on);
+             aYearFromNow.setFullYear(aYearFromNow.getFullYear() + 1);
+             this.form.ends_on = aYearFromNow                    
+            }
+
+            },
        budgeting(){ 
-       let total =0;        
-         if ((Object.values(this.form.item_stock[0])[0] !== '' && Object.values(this.form.item_stock[0])[0] !== null) || (Object.values(this.form.item_stock[0])[1] !== '' && Object.values(this.form.item_stock[0])[1] !== null)) {
-                    for(let i=0;i<this.form.item_stock.length;i++){         
+       let total =0;   
+       if (Object.values(this.form.item_stock[0])[1] !== '' && Object.values(this.form.item_stock[0])[1] !== null) {
+               for(let i=0;i<this.form.item_stock.length;i++){         
             if (this.form.item_stock[i]['item_id'] !=='' && this.form.item_stock[i]['amount'] !=='') {
                 total+=parseFloat(this.form.item_stock[i]['amount']);
             }   
          }  
-         } 
-          if ((Object.values(this.form.item_asset[0])[0] !== '' && Object.values(this.form.item_asset[0])[0] !== null) || (Object.values(this.form.item_asset[0])[1] !== '' && Object.values(this.form.item_asset[0])[1] !== null)) {               
+         }      
+            if (Object.values(this.form.item_asset[0])[1] !== '' && Object.values(this.form.item_asset[0])[1] !== null) {    
             for(let k=0;k<this.form.item_asset.length;k++){  
             if (this.form.item_asset[k]['item_id'] !=='' && this.form.item_asset[k]['amount'] !=='') {
                 total+=parseFloat(this.form.item_asset[k]['amount']);
             }        
          } 
-         }
+         }                    
+          
         this.form.total_amount = total; 
         }
     },
         computed:{
+            budget_frq(){
+            return [this.form.period,this.form.frequency_type,this.form.begins_on,this.form.start_date,this.form.ends_on].join();
+            },
         budgeting(){
             return [this.stock_item,this.budget_amount,this.form.item_stock,this.form.item_asset].join();
+        },
+        start_end(){
+            return [this.form.begins_on,this.form.ends_on].join();
         }
         },
         methods:{         
@@ -213,12 +326,21 @@
                         }
                     }
                 }
-                this.form.begins_on = DateConverter.convertDate(this.form.begins_on);
-                this.form.ends_on = DateConverter.convertDate(this.form.ends_on);
+                if (this.form.frequency_type !=='') {
+                    if (this.form.period =='' || this.form.start_date =='') {
+                        return this.$toastr.e('Sorry,All budget frequency fields are required.');
+                    }
+                this.form.start_date = DateConverter.convertDate(this.form.start_date);
+                this.form.fr_end_date = DateConverter.convertDate(this.form.end_date);
+                 }
+                             
+               this.form.begins_on = DateConverter.convertDate(this.form.begins_on);
+               this.form.ending_date = DateConverter.convertDate(this.form.ends_on);   
+                
                 this.edit_budget ? this.update() : this.save();
             },
             save(){
-                delete this.form.id;               
+                delete this.form.id;                       
                 axios.post('department-budget',this.form)
                     .then(res => {                        
                         eventBus.$emit('listBudgets',res.data)
@@ -239,8 +361,7 @@
             },
             listen(){
                 if (this.edit){                
-                    this.form = this.$store.state.budgets; 
-                   // this.form.total_amount = this.$store.state.budgets.total_amount;                
+                    this.form = this.$store.state.budgets;                         
                      this.itemType();
                    
 
@@ -271,5 +392,27 @@
 #b_budget{
     width:30%;
 }
-
+.the-legend {
+    border-style: none;
+    border-width: 0;
+    font-size: 14px;
+    line-height: 20px;
+    margin-bottom: 0;
+    width: auto;
+    padding: 0 10px;
+    border: 1px solid #e0e0e0;
+}
+.the-fieldset {
+    border: 1px solid #e0e0e0;
+    padding: 10px;
+}
+.fyr{
+    font-weight:800
+}
+.fy{
+    display:flex;
+}
+.bf{
+    width:100%
+}
 </style>

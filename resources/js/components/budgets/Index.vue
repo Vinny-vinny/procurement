@@ -25,8 +25,8 @@
                         <tr v-for="budget in tableData">
                             <td>{{budget.id}}</td>
                             <td>{{budget.department}}</td>
-                            <td>{{budget.start_date}}</td>
-                            <td>{{budget.end_date}}</td>
+                            <td>{{budget.start_date_fr}}</td>
+                            <td>{{budget.end_date_fr}}</td>
                             <td>{{budget.total_amount | number}}</td>
                             <td>
                                 <button class="btn btn-success btn-sm" @click="editBudget(budget)"><i class="fa fa-edit"></i></button>

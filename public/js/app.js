@@ -2223,6 +2223,68 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ['edit'],
@@ -2234,6 +2296,13 @@ __webpack_require__.r(__webpack_exports__);
         begins_on: '',
         ends_on: '',
         item_type: '',
+        renewal_type: '',
+        frequency_type: '',
+        period: '',
+        start_date: '',
+        end_date: '',
+        fr_end_date: '',
+        ending_date: '',
         item_stock: [{
           item_id: '',
           amount: ''
@@ -2260,10 +2329,44 @@ __webpack_require__.r(__webpack_exports__);
     this.getBudgetData();
   },
   watch: {
+    budget_frq: function budget_frq() {
+      if (this.form.period !== '' && this.form.frequency_type !== '' && this.form.begins_on !== '' && this.form.start_date !== '') {
+        if (DateConverter.convertDate(this.form.start_date) > DateConverter.convertDate(this.form.ends_on) || DateConverter.convertDate(this.form.start_date) < DateConverter.convertDate(this.form.begins_on)) {
+          this.$refs.start_date.clearDate();
+          this.form.start_date = '';
+          return this.$toastr.e('Sorry,Start date should be within the financial year.');
+        }
+
+        if (this.form.frequency_type == 'weeks') {
+          var now = new Date(this.form.begins_on);
+          now.setDate(now.getDate() + this.form.period * 7);
+          this.form.end_date = now;
+        } else if (this.form.frequency_type == 'months') {
+          var CurrentDate = new Date();
+          CurrentDate.setMonth(CurrentDate.getMonth() + this.form.period);
+          this.form.end_date = CurrentDate;
+        }
+
+        if (DateConverter.convertDate(this.form.end_date) > DateConverter.convertDate(this.form.ends_on)) {
+          this.$refs.start_date.clearDate();
+          this.$refs.end_date.clearDate();
+          this.form.start_date = '';
+          this.form.end_date = '';
+          return this.$toastr.e('Sorry,End date should be within the financial year.');
+        }
+      }
+    },
+    start_end: function start_end() {
+      if (this.form.begins_on !== '') {
+        var aYearFromNow = new Date(this.form.begins_on);
+        aYearFromNow.setFullYear(aYearFromNow.getFullYear() + 1);
+        this.form.ends_on = aYearFromNow;
+      }
+    },
     budgeting: function budgeting() {
       var total = 0;
 
-      if (Object.values(this.form.item_stock[0])[0] !== '' && Object.values(this.form.item_stock[0])[0] !== null || Object.values(this.form.item_stock[0])[1] !== '' && Object.values(this.form.item_stock[0])[1] !== null) {
+      if (Object.values(this.form.item_stock[0])[1] !== '' && Object.values(this.form.item_stock[0])[1] !== null) {
         for (var i = 0; i < this.form.item_stock.length; i++) {
           if (this.form.item_stock[i]['item_id'] !== '' && this.form.item_stock[i]['amount'] !== '') {
             total += parseFloat(this.form.item_stock[i]['amount']);
@@ -2271,7 +2374,7 @@ __webpack_require__.r(__webpack_exports__);
         }
       }
 
-      if (Object.values(this.form.item_asset[0])[0] !== '' && Object.values(this.form.item_asset[0])[0] !== null || Object.values(this.form.item_asset[0])[1] !== '' && Object.values(this.form.item_asset[0])[1] !== null) {
+      if (Object.values(this.form.item_asset[0])[1] !== '' && Object.values(this.form.item_asset[0])[1] !== null) {
         for (var k = 0; k < this.form.item_asset.length; k++) {
           if (this.form.item_asset[k]['item_id'] !== '' && this.form.item_asset[k]['amount'] !== '') {
             total += parseFloat(this.form.item_asset[k]['amount']);
@@ -2283,8 +2386,14 @@ __webpack_require__.r(__webpack_exports__);
     }
   },
   computed: {
+    budget_frq: function budget_frq() {
+      return [this.form.period, this.form.frequency_type, this.form.begins_on, this.form.start_date, this.form.ends_on].join();
+    },
     budgeting: function budgeting() {
       return [this.stock_item, this.budget_amount, this.form.item_stock, this.form.item_asset].join();
+    },
+    start_end: function start_end() {
+      return [this.form.begins_on, this.form.ends_on].join();
     }
   },
   methods: {
@@ -2342,8 +2451,17 @@ __webpack_require__.r(__webpack_exports__);
         }
       }
 
+      if (this.form.frequency_type !== '') {
+        if (this.form.period == '' || this.form.start_date == '') {
+          return this.$toastr.e('Sorry,All budget frequency fields are required.');
+        }
+
+        this.form.start_date = DateConverter.convertDate(this.form.start_date);
+        this.form.fr_end_date = DateConverter.convertDate(this.form.end_date);
+      }
+
       this.form.begins_on = DateConverter.convertDate(this.form.begins_on);
-      this.form.ends_on = DateConverter.convertDate(this.form.ends_on);
+      this.form.ending_date = DateConverter.convertDate(this.form.ends_on);
       this.edit_budget ? this.update() : this.save();
     },
     save: function save() {
@@ -2370,8 +2488,7 @@ __webpack_require__.r(__webpack_exports__);
     },
     listen: function listen() {
       if (this.edit) {
-        this.form = this.$store.state.budgets; // this.form.total_amount = this.$store.state.budgets.total_amount;                
-
+        this.form = this.$store.state.budgets;
         this.itemType();
       }
     }
@@ -6695,7 +6812,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, "\n.cost[data-v-62f51ad1]{\n    margin-left:10px;\n    margin-bottom:10px;\n}\n.add[data-v-62f51ad1],.remove[data-v-62f51ad1]{\n    margin-left:15px;\n}\n.item[data-v-62f51ad1]{\n    margin-bottom:10px;\n}\n.budget[data-v-62f51ad1]{\n    left:30%;\n}\n#b_budget[data-v-62f51ad1]{\n    width:30%;\n}\n\n", ""]);
+exports.push([module.i, "\n.cost[data-v-62f51ad1]{\n    margin-left:10px;\n    margin-bottom:10px;\n}\n.add[data-v-62f51ad1],.remove[data-v-62f51ad1]{\n    margin-left:15px;\n}\n.item[data-v-62f51ad1]{\n    margin-bottom:10px;\n}\n.budget[data-v-62f51ad1]{\n    left:30%;\n}\n#b_budget[data-v-62f51ad1]{\n    width:30%;\n}\n.the-legend[data-v-62f51ad1] {\n    border-style: none;\n    border-width: 0;\n    font-size: 14px;\n    line-height: 20px;\n    margin-bottom: 0;\n    width: auto;\n    padding: 0 10px;\n    border: 1px solid #e0e0e0;\n}\n.the-fieldset[data-v-62f51ad1] {\n    border: 1px solid #e0e0e0;\n    padding: 10px;\n}\n.fyr[data-v-62f51ad1]{\n    font-weight:800\n}\n.fy[data-v-62f51ad1]{\n    display:-webkit-box;\n    display:flex;\n}\n.bf[data-v-62f51ad1]{\n    width:100%\n}\n", ""]);
 
 // exports
 
@@ -26848,95 +26965,296 @@ var render = function() {
               }
             },
             [
-              _c("div", { staticClass: "form-group" }, [
-                _c("label", [_vm._v("Department")]),
+              _c("fieldset", { staticClass: "the-fieldset" }, [
+                _vm._m(0),
                 _vm._v(" "),
-                _c(
-                  "select",
-                  {
-                    directives: [
-                      {
-                        name: "model",
-                        rawName: "v-model",
-                        value: _vm.form.department_id,
-                        expression: "form.department_id"
-                      }
-                    ],
-                    staticClass: "form-control",
-                    attrs: { required: "" },
-                    on: {
-                      change: function($event) {
-                        var $$selectedVal = Array.prototype.filter
-                          .call($event.target.options, function(o) {
-                            return o.selected
-                          })
-                          .map(function(o) {
-                            var val = "_value" in o ? o._value : o.value
-                            return val
-                          })
-                        _vm.$set(
-                          _vm.form,
-                          "department_id",
-                          $event.target.multiple
-                            ? $$selectedVal
-                            : $$selectedVal[0]
-                        )
-                      }
-                    }
-                  },
-                  _vm._l(_vm.departments, function(department) {
-                    return _c(
-                      "option",
-                      {
-                        key: department.id,
-                        domProps: { value: department.id }
-                      },
-                      [_vm._v(_vm._s(department.name))]
+                _c("div", { staticClass: "row" }, [
+                  _c("div", { staticClass: "col-md-6" }, [
+                    _c(
+                      "div",
+                      { staticClass: "form-group" },
+                      [
+                        _c("label", [_vm._v("Begins On")]),
+                        _vm._v(" "),
+                        _c("datepicker", {
+                          attrs: { required: "" },
+                          model: {
+                            value: _vm.form.begins_on,
+                            callback: function($$v) {
+                              _vm.$set(_vm.form, "begins_on", $$v)
+                            },
+                            expression: "form.begins_on"
+                          }
+                        })
+                      ],
+                      1
                     )
-                  }),
-                  0
-                )
+                  ]),
+                  _vm._v(" "),
+                  _c("div", { staticClass: "col-md-6" }, [
+                    _c(
+                      "div",
+                      { staticClass: "form-group" },
+                      [
+                        _c("label", [_vm._v("Ends On")]),
+                        _vm._v(" "),
+                        _c("datepicker", {
+                          attrs: { required: "", disabled: "" },
+                          model: {
+                            value: _vm.form.ends_on,
+                            callback: function($$v) {
+                              _vm.$set(_vm.form, "ends_on", $$v)
+                            },
+                            expression: "form.ends_on"
+                          }
+                        })
+                      ],
+                      1
+                    )
+                  ])
+                ])
               ]),
               _vm._v(" "),
-              _c(
-                "div",
-                { staticClass: "form-group" },
-                [
-                  _c("label", [_vm._v("Begins On")]),
-                  _vm._v(" "),
-                  _c("datepicker", {
-                    attrs: { required: "" },
-                    model: {
-                      value: _vm.form.begins_on,
-                      callback: function($$v) {
-                        _vm.$set(_vm.form, "begins_on", $$v)
-                      },
-                      expression: "form.begins_on"
-                    }
-                  })
-                ],
-                1
-              ),
+              _c("br"),
               _vm._v(" "),
-              _c(
-                "div",
-                { staticClass: "form-group" },
-                [
-                  _c("label", [_vm._v("Ends On")]),
-                  _vm._v(" "),
-                  _c("datepicker", {
-                    attrs: { required: "" },
-                    model: {
-                      value: _vm.form.ends_on,
-                      callback: function($$v) {
-                        _vm.$set(_vm.form, "ends_on", $$v)
+              _c("fieldset", { staticClass: "the-fieldset" }, [
+                _vm._m(1),
+                _vm._v(" "),
+                _c("div", { staticClass: "fy" }, [
+                  _c("div", { staticClass: "row bf" }, [
+                    _c("div", { staticClass: "col-md-3" }, [
+                      _c("div", { staticClass: "form-group" }, [
+                        _c("label", [_vm._v("Type")]),
+                        _vm._v(" "),
+                        _c(
+                          "select",
+                          {
+                            directives: [
+                              {
+                                name: "model",
+                                rawName: "v-model",
+                                value: _vm.form.frequency_type,
+                                expression: "form.frequency_type"
+                              }
+                            ],
+                            staticClass: "form-control",
+                            on: {
+                              change: function($event) {
+                                var $$selectedVal = Array.prototype.filter
+                                  .call($event.target.options, function(o) {
+                                    return o.selected
+                                  })
+                                  .map(function(o) {
+                                    var val = "_value" in o ? o._value : o.value
+                                    return val
+                                  })
+                                _vm.$set(
+                                  _vm.form,
+                                  "frequency_type",
+                                  $event.target.multiple
+                                    ? $$selectedVal
+                                    : $$selectedVal[0]
+                                )
+                              }
+                            }
+                          },
+                          [
+                            _c("option", { attrs: { value: "weeks" } }, [
+                              _vm._v("Weeks")
+                            ]),
+                            _vm._v(" "),
+                            _c("option", { attrs: { value: "months" } }, [
+                              _vm._v("Months")
+                            ])
+                          ]
+                        )
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-3" }, [
+                      _c("div", { staticClass: "form-group" }, [
+                        _c("label", [_vm._v("Period")]),
+                        _vm._v(" "),
+                        _c("input", {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.form.period,
+                              expression: "form.period"
+                            }
+                          ],
+                          staticClass: "form-control",
+                          attrs: { type: "number" },
+                          domProps: { value: _vm.form.period },
+                          on: {
+                            input: function($event) {
+                              if ($event.target.composing) {
+                                return
+                              }
+                              _vm.$set(_vm.form, "period", $event.target.value)
+                            }
+                          }
+                        })
+                      ])
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-3" }, [
+                      _c(
+                        "div",
+                        { staticClass: "form-group" },
+                        [
+                          _c("label", [_vm._v("Start Date")]),
+                          _vm._v(" "),
+                          _c("datepicker", {
+                            ref: "start_date",
+                            model: {
+                              value: _vm.form.start_date,
+                              callback: function($$v) {
+                                _vm.$set(_vm.form, "start_date", $$v)
+                              },
+                              expression: "form.start_date"
+                            }
+                          })
+                        ],
+                        1
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "col-md-3" }, [
+                      _c(
+                        "div",
+                        { staticClass: "form-group" },
+                        [
+                          _c("label", [_vm._v("End Date")]),
+                          _vm._v(" "),
+                          _c("datepicker", {
+                            ref: "end_date",
+                            model: {
+                              value: _vm.form.end_date,
+                              callback: function($$v) {
+                                _vm.$set(_vm.form, "end_date", $$v)
+                              },
+                              expression: "form.end_date"
+                            }
+                          })
+                        ],
+                        1
+                      )
+                    ])
+                  ])
+                ])
+              ]),
+              _vm._v(" "),
+              _c("br"),
+              _vm._v(" "),
+              _c("div", { staticClass: "row" }, [
+                _c("div", { staticClass: "col-md-6" }, [
+                  _c("div", { staticClass: "form-group" }, [
+                    _c("label", [_vm._v("Department")]),
+                    _vm._v(" "),
+                    _c(
+                      "select",
+                      {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.form.department_id,
+                            expression: "form.department_id"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        attrs: { required: "" },
+                        on: {
+                          change: function($event) {
+                            var $$selectedVal = Array.prototype.filter
+                              .call($event.target.options, function(o) {
+                                return o.selected
+                              })
+                              .map(function(o) {
+                                var val = "_value" in o ? o._value : o.value
+                                return val
+                              })
+                            _vm.$set(
+                              _vm.form,
+                              "department_id",
+                              $event.target.multiple
+                                ? $$selectedVal
+                                : $$selectedVal[0]
+                            )
+                          }
+                        }
                       },
-                      expression: "form.ends_on"
-                    }
-                  })
-                ],
-                1
-              ),
+                      _vm._l(_vm.departments, function(department) {
+                        return _c(
+                          "option",
+                          {
+                            key: department.id,
+                            domProps: { value: department.id }
+                          },
+                          [_vm._v(_vm._s(department.name))]
+                        )
+                      }),
+                      0
+                    )
+                  ])
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "col-md-6" }, [
+                  _c("div", { staticClass: "form-group" }, [
+                    _c("label", [_vm._v("Budget Renewal Type")]),
+                    _vm._v(" "),
+                    _c(
+                      "select",
+                      {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.form.renewal_type,
+                            expression: "form.renewal_type"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        attrs: { required: "" },
+                        on: {
+                          change: function($event) {
+                            var $$selectedVal = Array.prototype.filter
+                              .call($event.target.options, function(o) {
+                                return o.selected
+                              })
+                              .map(function(o) {
+                                var val = "_value" in o ? o._value : o.value
+                                return val
+                              })
+                            _vm.$set(
+                              _vm.form,
+                              "renewal_type",
+                              $event.target.multiple
+                                ? $$selectedVal
+                                : $$selectedVal[0]
+                            )
+                          }
+                        }
+                      },
+                      [
+                        _c("option", { attrs: { value: "carried_forward" } }, [
+                          _vm._v("Budget Carried Forward")
+                        ]),
+                        _vm._v(" "),
+                        _c("option", { attrs: { value: "recurring_budget" } }, [
+                          _vm._v("Recurring Budget")
+                        ]),
+                        _vm._v(" "),
+                        _c("option", { attrs: { value: "relapses" } }, [
+                          _vm._v("Budget Replapses")
+                        ])
+                      ]
+                    )
+                  ])
+                ])
+              ]),
               _vm._v(" "),
               _c("div", { staticClass: "form-group" }, [
                 _c("label", [_vm._v("Item Type")]),
@@ -27005,7 +27323,7 @@ var render = function() {
                           "table",
                           { staticStyle: { width: "100%" } },
                           [
-                            _vm._m(0),
+                            _vm._m(2),
                             _vm._v(" "),
                             _vm._l(_vm.form.item_stock, function(m, i) {
                               return _c("tr", [
@@ -27175,7 +27493,7 @@ var render = function() {
                           "table",
                           { staticStyle: { width: "100%" } },
                           [
-                            _vm._m(1),
+                            _vm._m(3),
                             _vm._v(" "),
                             _vm._l(_vm.form.item_asset, function(m, i) {
                               return _c("tr", [
@@ -27402,6 +27720,22 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
+    return _c("legend", { staticClass: "the-legend" }, [
+      _c("label", { staticClass: "fyr" }, [_vm._v("FINANCIAL YEAR")])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("legend", { staticClass: "the-legend" }, [
+      _c("label", { staticClass: "fyr" }, [_vm._v("BUDGET FREQUENCY")])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
     return _c("tr", [
       _c("th", [_vm._v("Item")]),
       _vm._v(" "),
@@ -27485,9 +27819,9 @@ var render = function() {
                         _vm._v(" "),
                         _c("td", [_vm._v(_vm._s(budget.department))]),
                         _vm._v(" "),
-                        _c("td", [_vm._v(_vm._s(budget.start_date))]),
+                        _c("td", [_vm._v(_vm._s(budget.start_date_fr))]),
                         _vm._v(" "),
-                        _c("td", [_vm._v(_vm._s(budget.end_date))]),
+                        _c("td", [_vm._v(_vm._s(budget.end_date_fr))]),
                         _vm._v(" "),
                         _c("td", [
                           _vm._v(_vm._s(_vm._f("number")(budget.total_amount)))
@@ -55444,6 +55778,12 @@ function () {
           mnth = ("0" + (date.getMonth() + 1)).slice(-2),
           day = ("0" + date.getDate()).slice(-2);
       return [day, mnth, date.getFullYear()].join("-");
+    }
+  }, {
+    key: "addOneYear",
+    value: function addOneYear(str) {
+      var date = new Date(str);
+      date.setFullYear(date.getFullYear() + 1);
     }
   }]);
 
