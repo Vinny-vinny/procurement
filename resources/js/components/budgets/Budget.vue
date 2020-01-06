@@ -8,8 +8,7 @@
                     <h3 class="box-title">{{edit_budget ? 'Update Department Budget' : 'New Department Budget'}}</h3>
                 </div>
                 <div class="box-body">
-                    <form @submit.prevent="saveBudget()">
-                        
+                    <form @submit.prevent="saveBudget()">                        
                            <fieldset class="the-fieldset">
                             <legend class="the-legend"><label class="fyr">FINANCIAL YEAR</label></legend>
                              <div class="row">
@@ -25,7 +24,7 @@
                             <label>Ends On</label>
                             <datepicker v-model="form.ends_on" required disabled></datepicker>
                         </div>  
-                                 </div>
+                           </div>
                             </div>                        
                            
                          </fieldset>    
@@ -98,8 +97,9 @@
 
                         <div class="row">
                             <div class="col-md-12">
-                                <div class="form-group" v-if="show_stock">
-                                    <label>Stock Items</label>
+                                <div class="form-group" v-if="show_stock">                                    
+                                   <fieldset class="the-fieldset">
+                               <legend class="the-legend"><label class="fyr">Stock Items</label></legend>
                                     <table style="width:100%">
                                         <tr>
                                             <th>Item</th>
@@ -124,10 +124,11 @@
                                             </td>
                                         </tr>
                                     </table>
-                                       
+                                    </fieldset>   
                                 </div>
                                 <div class="form-group" v-if="show_asset">
-                                    <label>Assets</label>
+                                    <fieldset class="the-fieldset">
+                               <legend class="the-legend"><label class="fyr">Assets</label></legend>                                    
                                     <table style="width:100%">
                                         <tr>
                                             <th>Item</th>
@@ -150,6 +151,7 @@
                                             </td>
                                         </tr>
                                     </table>
+                                </fieldset>
                                 </div>
 
                             </div>
@@ -279,7 +281,8 @@
             return [this.form.begins_on,this.form.ends_on].join();
         }
         },
-        methods:{         
+        methods:{ 
+
             itemType(){
             if (this.form.item_type =='asset') {
                 this.show_asset=true;
@@ -392,27 +395,5 @@
 #b_budget{
     width:30%;
 }
-.the-legend {
-    border-style: none;
-    border-width: 0;
-    font-size: 14px;
-    line-height: 20px;
-    margin-bottom: 0;
-    width: auto;
-    padding: 0 10px;
-    border: 1px solid #e0e0e0;
-}
-.the-fieldset {
-    border: 1px solid #e0e0e0;
-    padding: 10px;
-}
-.fyr{
-    font-weight:800
-}
-.fy{
-    display:flex;
-}
-.bf{
-    width:100%
-}
+
 </style>

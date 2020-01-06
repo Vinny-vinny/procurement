@@ -24,12 +24,13 @@
                                  <div class="form-group">
                                     <label>Department</label>
                                     <select v-model="form.department_id" class="form-control" required @change="checkItems()">
+                                         <option selected disabled>Select Department</option>
                                         <option :value="department.id" v-for="department in departments" :key="department.id">{{department.name}}</option>
                                     </select>
                                 </div>
                             <div class="form-group">
                                     <label>Item Type</label>
-                                    <select v-model="form.item_type" required class="form-control" @change="fetchItems()">
+                                    <select v-model="form.item_type" required class="form-control">
                                        <option value="stock">Stock Item</option>
                                        <option value="asset">Asset</option>
                                     </select>
@@ -63,7 +64,8 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group" v-if="show_stock">
-                                    <label>Stock Items</label>
+                                    <fieldset class="the-fieldset">
+                               <legend class="the-legend"><label class="fyr">Stock Items</label></legend>
                                     <table style="width:100%">
                                         <tr>
                                             <th>Item</th>
@@ -97,10 +99,11 @@
                                             </td>
                                         </tr>
                                     </table>
-                                       
+                                       </fieldset>
                                 </div>
                                 <div class="form-group" v-if="show_asset">
-                                    <label>Assets</label>
+                                    <fieldset class="the-fieldset">
+                               <legend class="the-legend"><label class="fyr">Assets</label></legend>
                                     <table style="width:100%">
                                         <tr>
                                             <th>Item</th>
@@ -132,6 +135,7 @@
                                             </td>
                                         </tr>
                                     </table>
+                                </fieldset>
                                 </div>
 
                             </div>
@@ -184,6 +188,73 @@
             this.listen();
             this.getRequisitions();
         },
+        watch:{
+        fetchItems(){          
+                let budget_item ={} ;
+                let stk_items = {};
+                let asset_item = {};
+          if (this.form.department_id !=='' && this.form.item_type !=='') {            
+           setTimeout(()=>{
+          let budgets = this.budgets.find(b => b.department_id == this.form.department_id);               
+         if (budgets ==undefined) {
+           this.show_asset = false;
+           this.show_stock = false;                      
+           return this.$toastr.e(`The selected department does not have budgeted ${this.form.item_type}.`);  
+         }    
+             if (this.form.item_type=='asset') {
+                    if(budgets['item_asset'][0]['item_id'] != null){
+                        asset_item = budgets['item_asset'];
+                    }
+                     if (Custom.isEmpty(asset_item)) {
+                        this.show_asset = false;
+                        this.show_stock = false;                
+                      return this.$toastr.e(`The selected department does not have budgeted Assets.`);
+                     }  
+                this.show_stock = false;
+                this.show_asset = true;              
+                this.filtered_assets = [];           
+               for(let i=0;i<asset_item.length;i++){
+                for(let j=0;j<this.assets.length;j++){
+                    if (asset_item[i]['item_id'] == this.assets[j]['id']) {
+                        this.filtered_assets.push(this.assets[j]);
+                    }
+                }
+               } 
+                         
+                } 
+                 if (this.form.item_type=='stock') {                   
+                    if(budgets['item_stock'][0]['item_id'] != null){
+                        stk_items = budgets['item_stock'];
+                    }                 
+                     if (Custom.isEmpty(stk_items)) { 
+                        this.show_asset = false;
+                        this.show_stock = false;                       
+                      return this.$toastr.e(`The selected department does not have budgeted Stock Items.`);
+                     }
+                this.show_stock = true;
+                this.show_asset = false;                       
+                this.filtered_stock_items = [];
+                for(let i=0;i<stk_items.length;i++){
+                    for(let j=0;j<this.stock_items.length;j++){                     
+                        if (stk_items[i]['item_id'] == this.stock_items[j]['id']) {
+                            this.filtered_stock_items.push(this.stock_items[j]);
+                        }
+                    }
+                }  
+             
+                } 
+         },1000)  
+         
+                 
+                     
+            }
+        }
+        },
+        computed:{
+       fetchItems(){
+        return [this.form.item_type,this.form.department_id].join();
+       }
+        },
         methods:{
             username(){
             return User.name();
@@ -201,63 +272,12 @@
             this.form.item_asset.splice(i,1);
             },
             checkItems(){
-          if (this.form.item_type !=='') {
-            this.fetchItems();
-          }
+             //   console.log(this.form.item_type)
+          // if (this.form.item_type !=='') {
+          //   this.fetchItems();
+          // }
             },
-            fetchItems(){
-                let budget_item ={} ;
-                let stk_items = {};
-                let asset_item = {};
-             if (this.form.department_id =='') {
-                this.form.item_type = '';
-                return this.$toastr.e('Please select department first');
-             }                 
-
-            for(let i=0;i<this.budgets.length;i++){
-                if (this.form.item_type=='asset' && this.budgets[i]['department_id'] ==this.form.department_id) {
-                    if(this.budgets[i]['item_asset'][0]['item_id'] != null){
-                        asset_item = this.budgets[i]['item_asset'];
-                    }
-                     if (Custom.isEmpty(asset_item)) {
-                        this.show_asset = false;
-                        this.show_stock = false;                
-                      return this.$toastr.e(`The selected department does not have budgeted Assets.`);
-                     }  
-                this.show_stock = false;
-                this.show_asset = true;              
-                this.filtered_assets = [];           
-               for(let i=0;i<asset_item.length;i++){
-                for(let j=0;j<this.assets.length;j++){
-                    if (asset_item[i]['item_id'] == this.assets[j]['id']) {
-                        this.filtered_assets.push(this.assets[j]);
-                    }
-                }
-               }               
-                } 
-
-                 if (this.form.item_type=='stock' && this.budgets[i]['department_id'] ==this.form.department_id) {
-                    if(this.budgets[i]['item_stock'][0]['item_id'] != null){
-                        stk_items = this.budgets[i]['item_stock'];
-                    } 
-                     if (Custom.isEmpty(stk_items)) { 
-                        this.show_asset = false;
-                        this.show_stock = false;                       
-                      return this.$toastr.e(`The selected department does not have budgeted Stock Items.`);
-                     }
-                this.show_stock = true;
-                this.show_asset = false;                       
-                this.filtered_stock_items = [];
-                for(let i=0;i<stk_items.length;i++){
-                    for(let j=0;j<this.stock_items.length;j++){                     
-                        if (stk_items[i]['item_id'] == this.stock_items[j]['id']) {
-                            this.filtered_stock_items.push(this.stock_items[j]);
-                        }
-                    }
-                }               
-                }             
-            }           
-            },
+            
             getRequisitions(){
               axios.get('requisitions')
                 .then(res => {
@@ -313,9 +333,9 @@
             listen(){
                 if (this.edit){
                     this.form = this.$store.state.requisitions;
-                    setTimeout(()=>{
-                   this.fetchItems();
-                    },1000);                   
+                   //  setTimeout(()=>{
+                   // this.fetchItems();
+                   //  },1000);                   
                     if (this.form.item_type == 'stock') {
                         this.show_stock = true;
                         this.show_asset = false;                        
@@ -335,5 +355,27 @@
 </script>
 
 <style>
-
+.the-legend {
+    border-style: none;
+    border-width: 0;
+    font-size: 14px;
+    line-height: 20px;
+    margin-bottom: 0;
+    width: auto;
+    padding: 0 10px;
+    border: 1px solid #e0e0e0;
+}
+.the-fieldset {
+    border: 1px solid #e0e0e0;
+    padding: 10px;
+}
+.fyr{
+    font-weight:800
+}
+.fy{
+    display:flex;
+}
+.bf{
+    width:100%
+}
 </style>

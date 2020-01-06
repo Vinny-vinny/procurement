@@ -2285,6 +2285,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ['edit'],
@@ -5748,6 +5750,10 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: ['edit'],
@@ -5795,6 +5801,82 @@ __webpack_require__.r(__webpack_exports__);
     this.listen();
     this.getRequisitions();
   },
+  watch: {
+    fetchItems: function fetchItems() {
+      var _this = this;
+
+      var budget_item = {};
+      var stk_items = {};
+      var asset_item = {};
+
+      if (this.form.department_id !== '' && this.form.item_type !== '') {
+        setTimeout(function () {
+          var budgets = _this.budgets.find(function (b) {
+            return b.department_id == _this.form.department_id;
+          });
+
+          if (budgets == undefined) {
+            _this.show_asset = false;
+            _this.show_stock = false;
+            return _this.$toastr.e("The selected department does not have budgeted ".concat(_this.form.item_type, "."));
+          }
+
+          if (_this.form.item_type == 'asset') {
+            if (budgets['item_asset'][0]['item_id'] != null) {
+              asset_item = budgets['item_asset'];
+            }
+
+            if (Custom.isEmpty(asset_item)) {
+              _this.show_asset = false;
+              _this.show_stock = false;
+              return _this.$toastr.e("The selected department does not have budgeted Assets.");
+            }
+
+            _this.show_stock = false;
+            _this.show_asset = true;
+            _this.filtered_assets = [];
+
+            for (var i = 0; i < asset_item.length; i++) {
+              for (var j = 0; j < _this.assets.length; j++) {
+                if (asset_item[i]['item_id'] == _this.assets[j]['id']) {
+                  _this.filtered_assets.push(_this.assets[j]);
+                }
+              }
+            }
+          }
+
+          if (_this.form.item_type == 'stock') {
+            if (budgets['item_stock'][0]['item_id'] != null) {
+              stk_items = budgets['item_stock'];
+            }
+
+            if (Custom.isEmpty(stk_items)) {
+              _this.show_asset = false;
+              _this.show_stock = false;
+              return _this.$toastr.e("The selected department does not have budgeted Stock Items.");
+            }
+
+            _this.show_stock = true;
+            _this.show_asset = false;
+            _this.filtered_stock_items = [];
+
+            for (var _i = 0; _i < stk_items.length; _i++) {
+              for (var _j = 0; _j < _this.stock_items.length; _j++) {
+                if (stk_items[_i]['item_id'] == _this.stock_items[_j]['id']) {
+                  _this.filtered_stock_items.push(_this.stock_items[_j]);
+                }
+              }
+            }
+          }
+        }, 1000);
+      }
+    }
+  },
+  computed: {
+    fetchItems: function fetchItems() {
+      return [this.form.item_type, this.form.department_id].join();
+    }
+  },
   methods: {
     username: function username() {
       return User.name();
@@ -5821,76 +5903,16 @@ __webpack_require__.r(__webpack_exports__);
     removeAsset: function removeAsset(i) {
       this.form.item_asset.splice(i, 1);
     },
-    checkItems: function checkItems() {
-      if (this.form.item_type !== '') {
-        this.fetchItems();
-      }
-    },
-    fetchItems: function fetchItems() {
-      var budget_item = {};
-      var stk_items = {};
-      var asset_item = {};
-
-      if (this.form.department_id == '') {
-        this.form.item_type = '';
-        return this.$toastr.e('Please select department first');
-      }
-
-      for (var i = 0; i < this.budgets.length; i++) {
-        if (this.form.item_type == 'asset' && this.budgets[i]['department_id'] == this.form.department_id) {
-          if (this.budgets[i]['item_asset'][0]['item_id'] != null) {
-            asset_item = this.budgets[i]['item_asset'];
-          }
-
-          if (Custom.isEmpty(asset_item)) {
-            this.show_asset = false;
-            this.show_stock = false;
-            return this.$toastr.e("The selected department does not have budgeted Assets.");
-          }
-
-          this.show_stock = false;
-          this.show_asset = true;
-          this.filtered_assets = [];
-
-          for (var _i = 0; _i < asset_item.length; _i++) {
-            for (var j = 0; j < this.assets.length; j++) {
-              if (asset_item[_i]['item_id'] == this.assets[j]['id']) {
-                this.filtered_assets.push(this.assets[j]);
-              }
-            }
-          }
-        }
-
-        if (this.form.item_type == 'stock' && this.budgets[i]['department_id'] == this.form.department_id) {
-          if (this.budgets[i]['item_stock'][0]['item_id'] != null) {
-            stk_items = this.budgets[i]['item_stock'];
-          }
-
-          if (Custom.isEmpty(stk_items)) {
-            this.show_asset = false;
-            this.show_stock = false;
-            return this.$toastr.e("The selected department does not have budgeted Stock Items.");
-          }
-
-          this.show_stock = true;
-          this.show_asset = false;
-          this.filtered_stock_items = [];
-
-          for (var _i2 = 0; _i2 < stk_items.length; _i2++) {
-            for (var _j = 0; _j < this.stock_items.length; _j++) {
-              if (stk_items[_i2]['item_id'] == this.stock_items[_j]['id']) {
-                this.filtered_stock_items.push(this.stock_items[_j]);
-              }
-            }
-          }
-        }
-      }
+    checkItems: function checkItems() {//   console.log(this.form.item_type)
+      // if (this.form.item_type !=='') {
+      //   this.fetchItems();
+      // }
     },
     getRequisitions: function getRequisitions() {
-      var _this = this;
+      var _this2 = this;
 
       axios.get('requisitions').then(function (res) {
-        _this.req_types = res.data.requisition_types, _this.departments = res.data.departments, _this.priorities = res.data.priorities, _this.projects = res.data.projects, _this.stock_items = res.data.stock_items, _this.assets = res.data.assets, _this.budgets = res.data.budgets, _this.uoms = res.data.uoms;
+        _this2.req_types = res.data.requisition_types, _this2.departments = res.data.departments, _this2.priorities = res.data.priorities, _this2.projects = res.data.projects, _this2.stock_items = res.data.stock_items, _this2.assets = res.data.assets, _this2.budgets = res.data.budgets, _this2.uoms = res.data.uoms;
       });
     },
     saveRequisition: function saveRequisition() {
@@ -5903,8 +5925,8 @@ __webpack_require__.r(__webpack_exports__);
       }
 
       if (Object.values(this.form.item_asset[0])[0] !== '' || Object.values(this.form.item_asset[0])[1] !== '' || Object.values(this.form.item_asset[0])[2] !== '' || Object.values(this.form.item_asset[0])[3] !== '') {
-        for (var _i3 = 0; _i3 < this.form.item_asset.length; _i3++) {
-          if (this.form.item_asset[_i3]['item_id'] === '' || this.form.item_asset[_i3]['qty'] === '' || this.form.item_asset[_i3]['uom'] === '' || this.form.item_asset[_i3]['scheduled_date'] === '') {
+        for (var _i2 = 0; _i2 < this.form.item_asset.length; _i2++) {
+          if (this.form.item_asset[_i2]['item_id'] === '' || this.form.item_asset[_i2]['qty'] === '' || this.form.item_asset[_i2]['uom'] === '' || this.form.item_asset[_i2]['scheduled_date'] === '') {
             return this.$toastr.e('Please all Assets fields are required.');
           }
         }
@@ -5924,10 +5946,10 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     update: function update() {
-      var _this2 = this;
+      var _this3 = this;
 
       axios.patch("requisitions/".concat(this.form.id), this.form).then(function (res) {
-        _this2.edit_req = false;
+        _this3.edit_req = false;
         eventBus.$emit('updateRequisition', res.data);
       })["catch"](function (error) {
         return error.response;
@@ -5937,13 +5959,10 @@ __webpack_require__.r(__webpack_exports__);
       eventBus.$emit('cancel');
     },
     listen: function listen() {
-      var _this3 = this;
-
       if (this.edit) {
-        this.form = this.$store.state.requisitions;
-        setTimeout(function () {
-          _this3.fetchItems();
-        }, 1000);
+        this.form = this.$store.state.requisitions; //  setTimeout(()=>{
+        // this.fetchItems();
+        //  },1000);                   
 
         if (this.form.item_type == 'stock') {
           this.show_stock = true;
@@ -6812,7 +6831,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, "\n.cost[data-v-62f51ad1]{\n    margin-left:10px;\n    margin-bottom:10px;\n}\n.add[data-v-62f51ad1],.remove[data-v-62f51ad1]{\n    margin-left:15px;\n}\n.item[data-v-62f51ad1]{\n    margin-bottom:10px;\n}\n.budget[data-v-62f51ad1]{\n    left:30%;\n}\n#b_budget[data-v-62f51ad1]{\n    width:30%;\n}\n.the-legend[data-v-62f51ad1] {\n    border-style: none;\n    border-width: 0;\n    font-size: 14px;\n    line-height: 20px;\n    margin-bottom: 0;\n    width: auto;\n    padding: 0 10px;\n    border: 1px solid #e0e0e0;\n}\n.the-fieldset[data-v-62f51ad1] {\n    border: 1px solid #e0e0e0;\n    padding: 10px;\n}\n.fyr[data-v-62f51ad1]{\n    font-weight:800\n}\n.fy[data-v-62f51ad1]{\n    display:-webkit-box;\n    display:flex;\n}\n.bf[data-v-62f51ad1]{\n    width:100%\n}\n", ""]);
+exports.push([module.i, "\n.cost[data-v-62f51ad1]{\n    margin-left:10px;\n    margin-bottom:10px;\n}\n.add[data-v-62f51ad1],.remove[data-v-62f51ad1]{\n    margin-left:15px;\n}\n.item[data-v-62f51ad1]{\n    margin-bottom:10px;\n}\n.budget[data-v-62f51ad1]{\n    left:30%;\n}\n#b_budget[data-v-62f51ad1]{\n    width:30%;\n}\n\n", ""]);
 
 // exports
 
@@ -6870,6 +6889,25 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 // module
 exports.push([module.i, "\n.wrapperlogin{\n    /*margin-right: 10%;*/\n    /*margin-left: 10%;*/\n    /*height: 100vh;*/\n    /*background: darkgray;*/\n    /*margin-bottom: 20%;*/\n}\n.wrappercustom{\n}\n", ""]);
+
+// exports
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/requistions/Requisition.vue?vue&type=style&index=0&lang=css&":
+/*!*****************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/requistions/Requisition.vue?vue&type=style&index=0&lang=css& ***!
+  \*****************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, "\n.the-legend {\n    border-style: none;\n    border-width: 0;\n    font-size: 14px;\n    line-height: 20px;\n    margin-bottom: 0;\n    width: auto;\n    padding: 0 10px;\n    border: 1px solid #e0e0e0;\n}\n.the-fieldset {\n    border: 1px solid #e0e0e0;\n    padding: 10px;\n}\n.fyr{\n    font-weight:800\n}\n.fy{\n    display:-webkit-box;\n    display:flex;\n}\n.bf{\n    width:100%\n}\n", ""]);
 
 // exports
 
@@ -25355,6 +25393,36 @@ if(false) {}
 
 /***/ }),
 
+/***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/requistions/Requisition.vue?vue&type=style&index=0&lang=css&":
+/*!*********************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader!./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/requistions/Requisition.vue?vue&type=style&index=0&lang=css& ***!
+  \*********************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+var content = __webpack_require__(/*! !../../../../node_modules/css-loader??ref--6-1!../../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../../node_modules/postcss-loader/src??ref--6-2!../../../../node_modules/vue-loader/lib??vue-loader-options!./Requisition.vue?vue&type=style&index=0&lang=css& */ "./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/requistions/Requisition.vue?vue&type=style&index=0&lang=css&");
+
+if(typeof content === 'string') content = [[module.i, content, '']];
+
+var transform;
+var insertInto;
+
+
+
+var options = {"hmr":true}
+
+options.transform = transform
+options.insertInto = undefined;
+
+var update = __webpack_require__(/*! ../../../../node_modules/style-loader/lib/addStyles.js */ "./node_modules/style-loader/lib/addStyles.js")(content, options);
+
+if(content.locals) module.exports = content.locals;
+
+if(false) {}
+
+/***/ }),
+
 /***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/suppliers/Index.vue?vue&type=style&index=0&lang=css&":
 /*!*************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/style-loader!./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/suppliers/Index.vue?vue&type=style&index=0&lang=css& ***!
@@ -27317,341 +27385,353 @@ var render = function() {
                 _c("div", { staticClass: "col-md-12" }, [
                   _vm.show_stock
                     ? _c("div", { staticClass: "form-group" }, [
-                        _c("label", [_vm._v("Stock Items")]),
-                        _vm._v(" "),
-                        _c(
-                          "table",
-                          { staticStyle: { width: "100%" } },
-                          [
-                            _vm._m(2),
-                            _vm._v(" "),
-                            _vm._l(_vm.form.item_stock, function(m, i) {
-                              return _c("tr", [
-                                _c("td", [
-                                  _c(
-                                    "select",
-                                    {
+                        _c("fieldset", { staticClass: "the-fieldset" }, [
+                          _vm._m(2),
+                          _vm._v(" "),
+                          _c(
+                            "table",
+                            { staticStyle: { width: "100%" } },
+                            [
+                              _vm._m(3),
+                              _vm._v(" "),
+                              _vm._l(_vm.form.item_stock, function(m, i) {
+                                return _c("tr", [
+                                  _c("td", [
+                                    _c(
+                                      "select",
+                                      {
+                                        directives: [
+                                          {
+                                            name: "model",
+                                            rawName: "v-model",
+                                            value: m.item_id,
+                                            expression: "m.item_id"
+                                          }
+                                        ],
+                                        staticClass: "form-control item",
+                                        attrs: { placeholder: "Stock Item" },
+                                        on: {
+                                          change: [
+                                            function($event) {
+                                              var $$selectedVal = Array.prototype.filter
+                                                .call(
+                                                  $event.target.options,
+                                                  function(o) {
+                                                    return o.selected
+                                                  }
+                                                )
+                                                .map(function(o) {
+                                                  var val =
+                                                    "_value" in o
+                                                      ? o._value
+                                                      : o.value
+                                                  return val
+                                                })
+                                              _vm.$set(
+                                                m,
+                                                "item_id",
+                                                $event.target.multiple
+                                                  ? $$selectedVal
+                                                  : $$selectedVal[0]
+                                              )
+                                            },
+                                            function($event) {
+                                              _vm.stock_item = m.item_id
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      [
+                                        _c(
+                                          "option",
+                                          {
+                                            attrs: {
+                                              selected: "",
+                                              disabled: ""
+                                            }
+                                          },
+                                          [_vm._v("Select Stock Item")]
+                                        ),
+                                        _vm._v(" "),
+                                        _vm._l(_vm.stock_items, function(
+                                          stock
+                                        ) {
+                                          return _c(
+                                            "option",
+                                            {
+                                              key: stock.id,
+                                              domProps: { value: stock.id }
+                                            },
+                                            [
+                                              _vm._v(
+                                                _vm._s(stock.code) +
+                                                  "-" +
+                                                  _vm._s(stock.description)
+                                              )
+                                            ]
+                                          )
+                                        })
+                                      ],
+                                      2
+                                    )
+                                  ]),
+                                  _vm._v(" "),
+                                  _c("td", [
+                                    _c("input", {
                                       directives: [
                                         {
                                           name: "model",
                                           rawName: "v-model",
-                                          value: m.item_id,
-                                          expression: "m.item_id"
+                                          value: m.amount,
+                                          expression: "m.amount"
                                         }
                                       ],
-                                      staticClass: "form-control item",
-                                      attrs: { placeholder: "Stock Item" },
-                                      on: {
-                                        change: [
-                                          function($event) {
-                                            var $$selectedVal = Array.prototype.filter
-                                              .call(
-                                                $event.target.options,
-                                                function(o) {
-                                                  return o.selected
-                                                }
-                                              )
-                                              .map(function(o) {
-                                                var val =
-                                                  "_value" in o
-                                                    ? o._value
-                                                    : o.value
-                                                return val
-                                              })
-                                            _vm.$set(
-                                              m,
-                                              "item_id",
-                                              $event.target.multiple
-                                                ? $$selectedVal
-                                                : $$selectedVal[0]
-                                            )
-                                          },
-                                          function($event) {
-                                            _vm.stock_item = m.item_id
-                                          }
-                                        ]
-                                      }
-                                    },
-                                    [
-                                      _c(
-                                        "option",
-                                        {
-                                          attrs: { selected: "", disabled: "" }
-                                        },
-                                        [_vm._v("Select Stock Item")]
-                                      ),
-                                      _vm._v(" "),
-                                      _vm._l(_vm.stock_items, function(stock) {
-                                        return _c(
-                                          "option",
-                                          {
-                                            key: stock.id,
-                                            domProps: { value: stock.id }
-                                          },
-                                          [
-                                            _vm._v(
-                                              _vm._s(stock.code) +
-                                                "-" +
-                                                _vm._s(stock.description)
-                                            )
-                                          ]
-                                        )
-                                      })
-                                    ],
-                                    2
-                                  )
-                                ]),
-                                _vm._v(" "),
-                                _c("td", [
-                                  _c("input", {
-                                    directives: [
-                                      {
-                                        name: "model",
-                                        rawName: "v-model",
-                                        value: m.amount,
-                                        expression: "m.amount"
-                                      }
-                                    ],
-                                    staticClass: "form-control cost",
-                                    attrs: {
-                                      type: "number",
-                                      placeholder: "Amount"
-                                    },
-                                    domProps: { value: m.amount },
-                                    on: {
-                                      keyup: function($event) {
-                                        _vm.budget_amount = m.amount
+                                      staticClass: "form-control cost",
+                                      attrs: {
+                                        type: "number",
+                                        placeholder: "Amount"
                                       },
-                                      input: function($event) {
-                                        if ($event.target.composing) {
-                                          return
+                                      domProps: { value: m.amount },
+                                      on: {
+                                        keyup: function($event) {
+                                          _vm.budget_amount = m.amount
+                                        },
+                                        input: function($event) {
+                                          if ($event.target.composing) {
+                                            return
+                                          }
+                                          _vm.$set(
+                                            m,
+                                            "amount",
+                                            $event.target.value
+                                          )
                                         }
-                                        _vm.$set(
-                                          m,
-                                          "amount",
-                                          $event.target.value
-                                        )
                                       }
-                                    }
-                                  })
-                                ]),
-                                _vm._v(" "),
-                                _c("td", [
-                                  _c("i", {
-                                    directives: [
-                                      {
-                                        name: "show",
-                                        rawName: "v-show",
-                                        value:
-                                          i ||
-                                          (!i &&
-                                            _vm.form.item_stock.length > 1),
-                                        expression:
-                                          "i || (!i && form.item_stock.length > 1)"
-                                      }
-                                    ],
-                                    staticClass: "fa fa-minus-circle remove",
-                                    on: {
-                                      click: function($event) {
-                                        return _vm.removeItem(i)
-                                      }
-                                    }
-                                  }),
+                                    })
+                                  ]),
                                   _vm._v(" "),
-                                  _c("i", {
-                                    directives: [
-                                      {
-                                        name: "show",
-                                        rawName: "v-show",
-                                        value:
-                                          i == _vm.form.item_stock.length - 1,
-                                        expression:
-                                          "i == form.item_stock.length -1"
+                                  _c("td", [
+                                    _c("i", {
+                                      directives: [
+                                        {
+                                          name: "show",
+                                          rawName: "v-show",
+                                          value:
+                                            i ||
+                                            (!i &&
+                                              _vm.form.item_stock.length > 1),
+                                          expression:
+                                            "i || (!i && form.item_stock.length > 1)"
+                                        }
+                                      ],
+                                      staticClass: "fa fa-minus-circle remove",
+                                      on: {
+                                        click: function($event) {
+                                          return _vm.removeItem(i)
+                                        }
                                       }
-                                    ],
-                                    staticClass: "fa fa-plus-circle add",
-                                    on: {
-                                      click: function($event) {
-                                        return _vm.addItem(i)
+                                    }),
+                                    _vm._v(" "),
+                                    _c("i", {
+                                      directives: [
+                                        {
+                                          name: "show",
+                                          rawName: "v-show",
+                                          value:
+                                            i == _vm.form.item_stock.length - 1,
+                                          expression:
+                                            "i == form.item_stock.length -1"
+                                        }
+                                      ],
+                                      staticClass: "fa fa-plus-circle add",
+                                      on: {
+                                        click: function($event) {
+                                          return _vm.addItem(i)
+                                        }
                                       }
-                                    }
-                                  })
+                                    })
+                                  ])
                                 ])
-                              ])
-                            })
-                          ],
-                          2
-                        )
+                              })
+                            ],
+                            2
+                          )
+                        ])
                       ])
                     : _vm._e(),
                   _vm._v(" "),
                   _vm.show_asset
                     ? _c("div", { staticClass: "form-group" }, [
-                        _c("label", [_vm._v("Assets")]),
-                        _vm._v(" "),
-                        _c(
-                          "table",
-                          { staticStyle: { width: "100%" } },
-                          [
-                            _vm._m(3),
-                            _vm._v(" "),
-                            _vm._l(_vm.form.item_asset, function(m, i) {
-                              return _c("tr", [
-                                _c("td", [
-                                  _c(
-                                    "select",
-                                    {
+                        _c("fieldset", { staticClass: "the-fieldset" }, [
+                          _vm._m(4),
+                          _vm._v(" "),
+                          _c(
+                            "table",
+                            { staticStyle: { width: "100%" } },
+                            [
+                              _vm._m(5),
+                              _vm._v(" "),
+                              _vm._l(_vm.form.item_asset, function(m, i) {
+                                return _c("tr", [
+                                  _c("td", [
+                                    _c(
+                                      "select",
+                                      {
+                                        directives: [
+                                          {
+                                            name: "model",
+                                            rawName: "v-model",
+                                            value: m.item_id,
+                                            expression: "m.item_id"
+                                          }
+                                        ],
+                                        staticClass: "form-control item",
+                                        attrs: { placeholder: "Asset" },
+                                        on: {
+                                          change: [
+                                            function($event) {
+                                              var $$selectedVal = Array.prototype.filter
+                                                .call(
+                                                  $event.target.options,
+                                                  function(o) {
+                                                    return o.selected
+                                                  }
+                                                )
+                                                .map(function(o) {
+                                                  var val =
+                                                    "_value" in o
+                                                      ? o._value
+                                                      : o.value
+                                                  return val
+                                                })
+                                              _vm.$set(
+                                                m,
+                                                "item_id",
+                                                $event.target.multiple
+                                                  ? $$selectedVal
+                                                  : $$selectedVal[0]
+                                              )
+                                            },
+                                            function($event) {
+                                              _vm.stock_item = m.item_id
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      [
+                                        _c(
+                                          "option",
+                                          {
+                                            attrs: {
+                                              selected: "",
+                                              disabled: ""
+                                            }
+                                          },
+                                          [_vm._v("Select Asset")]
+                                        ),
+                                        _vm._v(" "),
+                                        _vm._l(_vm.assets, function(asset) {
+                                          return _c(
+                                            "option",
+                                            {
+                                              key: asset.id,
+                                              domProps: { value: asset.id }
+                                            },
+                                            [
+                                              _vm._v(
+                                                _vm._s(asset.code) +
+                                                  "-" +
+                                                  _vm._s(asset.description)
+                                              )
+                                            ]
+                                          )
+                                        })
+                                      ],
+                                      2
+                                    )
+                                  ]),
+                                  _vm._v(" "),
+                                  _c("td", [
+                                    _c("input", {
                                       directives: [
                                         {
                                           name: "model",
                                           rawName: "v-model",
-                                          value: m.item_id,
-                                          expression: "m.item_id"
+                                          value: m.amount,
+                                          expression: "m.amount"
                                         }
                                       ],
-                                      staticClass: "form-control item",
-                                      attrs: { placeholder: "Asset" },
-                                      on: {
-                                        change: [
-                                          function($event) {
-                                            var $$selectedVal = Array.prototype.filter
-                                              .call(
-                                                $event.target.options,
-                                                function(o) {
-                                                  return o.selected
-                                                }
-                                              )
-                                              .map(function(o) {
-                                                var val =
-                                                  "_value" in o
-                                                    ? o._value
-                                                    : o.value
-                                                return val
-                                              })
-                                            _vm.$set(
-                                              m,
-                                              "item_id",
-                                              $event.target.multiple
-                                                ? $$selectedVal
-                                                : $$selectedVal[0]
-                                            )
-                                          },
-                                          function($event) {
-                                            _vm.stock_item = m.item_id
-                                          }
-                                        ]
-                                      }
-                                    },
-                                    [
-                                      _c(
-                                        "option",
-                                        {
-                                          attrs: { selected: "", disabled: "" }
-                                        },
-                                        [_vm._v("Select Asset")]
-                                      ),
-                                      _vm._v(" "),
-                                      _vm._l(_vm.assets, function(asset) {
-                                        return _c(
-                                          "option",
-                                          {
-                                            key: asset.id,
-                                            domProps: { value: asset.id }
-                                          },
-                                          [
-                                            _vm._v(
-                                              _vm._s(asset.code) +
-                                                "-" +
-                                                _vm._s(asset.description)
-                                            )
-                                          ]
-                                        )
-                                      })
-                                    ],
-                                    2
-                                  )
-                                ]),
-                                _vm._v(" "),
-                                _c("td", [
-                                  _c("input", {
-                                    directives: [
-                                      {
-                                        name: "model",
-                                        rawName: "v-model",
-                                        value: m.amount,
-                                        expression: "m.amount"
-                                      }
-                                    ],
-                                    staticClass: "form-control cost",
-                                    attrs: {
-                                      type: "number",
-                                      placeholder: "Amount"
-                                    },
-                                    domProps: { value: m.amount },
-                                    on: {
-                                      keyup: function($event) {
-                                        _vm.budget_amount = m.amount
+                                      staticClass: "form-control cost",
+                                      attrs: {
+                                        type: "number",
+                                        placeholder: "Amount"
                                       },
-                                      input: function($event) {
-                                        if ($event.target.composing) {
-                                          return
+                                      domProps: { value: m.amount },
+                                      on: {
+                                        keyup: function($event) {
+                                          _vm.budget_amount = m.amount
+                                        },
+                                        input: function($event) {
+                                          if ($event.target.composing) {
+                                            return
+                                          }
+                                          _vm.$set(
+                                            m,
+                                            "amount",
+                                            $event.target.value
+                                          )
                                         }
-                                        _vm.$set(
-                                          m,
-                                          "amount",
-                                          $event.target.value
-                                        )
                                       }
-                                    }
-                                  })
-                                ]),
-                                _vm._v(" "),
-                                _c("td", [
-                                  _c("i", {
-                                    directives: [
-                                      {
-                                        name: "show",
-                                        rawName: "v-show",
-                                        value:
-                                          i ||
-                                          (!i &&
-                                            _vm.form.item_asset.length > 1),
-                                        expression:
-                                          "i || (!i && form.item_asset.length > 1)"
-                                      }
-                                    ],
-                                    staticClass: "fa fa-minus-circle remove",
-                                    on: {
-                                      click: function($event) {
-                                        return _vm.removeAsset(i)
-                                      }
-                                    }
-                                  }),
+                                    })
+                                  ]),
                                   _vm._v(" "),
-                                  _c("i", {
-                                    directives: [
-                                      {
-                                        name: "show",
-                                        rawName: "v-show",
-                                        value:
-                                          i == _vm.form.item_asset.length - 1,
-                                        expression:
-                                          "i == form.item_asset.length -1"
+                                  _c("td", [
+                                    _c("i", {
+                                      directives: [
+                                        {
+                                          name: "show",
+                                          rawName: "v-show",
+                                          value:
+                                            i ||
+                                            (!i &&
+                                              _vm.form.item_asset.length > 1),
+                                          expression:
+                                            "i || (!i && form.item_asset.length > 1)"
+                                        }
+                                      ],
+                                      staticClass: "fa fa-minus-circle remove",
+                                      on: {
+                                        click: function($event) {
+                                          return _vm.removeAsset(i)
+                                        }
                                       }
-                                    ],
-                                    staticClass: "fa fa-plus-circle add",
-                                    on: {
-                                      click: function($event) {
-                                        return _vm.addAsset(i)
+                                    }),
+                                    _vm._v(" "),
+                                    _c("i", {
+                                      directives: [
+                                        {
+                                          name: "show",
+                                          rawName: "v-show",
+                                          value:
+                                            i == _vm.form.item_asset.length - 1,
+                                          expression:
+                                            "i == form.item_asset.length -1"
+                                        }
+                                      ],
+                                      staticClass: "fa fa-plus-circle add",
+                                      on: {
+                                        click: function($event) {
+                                          return _vm.addAsset(i)
+                                        }
                                       }
-                                    }
-                                  })
+                                    })
+                                  ])
                                 ])
-                              ])
-                            })
-                          ],
-                          2
-                        )
+                              })
+                            ],
+                            2
+                          )
+                        ])
                       ])
                     : _vm._e()
                 ])
@@ -27736,12 +27816,28 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
+    return _c("legend", { staticClass: "the-legend" }, [
+      _c("label", { staticClass: "fyr" }, [_vm._v("Stock Items")])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
     return _c("tr", [
       _c("th", [_vm._v("Item")]),
       _vm._v(" "),
       _c("th", [_vm._v("Amount")]),
       _vm._v(" "),
       _c("th")
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("legend", { staticClass: "the-legend" }, [
+      _c("label", { staticClass: "fyr" }, [_vm._v("Assets")])
     ])
   },
   function() {
@@ -31917,17 +32013,25 @@ var render = function() {
                           ]
                         }
                       },
-                      _vm._l(_vm.departments, function(department) {
-                        return _c(
+                      [
+                        _c(
                           "option",
-                          {
-                            key: department.id,
-                            domProps: { value: department.id }
-                          },
-                          [_vm._v(_vm._s(department.name))]
-                        )
-                      }),
-                      0
+                          { attrs: { selected: "", disabled: "" } },
+                          [_vm._v("Select Department")]
+                        ),
+                        _vm._v(" "),
+                        _vm._l(_vm.departments, function(department) {
+                          return _c(
+                            "option",
+                            {
+                              key: department.id,
+                              domProps: { value: department.id }
+                            },
+                            [_vm._v(_vm._s(department.name))]
+                          )
+                        })
+                      ],
+                      2
                     )
                   ]),
                   _vm._v(" "),
@@ -31948,28 +32052,23 @@ var render = function() {
                         staticClass: "form-control",
                         attrs: { required: "" },
                         on: {
-                          change: [
-                            function($event) {
-                              var $$selectedVal = Array.prototype.filter
-                                .call($event.target.options, function(o) {
-                                  return o.selected
-                                })
-                                .map(function(o) {
-                                  var val = "_value" in o ? o._value : o.value
-                                  return val
-                                })
-                              _vm.$set(
-                                _vm.form,
-                                "item_type",
-                                $event.target.multiple
-                                  ? $$selectedVal
-                                  : $$selectedVal[0]
-                              )
-                            },
-                            function($event) {
-                              return _vm.fetchItems()
-                            }
-                          ]
+                          change: function($event) {
+                            var $$selectedVal = Array.prototype.filter
+                              .call($event.target.options, function(o) {
+                                return o.selected
+                              })
+                              .map(function(o) {
+                                var val = "_value" in o ? o._value : o.value
+                                return val
+                              })
+                            _vm.$set(
+                              _vm.form,
+                              "item_type",
+                              $event.target.multiple
+                                ? $$selectedVal
+                                : $$selectedVal[0]
+                            )
+                          }
                         }
                       },
                       [
@@ -32131,483 +32230,512 @@ var render = function() {
                 _c("div", { staticClass: "col-md-12" }, [
                   _vm.show_stock
                     ? _c("div", { staticClass: "form-group" }, [
-                        _c("label", [_vm._v("Stock Items")]),
-                        _vm._v(" "),
-                        _c(
-                          "table",
-                          { staticStyle: { width: "100%" } },
-                          [
-                            _vm._m(0),
-                            _vm._v(" "),
-                            _vm._l(_vm.form.item_stock, function(m, i) {
-                              return _c("tr", [
-                                _c("td", [
-                                  _c(
-                                    "select",
-                                    {
-                                      directives: [
-                                        {
-                                          name: "model",
-                                          rawName: "v-model",
-                                          value: m.item_id,
-                                          expression: "m.item_id"
-                                        }
-                                      ],
-                                      staticClass: "form-control item",
-                                      attrs: { placeholder: "Stock Item" },
-                                      on: {
-                                        change: function($event) {
-                                          var $$selectedVal = Array.prototype.filter
-                                            .call(
-                                              $event.target.options,
-                                              function(o) {
-                                                return o.selected
-                                              }
-                                            )
-                                            .map(function(o) {
-                                              var val =
-                                                "_value" in o
-                                                  ? o._value
-                                                  : o.value
-                                              return val
-                                            })
-                                          _vm.$set(
-                                            m,
-                                            "item_id",
-                                            $event.target.multiple
-                                              ? $$selectedVal
-                                              : $$selectedVal[0]
-                                          )
-                                        }
-                                      }
-                                    },
-                                    [
-                                      _c(
-                                        "option",
-                                        {
-                                          attrs: { selected: "", disabled: "" }
-                                        },
-                                        [_vm._v("Select Stock Item")]
-                                      ),
-                                      _vm._v(" "),
-                                      _vm._l(_vm.filtered_stock_items, function(
-                                        stock
-                                      ) {
-                                        return _c(
-                                          "option",
-                                          {
-                                            key: stock.id,
-                                            domProps: { value: stock.id }
-                                          },
-                                          [
-                                            _vm._v(
-                                              _vm._s(stock.code) +
-                                                "-" +
-                                                _vm._s(stock.description)
-                                            )
-                                          ]
-                                        )
-                                      })
-                                    ],
-                                    2
-                                  )
-                                ]),
-                                _vm._v(" "),
-                                _c("td", [
-                                  _c("input", {
-                                    directives: [
+                        _c("fieldset", { staticClass: "the-fieldset" }, [
+                          _vm._m(0),
+                          _vm._v(" "),
+                          _c(
+                            "table",
+                            { staticStyle: { width: "100%" } },
+                            [
+                              _vm._m(1),
+                              _vm._v(" "),
+                              _vm._l(_vm.form.item_stock, function(m, i) {
+                                return _c("tr", [
+                                  _c("td", [
+                                    _c(
+                                      "select",
                                       {
-                                        name: "model",
-                                        rawName: "v-model",
-                                        value: m.qty,
-                                        expression: "m.qty"
-                                      }
-                                    ],
-                                    staticClass: "form-control cost",
-                                    attrs: {
-                                      type: "number",
-                                      placeholder: "Qty"
-                                    },
-                                    domProps: { value: m.qty },
-                                    on: {
-                                      input: function($event) {
-                                        if ($event.target.composing) {
-                                          return
+                                        directives: [
+                                          {
+                                            name: "model",
+                                            rawName: "v-model",
+                                            value: m.item_id,
+                                            expression: "m.item_id"
+                                          }
+                                        ],
+                                        staticClass: "form-control item",
+                                        attrs: { placeholder: "Stock Item" },
+                                        on: {
+                                          change: function($event) {
+                                            var $$selectedVal = Array.prototype.filter
+                                              .call(
+                                                $event.target.options,
+                                                function(o) {
+                                                  return o.selected
+                                                }
+                                              )
+                                              .map(function(o) {
+                                                var val =
+                                                  "_value" in o
+                                                    ? o._value
+                                                    : o.value
+                                                return val
+                                              })
+                                            _vm.$set(
+                                              m,
+                                              "item_id",
+                                              $event.target.multiple
+                                                ? $$selectedVal
+                                                : $$selectedVal[0]
+                                            )
+                                          }
                                         }
-                                        _vm.$set(m, "qty", $event.target.value)
-                                      }
-                                    }
-                                  })
-                                ]),
-                                _vm._v(" "),
-                                _c("td", [
-                                  _c(
-                                    "select",
-                                    {
+                                      },
+                                      [
+                                        _c(
+                                          "option",
+                                          {
+                                            attrs: {
+                                              selected: "",
+                                              disabled: ""
+                                            }
+                                          },
+                                          [_vm._v("Select Stock Item")]
+                                        ),
+                                        _vm._v(" "),
+                                        _vm._l(
+                                          _vm.filtered_stock_items,
+                                          function(stock) {
+                                            return _c(
+                                              "option",
+                                              {
+                                                key: stock.id,
+                                                domProps: { value: stock.id }
+                                              },
+                                              [
+                                                _vm._v(
+                                                  _vm._s(stock.code) +
+                                                    "-" +
+                                                    _vm._s(stock.description)
+                                                )
+                                              ]
+                                            )
+                                          }
+                                        )
+                                      ],
+                                      2
+                                    )
+                                  ]),
+                                  _vm._v(" "),
+                                  _c("td", [
+                                    _c("input", {
                                       directives: [
                                         {
                                           name: "model",
                                           rawName: "v-model",
-                                          value: m.uom,
-                                          expression: "m.uom"
+                                          value: m.qty,
+                                          expression: "m.qty"
                                         }
                                       ],
-                                      staticClass: "form-control item",
-                                      attrs: { placeholder: "UOM" },
+                                      staticClass: "form-control cost",
+                                      attrs: {
+                                        type: "number",
+                                        placeholder: "Qty"
+                                      },
+                                      domProps: { value: m.qty },
                                       on: {
-                                        change: function($event) {
-                                          var $$selectedVal = Array.prototype.filter
-                                            .call(
-                                              $event.target.options,
-                                              function(o) {
-                                                return o.selected
-                                              }
-                                            )
-                                            .map(function(o) {
-                                              var val =
-                                                "_value" in o
-                                                  ? o._value
-                                                  : o.value
-                                              return val
-                                            })
+                                        input: function($event) {
+                                          if ($event.target.composing) {
+                                            return
+                                          }
                                           _vm.$set(
                                             m,
-                                            "uom",
-                                            $event.target.multiple
-                                              ? $$selectedVal
-                                              : $$selectedVal[0]
+                                            "qty",
+                                            $event.target.value
                                           )
                                         }
-                                      }
-                                    },
-                                    [
-                                      _c(
-                                        "option",
-                                        {
-                                          attrs: { selected: "", disabled: "" }
-                                        },
-                                        [_vm._v("Select UOM")]
-                                      ),
-                                      _vm._v(" "),
-                                      _vm._l(_vm.uoms, function(u) {
-                                        return _c(
-                                          "option",
-                                          {
-                                            key: u.id,
-                                            domProps: { value: u.id }
-                                          },
-                                          [_vm._v(_vm._s(u.name))]
-                                        )
-                                      })
-                                    ],
-                                    2
-                                  )
-                                ]),
-                                _vm._v(" "),
-                                _c(
-                                  "td",
-                                  [
-                                    _c("datepicker", {
-                                      attrs: { placeholder: "Scheduled Date" },
-                                      model: {
-                                        value: m.scheduled_date,
-                                        callback: function($$v) {
-                                          _vm.$set(m, "scheduled_date", $$v)
-                                        },
-                                        expression: "m.scheduled_date"
                                       }
                                     })
-                                  ],
-                                  1
-                                ),
-                                _vm._v(" "),
-                                _c("td", [
-                                  _c("i", {
-                                    directives: [
-                                      {
-                                        name: "show",
-                                        rawName: "v-show",
-                                        value:
-                                          i ||
-                                          (!i &&
-                                            _vm.form.item_stock.length > 1),
-                                        expression:
-                                          "i || (!i && form.item_stock.length > 1)"
-                                      }
-                                    ],
-                                    staticClass: "fa fa-minus-circle remove",
-                                    on: {
-                                      click: function($event) {
-                                        return _vm.removeItem(i)
-                                      }
-                                    }
-                                  }),
+                                  ]),
                                   _vm._v(" "),
-                                  _c("i", {
-                                    directives: [
+                                  _c("td", [
+                                    _c(
+                                      "select",
                                       {
-                                        name: "show",
-                                        rawName: "v-show",
-                                        value:
-                                          i == _vm.form.item_stock.length - 1,
-                                        expression:
-                                          "i == form.item_stock.length -1"
-                                      }
+                                        directives: [
+                                          {
+                                            name: "model",
+                                            rawName: "v-model",
+                                            value: m.uom,
+                                            expression: "m.uom"
+                                          }
+                                        ],
+                                        staticClass: "form-control item",
+                                        attrs: { placeholder: "UOM" },
+                                        on: {
+                                          change: function($event) {
+                                            var $$selectedVal = Array.prototype.filter
+                                              .call(
+                                                $event.target.options,
+                                                function(o) {
+                                                  return o.selected
+                                                }
+                                              )
+                                              .map(function(o) {
+                                                var val =
+                                                  "_value" in o
+                                                    ? o._value
+                                                    : o.value
+                                                return val
+                                              })
+                                            _vm.$set(
+                                              m,
+                                              "uom",
+                                              $event.target.multiple
+                                                ? $$selectedVal
+                                                : $$selectedVal[0]
+                                            )
+                                          }
+                                        }
+                                      },
+                                      [
+                                        _c(
+                                          "option",
+                                          {
+                                            attrs: {
+                                              selected: "",
+                                              disabled: ""
+                                            }
+                                          },
+                                          [_vm._v("Select UOM")]
+                                        ),
+                                        _vm._v(" "),
+                                        _vm._l(_vm.uoms, function(u) {
+                                          return _c(
+                                            "option",
+                                            {
+                                              key: u.id,
+                                              domProps: { value: u.id }
+                                            },
+                                            [_vm._v(_vm._s(u.name))]
+                                          )
+                                        })
+                                      ],
+                                      2
+                                    )
+                                  ]),
+                                  _vm._v(" "),
+                                  _c(
+                                    "td",
+                                    [
+                                      _c("datepicker", {
+                                        attrs: {
+                                          placeholder: "Scheduled Date"
+                                        },
+                                        model: {
+                                          value: m.scheduled_date,
+                                          callback: function($$v) {
+                                            _vm.$set(m, "scheduled_date", $$v)
+                                          },
+                                          expression: "m.scheduled_date"
+                                        }
+                                      })
                                     ],
-                                    staticClass: "fa fa-plus-circle add",
-                                    on: {
-                                      click: function($event) {
-                                        return _vm.addItem(i)
+                                    1
+                                  ),
+                                  _vm._v(" "),
+                                  _c("td", [
+                                    _c("i", {
+                                      directives: [
+                                        {
+                                          name: "show",
+                                          rawName: "v-show",
+                                          value:
+                                            i ||
+                                            (!i &&
+                                              _vm.form.item_stock.length > 1),
+                                          expression:
+                                            "i || (!i && form.item_stock.length > 1)"
+                                        }
+                                      ],
+                                      staticClass: "fa fa-minus-circle remove",
+                                      on: {
+                                        click: function($event) {
+                                          return _vm.removeItem(i)
+                                        }
                                       }
-                                    }
-                                  })
+                                    }),
+                                    _vm._v(" "),
+                                    _c("i", {
+                                      directives: [
+                                        {
+                                          name: "show",
+                                          rawName: "v-show",
+                                          value:
+                                            i == _vm.form.item_stock.length - 1,
+                                          expression:
+                                            "i == form.item_stock.length -1"
+                                        }
+                                      ],
+                                      staticClass: "fa fa-plus-circle add",
+                                      on: {
+                                        click: function($event) {
+                                          return _vm.addItem(i)
+                                        }
+                                      }
+                                    })
+                                  ])
                                 ])
-                              ])
-                            })
-                          ],
-                          2
-                        )
+                              })
+                            ],
+                            2
+                          )
+                        ])
                       ])
                     : _vm._e(),
                   _vm._v(" "),
                   _vm.show_asset
                     ? _c("div", { staticClass: "form-group" }, [
-                        _c("label", [_vm._v("Assets")]),
-                        _vm._v(" "),
-                        _c(
-                          "table",
-                          { staticStyle: { width: "100%" } },
-                          [
-                            _vm._m(1),
-                            _vm._v(" "),
-                            _vm._l(_vm.form.item_asset, function(m, i) {
-                              return _c("tr", [
-                                _c("td", [
-                                  _c(
-                                    "select",
-                                    {
-                                      directives: [
-                                        {
-                                          name: "model",
-                                          rawName: "v-model",
-                                          value: m.item_id,
-                                          expression: "m.item_id"
-                                        }
-                                      ],
-                                      staticClass: "form-control item",
-                                      attrs: { placeholder: "Asset" },
-                                      on: {
-                                        change: function($event) {
-                                          var $$selectedVal = Array.prototype.filter
-                                            .call(
-                                              $event.target.options,
-                                              function(o) {
-                                                return o.selected
-                                              }
-                                            )
-                                            .map(function(o) {
-                                              var val =
-                                                "_value" in o
-                                                  ? o._value
-                                                  : o.value
-                                              return val
-                                            })
-                                          _vm.$set(
-                                            m,
-                                            "item_id",
-                                            $event.target.multiple
-                                              ? $$selectedVal
-                                              : $$selectedVal[0]
-                                          )
-                                        }
-                                      }
-                                    },
-                                    [
-                                      _c(
-                                        "option",
-                                        {
-                                          attrs: { selected: "", disabled: "" }
-                                        },
-                                        [_vm._v("Select Asset")]
-                                      ),
-                                      _vm._v(" "),
-                                      _vm._l(_vm.filtered_assets, function(
-                                        asset
-                                      ) {
-                                        return _c(
-                                          "option",
-                                          {
-                                            key: asset.id,
-                                            domProps: { value: asset.id }
-                                          },
-                                          [
-                                            _vm._v(
-                                              _vm._s(asset.code) +
-                                                "-" +
-                                                _vm._s(asset.description)
-                                            )
-                                          ]
-                                        )
-                                      })
-                                    ],
-                                    2
-                                  )
-                                ]),
-                                _vm._v(" "),
-                                _c("td", [
-                                  _c("input", {
-                                    directives: [
+                        _c("fieldset", { staticClass: "the-fieldset" }, [
+                          _vm._m(2),
+                          _vm._v(" "),
+                          _c(
+                            "table",
+                            { staticStyle: { width: "100%" } },
+                            [
+                              _vm._m(3),
+                              _vm._v(" "),
+                              _vm._l(_vm.form.item_asset, function(m, i) {
+                                return _c("tr", [
+                                  _c("td", [
+                                    _c(
+                                      "select",
                                       {
-                                        name: "model",
-                                        rawName: "v-model",
-                                        value: m.qty,
-                                        expression: "m.qty"
-                                      }
-                                    ],
-                                    staticClass: "form-control cost",
-                                    attrs: {
-                                      type: "number",
-                                      placeholder: "Qty"
-                                    },
-                                    domProps: { value: m.qty },
-                                    on: {
-                                      input: function($event) {
-                                        if ($event.target.composing) {
-                                          return
+                                        directives: [
+                                          {
+                                            name: "model",
+                                            rawName: "v-model",
+                                            value: m.item_id,
+                                            expression: "m.item_id"
+                                          }
+                                        ],
+                                        staticClass: "form-control item",
+                                        attrs: { placeholder: "Asset" },
+                                        on: {
+                                          change: function($event) {
+                                            var $$selectedVal = Array.prototype.filter
+                                              .call(
+                                                $event.target.options,
+                                                function(o) {
+                                                  return o.selected
+                                                }
+                                              )
+                                              .map(function(o) {
+                                                var val =
+                                                  "_value" in o
+                                                    ? o._value
+                                                    : o.value
+                                                return val
+                                              })
+                                            _vm.$set(
+                                              m,
+                                              "item_id",
+                                              $event.target.multiple
+                                                ? $$selectedVal
+                                                : $$selectedVal[0]
+                                            )
+                                          }
                                         }
-                                        _vm.$set(m, "qty", $event.target.value)
-                                      }
-                                    }
-                                  })
-                                ]),
-                                _vm._v(" "),
-                                _c("td", [
-                                  _c(
-                                    "select",
-                                    {
+                                      },
+                                      [
+                                        _c(
+                                          "option",
+                                          {
+                                            attrs: {
+                                              selected: "",
+                                              disabled: ""
+                                            }
+                                          },
+                                          [_vm._v("Select Asset")]
+                                        ),
+                                        _vm._v(" "),
+                                        _vm._l(_vm.filtered_assets, function(
+                                          asset
+                                        ) {
+                                          return _c(
+                                            "option",
+                                            {
+                                              key: asset.id,
+                                              domProps: { value: asset.id }
+                                            },
+                                            [
+                                              _vm._v(
+                                                _vm._s(asset.code) +
+                                                  "-" +
+                                                  _vm._s(asset.description)
+                                              )
+                                            ]
+                                          )
+                                        })
+                                      ],
+                                      2
+                                    )
+                                  ]),
+                                  _vm._v(" "),
+                                  _c("td", [
+                                    _c("input", {
                                       directives: [
                                         {
                                           name: "model",
                                           rawName: "v-model",
-                                          value: m.uom,
-                                          expression: "m.uom"
+                                          value: m.qty,
+                                          expression: "m.qty"
                                         }
                                       ],
-                                      staticClass: "form-control item",
-                                      attrs: { placeholder: "UOM" },
+                                      staticClass: "form-control cost",
+                                      attrs: {
+                                        type: "number",
+                                        placeholder: "Qty"
+                                      },
+                                      domProps: { value: m.qty },
                                       on: {
-                                        change: function($event) {
-                                          var $$selectedVal = Array.prototype.filter
-                                            .call(
-                                              $event.target.options,
-                                              function(o) {
-                                                return o.selected
-                                              }
-                                            )
-                                            .map(function(o) {
-                                              var val =
-                                                "_value" in o
-                                                  ? o._value
-                                                  : o.value
-                                              return val
-                                            })
+                                        input: function($event) {
+                                          if ($event.target.composing) {
+                                            return
+                                          }
                                           _vm.$set(
                                             m,
-                                            "uom",
-                                            $event.target.multiple
-                                              ? $$selectedVal
-                                              : $$selectedVal[0]
+                                            "qty",
+                                            $event.target.value
                                           )
                                         }
-                                      }
-                                    },
-                                    [
-                                      _c(
-                                        "option",
-                                        {
-                                          attrs: { selected: "", disabled: "" }
-                                        },
-                                        [_vm._v("Select UOM")]
-                                      ),
-                                      _vm._v(" "),
-                                      _vm._l(_vm.uoms, function(u) {
-                                        return _c(
-                                          "option",
-                                          {
-                                            key: u.id,
-                                            domProps: { value: u.id }
-                                          },
-                                          [_vm._v(_vm._s(u.name))]
-                                        )
-                                      })
-                                    ],
-                                    2
-                                  )
-                                ]),
-                                _vm._v(" "),
-                                _c(
-                                  "td",
-                                  [
-                                    _c("datepicker", {
-                                      attrs: { placeholder: "Scheduled Date" },
-                                      model: {
-                                        value: m.scheduled_date,
-                                        callback: function($$v) {
-                                          _vm.$set(m, "scheduled_date", $$v)
-                                        },
-                                        expression: "m.scheduled_date"
                                       }
                                     })
-                                  ],
-                                  1
-                                ),
-                                _vm._v(" "),
-                                _c("td", [
-                                  _c("i", {
-                                    directives: [
-                                      {
-                                        name: "show",
-                                        rawName: "v-show",
-                                        value:
-                                          i ||
-                                          (!i &&
-                                            _vm.form.item_asset.length > 1),
-                                        expression:
-                                          "i || (!i && form.item_asset.length > 1)"
-                                      }
-                                    ],
-                                    staticClass: "fa fa-minus-circle remove",
-                                    on: {
-                                      click: function($event) {
-                                        return _vm.removeAsset(i)
-                                      }
-                                    }
-                                  }),
+                                  ]),
                                   _vm._v(" "),
-                                  _c("i", {
-                                    directives: [
+                                  _c("td", [
+                                    _c(
+                                      "select",
                                       {
-                                        name: "show",
-                                        rawName: "v-show",
-                                        value:
-                                          i == _vm.form.item_asset.length - 1,
-                                        expression:
-                                          "i == form.item_asset.length -1"
-                                      }
+                                        directives: [
+                                          {
+                                            name: "model",
+                                            rawName: "v-model",
+                                            value: m.uom,
+                                            expression: "m.uom"
+                                          }
+                                        ],
+                                        staticClass: "form-control item",
+                                        attrs: { placeholder: "UOM" },
+                                        on: {
+                                          change: function($event) {
+                                            var $$selectedVal = Array.prototype.filter
+                                              .call(
+                                                $event.target.options,
+                                                function(o) {
+                                                  return o.selected
+                                                }
+                                              )
+                                              .map(function(o) {
+                                                var val =
+                                                  "_value" in o
+                                                    ? o._value
+                                                    : o.value
+                                                return val
+                                              })
+                                            _vm.$set(
+                                              m,
+                                              "uom",
+                                              $event.target.multiple
+                                                ? $$selectedVal
+                                                : $$selectedVal[0]
+                                            )
+                                          }
+                                        }
+                                      },
+                                      [
+                                        _c(
+                                          "option",
+                                          {
+                                            attrs: {
+                                              selected: "",
+                                              disabled: ""
+                                            }
+                                          },
+                                          [_vm._v("Select UOM")]
+                                        ),
+                                        _vm._v(" "),
+                                        _vm._l(_vm.uoms, function(u) {
+                                          return _c(
+                                            "option",
+                                            {
+                                              key: u.id,
+                                              domProps: { value: u.id }
+                                            },
+                                            [_vm._v(_vm._s(u.name))]
+                                          )
+                                        })
+                                      ],
+                                      2
+                                    )
+                                  ]),
+                                  _vm._v(" "),
+                                  _c(
+                                    "td",
+                                    [
+                                      _c("datepicker", {
+                                        attrs: {
+                                          placeholder: "Scheduled Date"
+                                        },
+                                        model: {
+                                          value: m.scheduled_date,
+                                          callback: function($$v) {
+                                            _vm.$set(m, "scheduled_date", $$v)
+                                          },
+                                          expression: "m.scheduled_date"
+                                        }
+                                      })
                                     ],
-                                    staticClass: "fa fa-plus-circle add",
-                                    on: {
-                                      click: function($event) {
-                                        return _vm.addAsset(i)
+                                    1
+                                  ),
+                                  _vm._v(" "),
+                                  _c("td", [
+                                    _c("i", {
+                                      directives: [
+                                        {
+                                          name: "show",
+                                          rawName: "v-show",
+                                          value:
+                                            i ||
+                                            (!i &&
+                                              _vm.form.item_asset.length > 1),
+                                          expression:
+                                            "i || (!i && form.item_asset.length > 1)"
+                                        }
+                                      ],
+                                      staticClass: "fa fa-minus-circle remove",
+                                      on: {
+                                        click: function($event) {
+                                          return _vm.removeAsset(i)
+                                        }
                                       }
-                                    }
-                                  })
+                                    }),
+                                    _vm._v(" "),
+                                    _c("i", {
+                                      directives: [
+                                        {
+                                          name: "show",
+                                          rawName: "v-show",
+                                          value:
+                                            i == _vm.form.item_asset.length - 1,
+                                          expression:
+                                            "i == form.item_asset.length -1"
+                                        }
+                                      ],
+                                      staticClass: "fa fa-plus-circle add",
+                                      on: {
+                                        click: function($event) {
+                                          return _vm.addAsset(i)
+                                        }
+                                      }
+                                    })
+                                  ])
                                 ])
-                              ])
-                            })
-                          ],
-                          2
-                        )
+                              })
+                            ],
+                            2
+                          )
+                        ])
                       ])
                     : _vm._e()
                 ])
@@ -32640,6 +32768,14 @@ var staticRenderFns = [
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
+    return _c("legend", { staticClass: "the-legend" }, [
+      _c("label", { staticClass: "fyr" }, [_vm._v("Stock Items")])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
     return _c("tr", [
       _c("th", [_vm._v("Item")]),
       _vm._v(" "),
@@ -32650,6 +32786,14 @@ var staticRenderFns = [
       _c("th", [_vm._v("Scheduled Date")]),
       _vm._v(" "),
       _c("th")
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("legend", { staticClass: "the-legend" }, [
+      _c("label", { staticClass: "fyr" }, [_vm._v("Assets")])
     ])
   },
   function() {
@@ -55117,7 +55261,9 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Requisition_vue_vue_type_template_id_f5466920___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Requisition.vue?vue&type=template&id=f5466920& */ "./resources/js/components/requistions/Requisition.vue?vue&type=template&id=f5466920&");
 /* harmony import */ var _Requisition_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Requisition.vue?vue&type=script&lang=js& */ "./resources/js/components/requistions/Requisition.vue?vue&type=script&lang=js&");
-/* empty/unused harmony star reexport *//* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+/* empty/unused harmony star reexport *//* harmony import */ var _Requisition_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Requisition.vue?vue&type=style&index=0&lang=css& */ "./resources/js/components/requistions/Requisition.vue?vue&type=style&index=0&lang=css&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
 
 
 
@@ -55125,7 +55271,7 @@ __webpack_require__.r(__webpack_exports__);
 
 /* normalize component */
 
-var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
   _Requisition_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
   _Requisition_vue_vue_type_template_id_f5466920___WEBPACK_IMPORTED_MODULE_0__["render"],
   _Requisition_vue_vue_type_template_id_f5466920___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
@@ -55154,6 +55300,22 @@ component.options.__file = "resources/js/components/requistions/Requisition.vue"
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Requisition_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib??ref--4-0!../../../../node_modules/vue-loader/lib??vue-loader-options!./Requisition.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/requistions/Requisition.vue?vue&type=script&lang=js&");
 /* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_Requisition_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/requistions/Requisition.vue?vue&type=style&index=0&lang=css&":
+/*!**********************************************************************************************!*\
+  !*** ./resources/js/components/requistions/Requisition.vue?vue&type=style&index=0&lang=css& ***!
+  \**********************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_Requisition_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/style-loader!../../../../node_modules/css-loader??ref--6-1!../../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../../node_modules/postcss-loader/src??ref--6-2!../../../../node_modules/vue-loader/lib??vue-loader-options!./Requisition.vue?vue&type=style&index=0&lang=css& */ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/requistions/Requisition.vue?vue&type=style&index=0&lang=css&");
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_Requisition_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_Requisition_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_Requisition_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0__) if(__WEBPACK_IMPORT_KEY__ !== 'default') (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_Requisition_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_Requisition_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0___default.a); 
 
 /***/ }),
 
