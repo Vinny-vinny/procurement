@@ -272,10 +272,7 @@
             this.form.item_asset.splice(i,1);
             },
             checkItems(){
-             //   console.log(this.form.item_type)
-          // if (this.form.item_type !=='') {
-          //   this.fetchItems();
-          // }
+          
             },
             
             getRequisitions(){

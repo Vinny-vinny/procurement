@@ -1,7 +1,13 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Http\Resources\PurchaseOrderResource;
+use App\Http\Resources\QuotationResource;
+use App\PurchaseOrder;
+use App\Quotation;
+use App\Part;
+use App\Machine;
+use App\Supplier;
 use Illuminate\Http\Request;
 
 class PurchaseOrderController extends Controller
@@ -13,18 +19,15 @@ class PurchaseOrderController extends Controller
      */
     public function index()
     {
-        //
+        return response()->json([
+            'pos' => PurchaseOrderResource::collection(PurchaseOrder::all()),
+            'quotations' => QuotationResource::collection(Quotation::all()),
+            'stock_items' => Part::all(),
+            'assets' => Machine::all(),
+            'suppliers' => Supplier::all() 
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
 
     /**
      * Store a newly created resource in storage.
@@ -34,7 +37,13 @@ class PurchaseOrderController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $po_no = PurchaseOrder::count()+1;
+        $request['item_stock'] = json_encode($request->get('item_stock'));
+        $request['item_asset'] = json_encode($request->get('item_asset'));
+        $request['po_no'] = 'LPO00'.$po_no;
+        $po = PurchaseOrder::create($request->all());
+        return response()->json(new PurchaseOrderResource($po));
+
     }
 
     /**
@@ -49,17 +58,6 @@ class PurchaseOrderController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -68,7 +66,10 @@ class PurchaseOrderController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+     $request['item_asset'] = json_encode($request->get('item_asset'));
+     $request['item_stock'] = json_encode($request->get('item_stock'));
+     PurchaseOrder::find($id)->update($request->except('date_requested'));
+     return response()->json(new PurchaseOrderResource(PurchaseOrder::find($id)));
     }
 
     /**
@@ -79,6 +80,7 @@ class PurchaseOrderController extends Controller
      */
     public function destroy($id)
     {
-        //
+        PurchaseOrder::destroy($id);
+        return response()->json($id);
     }
 }

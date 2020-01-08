@@ -16,7 +16,7 @@ import ServiceProviders from "../components/suppliers/Index";
 import Budget from "../components/budgets/Index";
 import Enquiry from "../components/pos/enquiries/Index";
 import Quotation from "../components/quotations/Index";
-
+import PurchaseOrder from "../components/pos/po/Index";
 
 Vue.use(VueRouter);
 function guard(to, from, next) {
@@ -43,6 +43,7 @@ const routes = [
     {path:'/budget',component:Budget, beforeEnter: guard},
     {path:'/enquiry',component:Enquiry, beforeEnter: guard},
     {path:'/quotations',component:Quotation, beforeEnter: guard},
+    {path:'/purchase-order',component:PurchaseOrder, beforeEnter: guard},
 
 ];
 

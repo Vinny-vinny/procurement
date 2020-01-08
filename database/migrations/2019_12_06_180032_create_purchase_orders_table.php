@@ -15,19 +15,14 @@ class CreatePurchaseOrdersTable extends Migration
     {
         Schema::create('purchase_orders', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('PurchaseOrderNo');
-            $table->date('PurchaseOrderDate');
-            $table->double('Amount');
-            $table->integer('SupplierId');
-            $table->text('Description');
-            $table->string('TermsConditions');
-            $table->date('EndDate');
-            $table->string('QuotationId');
-            $table->enum('IsArchieved', ['Achieved', 'Active'])->default('Active');
-            $table->string('PONo');
-            $table->integer('DirectPO');
-            $table->string('CurrencyId');
-            $table->integer('ExchangeRate');
+            $table->string('po_no');
+            $table->date('po_date');
+            $table->integer('quotation_id');
+            $table->string('po_description');
+            $table->string('item_type');
+            $table->integer('supplier_id');
+            $table->text('item_stock')->nullable();
+            $table->text('item_asset')->nullable(); 
             $table->timestamps();
         });
     }

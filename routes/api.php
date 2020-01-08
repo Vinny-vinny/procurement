@@ -40,6 +40,7 @@ Route::apiResource('suppliers','SupplierController');
 Route::get('import-suppliers','SupplierController@importSuppliers');
 Route::apiResource('enquiry','EnquiryController');
 Route::apiResource('quotations','QuotationController');
+Route::apiResource('purchase-order','PurchaseOrderController');
 
 Route::group([
     'middleware' => 'api',

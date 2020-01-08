@@ -18,7 +18,8 @@ export default new Vuex.Store({
         machines:{},
         budgets:{},
         enquiries:{},
-        quotations:{}
+        quotations:{},
+        purchase_orders:{}
     },
     mutations:{
      pathTo(state, to) {
@@ -63,7 +64,10 @@ export default new Vuex.Store({
         },
         updateQuotation(state,quotation){
         state.quotations = quotation;
-        }
+        },
+       updatePurchaseOrder(state,po){
+       state.purchase_orders = po;
+       }
     },
     actions:{
     pathTo({commit},to){
@@ -107,6 +111,9 @@ export default new Vuex.Store({
        },
        updateQuotation({commit},quotation){
       commit('updateQuotation',quotation);
+       },
+       updatePurchaseOrder({commit},po){
+        commit('updatePurchaseOrder',po);
        }
     }
 })

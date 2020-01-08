@@ -38,17 +38,18 @@
               </span>
                     </a>
                     <ul class="treeview-menu">
-                        <li><router-link to="/enquiry" class="fa fa-circle-o"> Purchase Enquiry</router-link></li>                   
+                        <li><router-link to="/enquiry" class="fa fa-circle-o"> Purchase Enquiry</router-link></li> 
+                        <li><router-link to="/purchase-order" class="fa fa-circle-o"> Purchase Order</router-link></li>                    
                     </ul>
                 </li>
                 <li class="treeview">
-                    <a href="#"><i class="fa fa-shopping-bag""></i> <span>Quotations</span>
+                    <a href="#"><i class="fa fa-shopping-bag"></i> <span>Quotations</span>
                         <span class="pull-right-container">
                 <i class="fa fa-angle-left pull-right"></i>
               </span>
                     </a>
                     <ul class="treeview-menu">
-                        <li><router-link to="/Quotations" class="fa fa-circle-o"> Receive Quotation</router-link></li>                   
+                        <li><router-link to="/quotations" class="fa fa-circle-o"> Receive Quotation</router-link></li>                   
                     </ul>
                 </li>
 
