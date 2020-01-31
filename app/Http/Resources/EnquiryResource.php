@@ -20,6 +20,7 @@ class EnquiryResource extends JsonResource
             'item_stock' => json_decode($this->item_stock),
             'item_asset' => json_decode($this->item_asset),
             'supplier_id' => json_decode($this->supplier_id),
+            'item_service' => json_decode($this->item_service),
             'enquiry_no' => $this->enquiry_no,
             'enquiry_date' => $this->enquiry_date,
             'date_requested' => Carbon::parse($this->enquiry_date)->format('d/m/Y'),

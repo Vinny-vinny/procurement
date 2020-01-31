@@ -22,7 +22,7 @@ Route::get('import-machines','MachineController@importMachines');
 Route::apiResource('parts','PartsController');
 Route::apiResource('categories','CategoriesController');
 Route::apiResource('warehouse','WarehouseController');
-Route::get('import-parts/{warehouse}','PartsController@importParts');
+Route::get('import-parts','PartsController@importParts');
 Route::apiResource('projects','ProjectController');
 Route::apiResource('customers','CustomerController');
 Route::apiResource('customer-types','CustomerTypeController');
@@ -41,6 +41,8 @@ Route::get('import-suppliers','SupplierController@importSuppliers');
 Route::apiResource('enquiry','EnquiryController');
 Route::apiResource('quotations','QuotationController');
 Route::apiResource('purchase-order','PurchaseOrderController');
+Route::apiResource('services','ServicesController');
+Route::apiResource('users','UserController');
 
 Route::group([
     'middleware' => 'api',

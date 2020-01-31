@@ -30,7 +30,8 @@ class RequisitionResource extends JsonResource
             'description' => $this->description,
             'req_no' => $this->req_no,         
             'item_stock' => json_decode($this->item_stock),
-            'item_asset' => json_decode($this->item_asset)
+            'item_asset' => json_decode($this->item_asset),
+            'item_service' => json_decode($this->item_service)
 
         ];
     }

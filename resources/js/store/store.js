@@ -19,7 +19,8 @@ export default new Vuex.Store({
         budgets:{},
         enquiries:{},
         quotations:{},
-        purchase_orders:{}
+        purchase_orders:{},
+        services:{}
     },
     mutations:{
      pathTo(state, to) {
@@ -67,6 +68,9 @@ export default new Vuex.Store({
         },
        updatePurchaseOrder(state,po){
        state.purchase_orders = po;
+       },
+       updateService(state,service){
+        state.services = service;
        }
     },
     actions:{
@@ -114,6 +118,9 @@ export default new Vuex.Store({
        },
        updatePurchaseOrder({commit},po){
         commit('updatePurchaseOrder',po);
+       },
+       updateService({commit},service){
+        commit('updateService',service);
        }
     }
 })

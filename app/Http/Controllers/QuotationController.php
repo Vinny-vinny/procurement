@@ -6,6 +6,7 @@ use App\Supplier;
 use App\Enquiry;
 use App\Part;
 use App\Machine;
+use App\Service;
 use App\Http\Resources\EnquiryResource;
 use Illuminate\Http\Request;
 
@@ -23,7 +24,10 @@ class QuotationController extends Controller
             'suppliers' => Supplier::all(),
             'enquiries' => EnquiryResource::collection(Enquiry::all()),
             'stock_items' => Part::all(),
-            'assets' => Machine::all()
+            'assets' => Machine::all(),
+            'services' => Service::all(),
+            'filtered_enquiries' => EnquiryResource::collection(Enquiry::whereBetween('created_at',[date('Y').'-01-01',date('Y').'-12-31'])->get()),
+             'filtered_quotations' => QuotationResource::collection(Quotation::whereBetween('created_at',[date('Y').'-01-01',date('Y').'-12-31'])->get())
         ]); 
     }
     /**
@@ -38,6 +42,7 @@ class QuotationController extends Controller
         $request['quote_no'] = 'Q00'.$quote_no;
         $request['item_stock'] = json_encode($request->get('item_stock'));
         $request['item_asset'] = json_encode($request->get('item_asset'));
+        $request['item_service'] = json_encode($request->get('item_service'));
         $quotation = Quotation::create($request->all());
         return response()->json(new QuotationResource($quotation));
     }
@@ -64,6 +69,7 @@ class QuotationController extends Controller
     {
         $request['item_stock'] = json_encode($request->get('item_stock'));
         $request['item_asset'] = json_encode($request->get('item_asset'));
+        $request['item_service'] = json_encode($request->get('item_service'));
         Quotation::find($id)->update($request->except(['quotation_date','supplier']));
         return response()->json(new QuotationResource(Quotation::find($id)));
     }

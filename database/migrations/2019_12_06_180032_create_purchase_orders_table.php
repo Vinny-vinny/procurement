@@ -23,6 +23,7 @@ class CreatePurchaseOrdersTable extends Migration
             $table->integer('supplier_id');
             $table->text('item_stock')->nullable();
             $table->text('item_asset')->nullable(); 
+            $table->text('item_service')->nullable(); 
             $table->timestamps();
         });
     }

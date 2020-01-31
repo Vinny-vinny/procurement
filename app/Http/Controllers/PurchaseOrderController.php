@@ -8,6 +8,7 @@ use App\Quotation;
 use App\Part;
 use App\Machine;
 use App\Supplier;
+use App\Service;
 use Illuminate\Http\Request;
 
 class PurchaseOrderController extends Controller
@@ -24,7 +25,8 @@ class PurchaseOrderController extends Controller
             'quotations' => QuotationResource::collection(Quotation::all()),
             'stock_items' => Part::all(),
             'assets' => Machine::all(),
-            'suppliers' => Supplier::all() 
+            'suppliers' => Supplier::all(),
+            'services' => Service::all() 
         ]);
     }
 
@@ -40,6 +42,7 @@ class PurchaseOrderController extends Controller
         $po_no = PurchaseOrder::count()+1;
         $request['item_stock'] = json_encode($request->get('item_stock'));
         $request['item_asset'] = json_encode($request->get('item_asset'));
+        $request['item_service'] = json_encode($request->get('item_service'));
         $request['po_no'] = 'LPO00'.$po_no;
         $po = PurchaseOrder::create($request->all());
         return response()->json(new PurchaseOrderResource($po));
@@ -68,6 +71,7 @@ class PurchaseOrderController extends Controller
     {
      $request['item_asset'] = json_encode($request->get('item_asset'));
      $request['item_stock'] = json_encode($request->get('item_stock'));
+     $request['item_service'] = json_encode($request->get('item_service'));
      PurchaseOrder::find($id)->update($request->except('date_requested'));
      return response()->json(new PurchaseOrderResource(PurchaseOrder::find($id)));
     }

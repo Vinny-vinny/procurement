@@ -14,6 +14,7 @@ use App\Project;
 use App\Requisition;
 use App\RequisitionType;
 use App\Uom;
+use App\Service;
 use Illuminate\Http\Request;
 
 class RequisitionController extends Controller
@@ -34,7 +35,10 @@ class RequisitionController extends Controller
             'priorities' => Priority::all(),
             'stock_items' => Part::all(),
             'assets' => Machine::all(),
-            'uoms' => Uom::all()
+            'uoms' => Uom::all(),
+            'services' => Service::all(),
+            'filtered_departments' => DepartmentBudgetResource::collection(DepartmentBudget::whereBetween('begins_on',[date('Y').'-01-01',date('Y').'-12-31'])->get()),
+             'filtered_requistions' => RequisitionResource::collection(Requisition::whereBetween('created_at',[date('Y').'-01-01',date('Y').'-12-31'])->get()) 
         ]);
     }
 
@@ -50,6 +54,7 @@ class RequisitionController extends Controller
         $request['req_no'] = 'REQ00'.$req;
         $request['item_stock'] = json_encode($request->get('item_stock'));
         $request['item_asset'] = json_encode($request->get('item_asset'));
+        $request['item_service'] = json_encode($request->get('item_service'));
         $requisition = Requisition::create($request->all());
         return response()->json(new RequisitionResource($requisition));
     }
@@ -84,6 +89,7 @@ class RequisitionController extends Controller
     {
         $request['item_stock'] = json_encode($request->get('item_stock'));
         $request['item_asset'] = json_encode($request->get('item_asset'));
+        $request['item_service'] = json_encode($request->get('item_service'));
         Requisition::find($id)->update($request->except(['date_requested','project','person_requested']));
         return response()->json(new RequisitionResource(Requisition::find($id)));
     }

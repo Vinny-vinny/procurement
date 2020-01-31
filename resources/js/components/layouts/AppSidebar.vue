@@ -49,7 +49,8 @@
               </span>
                     </a>
                     <ul class="treeview-menu">
-                        <li><router-link to="/quotations" class="fa fa-circle-o"> Receive Quotation</router-link></li>                   
+                        <li><router-link to="/quotations" class="fa fa-circle-o"> Receive Quotation</router-link></li> 
+                        <li><router-link to="/approve-quotations" class="fa fa-circle-o"> Approve Quotations</router-link></li>                   
                     </ul>
                 </li>
 
@@ -69,8 +70,10 @@
                         <li><router-link to="/projects" class="fa fa-circle-o"> Projects</router-link></li>
                         <li><router-link to="/all-assets" class="fa fa-circle-o"> Assets</router-link></li>
                         <li><router-link to="/items" class="fa fa-circle-o"> Stock Items</router-link></li>
+                         <li><router-link to="/services" class="fa fa-circle-o"> Services</router-link></li>
                     </ul>
                 </li>
+
             </ul>
             <!-- /.sidebar-menu -->
         </section>

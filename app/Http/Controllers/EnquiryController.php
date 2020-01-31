@@ -6,6 +6,7 @@ use App\Supplier;
 use App\Machine;
 use App\Part;
 use App\Uom;
+use App\Service;
 use App\Http\Resources\EnquiryResource;
 use Illuminate\Http\Request;
 
@@ -23,7 +24,8 @@ class EnquiryController extends Controller
             'suppliers' => Supplier::all(),
             'assets' => Machine::all(),
             'stocks' => Part::all(),
-            'uoms' => Uom::all()
+            'uoms' => Uom::all(),
+            'services' => Service::all()
         ]);
     }
 
@@ -37,8 +39,9 @@ class EnquiryController extends Controller
     {
         $enquiry_no = Enquiry::count()+1;
         $request['item_stock'] = json_encode($request->get('item_stock'));
-         $request['item_asset'] = json_encode($request->get('item_asset'));
-         $request['supplier_id'] = json_encode($request->get('supplier_id'));
+        $request['item_asset'] = json_encode($request->get('item_asset'));
+        $request['supplier_id'] = json_encode($request->get('supplier_id'));
+        $request['item_service'] = json_encode($request->get('item_service'));
          $request['enquiry_no'] = 'RFQ00'.$enquiry_no;
         $enquiry = Enquiry::create($request->all());
         return response()->json(new EnquiryResource($enquiry));
@@ -66,6 +69,7 @@ class EnquiryController extends Controller
          $request['item_stock'] = json_encode($request->get('item_stock'));
          $request['item_asset'] = json_encode($request->get('item_asset'));
          $request['supplier_id'] = json_encode($request->get('supplier_id'));
+         $request['item_service'] = json_encode($request->get('item_service'));
          Enquiry::find($id)->update($request->except('date_requested'));
         return response()->json(new EnquiryResource(Enquiry::find($id)));
     }

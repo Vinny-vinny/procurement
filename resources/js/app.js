@@ -23,6 +23,7 @@ const options = {
     ]
 }
 
+
 Vue.use(VueHtmlToPaper, options);
 
 Vue.component('downloadExcel', JsonExcel)
@@ -33,6 +34,7 @@ Vue.filter('formatDate', function(value) {
         return moment(String(value)).format('MM/DD/YYYY hh:mm')
     }
 });
+import 'vue-search-select/dist/VueSearchSelect.css';
 
 import User from './helpers/User';
 window.User = User;

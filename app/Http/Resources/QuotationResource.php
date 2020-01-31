@@ -19,6 +19,7 @@ class QuotationResource extends JsonResource
             'item_type' => $this->item_type,
             'item_stock' => json_decode($this->item_stock),
             'item_asset' => json_decode($this->item_asset),
+            'item_service' => json_decode($this->item_service),
             'quote_no' => $this->quote_no,
             'quote_date' => $this->quote_date,
             'quotation_date' => Carbon::parse($this->quote_date)->format('d/m/Y'),

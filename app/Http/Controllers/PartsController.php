@@ -41,12 +41,10 @@ class PartsController extends Controller
     {
         //
     }
-    public function importParts($wh)
+    public function importParts()
     {
-        $parts = WhseStk::join('WhseMst','WhseStk.WHWhseID','=','WhseMst.WhseLink')
-            ->join('StkItem','WhseStk.WHStockLink','=','StkItem.StockLink')
-            ->select("StkItem.StockLink","StkItem.Code","StkItem.Description_1","StkItem.AveUCst")
-            ->where('WhseMst.Code',$wh)
+        $parts = WhseStk::select("StockLink","Code","Description_1","AveUCst")
+           // ->where('WhseMst.Code',$wh)
             ->get();
            Part::truncate();
         return $this->storeParts($parts);
@@ -58,7 +56,7 @@ class PartsController extends Controller
             $inserted[] = Part::create([
                 'code' => $asset->Code,
                 'description' => $asset->Description_1,
-                'cost' => $asset->AveUCst==0 ? $faker->unique()->numberBetween(50,250) : $asset->AveUCst ,
+                'cost' => $asset->AveUCst==0 ? $faker->unique()->numberBetween(50,2000) : $asset->AveUCst ,
                 'stock_link' => $asset->StockLink,
                 ]);
 

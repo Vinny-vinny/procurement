@@ -7,6 +7,7 @@ use App\DepartmentBudget;
 use App\ItemType;
 use App\Machine;
 use App\Part;
+use App\Service;
 use App\Http\Resources\DepartmentBudgetResource;
 use Illuminate\Http\Request;
 
@@ -19,12 +20,15 @@ class DepartmentBudgetController extends Controller
      */
     public function index()
     {
+        
         return response()->json([
            'budgets' => DepartmentBudgetResource::collection(DepartmentBudget::all()),
            'item_types' => ItemType::all(),
            'stock_items' => Part::all(),
            'assets' => Machine::all(),
-           'departments' => Department::all()
+           'departments' => Department::all(),
+           'services' =>  Service::all(),
+           'filtered_departments' => DepartmentBudgetResource::collection(DepartmentBudget::whereBetween('begins_on',[date('Y').'-01-01',date('Y').'-12-31'])->get()) 
         ]);
     }   
     /**
@@ -37,9 +41,9 @@ class DepartmentBudgetController extends Controller
     {
         $request['item_stock'] = json_encode($request->get('item_stock'));
         $request['item_asset'] = json_encode($request->get('item_asset'));
-        $request['ends_on'] = $request->get('ending_date'); 
-        $request['end_date'] = $request->get('fr_end_date'); 
-        $budget = DepartmentBudget::create($request->except(['ending_date','fr_end_date']));
+        $request['item_service'] = json_encode($request->get('item_service'));
+        $request['ends_on'] = $request->get('ending_date');        
+        $budget = DepartmentBudget::create($request->except(['ending_date']));
         return response()->json(new DepartmentBudgetResource($budget));
     }
 
@@ -65,9 +69,9 @@ class DepartmentBudgetController extends Controller
 
         $request['item_stock'] = json_encode($request->get('item_stock'));
         $request['item_asset'] = json_encode($request->get('item_asset'));
-        $request['ends_on'] = $request->get('ending_date'); 
-        $request['end_date'] = $request->get('fr_end_date'); 
-        DepartmentBudget::find($id)->update($request->except(['department','start_date_fr','end_date_fr','total','ending_date','fr_end_date']));
+        $request['item_service'] = json_encode($request->get('item_service'));
+        $request['ends_on'] = $request->get('ending_date');     
+        DepartmentBudget::find($id)->update($request->except(['department','start_date_fr','end_date','total','ending_date']));
         return response()->json(new DepartmentBudgetResource(DepartmentBudget::find($id)));
     }
 

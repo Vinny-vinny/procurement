@@ -25,6 +25,8 @@ class CreateEnquiriesTable extends Migration
             $table->string('item_type');
             $table->text('item_stock')->nullable();
             $table->text('item_asset')->nullable(); 
+            $table->text('item_service')->nullable();
+            $table->text('supplier_list')->nullable();            
             $table->timestamps();
         });
     }

@@ -17,6 +17,8 @@ import Budget from "../components/budgets/Index";
 import Enquiry from "../components/pos/enquiries/Index";
 import Quotation from "../components/quotations/Index";
 import PurchaseOrder from "../components/pos/po/Index";
+import Service from "../components/services/Index";
+import CompareQuotations from "../components/quotations/CompareQuotations";
 
 Vue.use(VueRouter);
 function guard(to, from, next) {
@@ -44,6 +46,8 @@ const routes = [
     {path:'/enquiry',component:Enquiry, beforeEnter: guard},
     {path:'/quotations',component:Quotation, beforeEnter: guard},
     {path:'/purchase-order',component:PurchaseOrder, beforeEnter: guard},
+    {path:'/services',component:Service, beforeEnter: guard},
+    {path:'/approve-quotations',component:CompareQuotations, beforeEnter: guard},
 
 ];
 

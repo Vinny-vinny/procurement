@@ -23,9 +23,9 @@
                                 </div>
                                  <div class="form-group">
                                     <label>Department</label>
-                                    <select v-model="form.department_id" class="form-control" required @change="checkItems()">
+                                    <select v-model="form.department_id" class="form-control" required @change="checkItems()" :disabled="edit">
                                          <option selected disabled>Select Department</option>
-                                        <option :value="department.id" v-for="department in departments" :key="department.id">{{department.name}}</option>
+                                        <option :value="department.id" v-for="department in unbudgeted_departments" :key="department.id">{{department.name}}</option>
                                     </select>
                                 </div>
                             <div class="form-group">
@@ -33,19 +33,21 @@
                                     <select v-model="form.item_type" required class="form-control">
                                        <option value="stock">Stock Item</option>
                                        <option value="asset">Asset</option>
+                                        <option value="service">Service</option>
                                     </select>
                                 </div>  
                             </div>
-                                  <div class="col-md-6">                          
+                                <div class="col-md-6">                          
                                 <div class="form-group">
                                     <label>Requistion By</label>
                                     <input type="text" class="form-control" :value="username()" disabled>
                                 </div>                             
                                 <div class="form-group">
-                                    <label>Project</label>
-                                    <select v-model="form.project_id" required class="form-control">
-                                        <option :value="project.id" v-for="project in projects" :key="project.id">{{project.code}} - {{project.code}}</option>
-                                    </select>
+                                    <label>Project</label>                               
+                                      <model-select :options="projects"
+                                        v-model="form.project_id"                               
+                                        >
+                                        </model-select>
                                 </div>                                             
                            
                                 <div class="form-group">
@@ -74,13 +76,14 @@
                                             <th>Scheduled Date</th> 
                                             <th></th>                                            
                                         </tr>
-                                        <tr v-for="(m,i) in form.item_stock">                 
-
-                                            <td><select class="form-control item" v-model="m.item_id"
-                                                        placeholder="Stock Item">
-                                                <option selected disabled>Select Stock Item</option>
-                                                <option :value="stock.id" v-for="stock in filtered_stock_items" :key="stock.id">{{stock.code}}-{{stock.description}}</option>
-                                            </select></td>                                          
+                                        <tr v-for="(m,i) in form.item_stock">
+                                         <td>
+                                         <model-select :options="filtered_stock_items"
+                                        v-model="m.item_id"                                                                
+                                        class="i_p"
+                                        >
+                                        </model-select>
+                                        </td>                                          
 
                                             <td><input type="number" class="form-control cost" v-model="m.qty"
                                                        placeholder="Qty">                                                
@@ -113,11 +116,12 @@
                                             <th></th>                         
                                         </tr>
                                         <tr v-for="(m,i) in form.item_asset">                           
-                                            <td><select class="form-control item" v-model="m.item_id"
-                                                        placeholder="Asset">
-                                                <option selected disabled>Select Asset</option>
-                                                <option :value="asset.id" v-for="asset in filtered_assets" :key="asset.id">{{asset.code}}-{{asset.description}}</option>
-                                            </select></td>
+                                            <td>
+                                         <model-select :options="filtered_assets"
+                                        v-model="m.item_id"                                                                
+                                        class="i_p">
+                                        </model-select>
+                                        </td>
                                             <td><input type="number" class="form-control cost" v-model="m.qty"
                                                        placeholder="Qty">                                                
                                                    </td>
@@ -138,6 +142,44 @@
                                 </fieldset>
                                 </div>
 
+                                <div class="form-group" v-if="show_service">
+                                    <fieldset class="the-fieldset">
+                               <legend class="the-legend"><label class="fyr">Services</label></legend>
+                                    <table style="width:100%">
+                                        <tr>
+                                            <th>Service Name</th>
+                                            <th>Description</th>
+                                            <th>Amount</th> 
+                                            <th>Scheduled Date</th> 
+                                            <th></th>                         
+                                        </tr>
+                                        <tr v-for="(m,i) in form.item_service">                           
+                                            <td>
+                                         <model-select :options="filtered_services"
+                                        v-model="m.item_id" 
+                                        @input="service_item = m.item_id"                                 
+                                        class="i_p"
+                                        >
+                                        </model-select>
+                                        </td>
+                                        <td>
+                                         <input type="text" class="form-control cost" v-model="m.description"
+                                                       placeholder="Description" disabled></td>
+
+                                         <td><input type="number" class="form-control cost" v-model="m.amount"
+                                                       placeholder="Amount" disabled></td>
+                                         <td><datepicker v-model="m.scheduled_date" placeholder="Scheduled Date"></datepicker></td>
+                                            <td>
+                                                <i class="fa fa-minus-circle remove" @click="removeService(i)"
+                                                   v-show="i || (!i && form.item_service.length > 1)"></i>
+                                                <i class="fa fa-plus-circle add" @click="addService(i)"
+                                                   v-show="i == form.item_service.length -1"></i>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </fieldset>
+                                </div>
+
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary">{{edit_req ? 'Update' : 'Save'}}</button>
@@ -152,6 +194,7 @@
 
 <script>
     import datepicker from 'vuejs-datepicker';
+    import { ModelSelect } from 'vue-search-select';
     export default {
         props:['edit'],
         data(){
@@ -167,21 +210,29 @@
                     description:'',
                     item_stock: [{item_id: '',qty:'',uom: '',scheduled_date:''}],
                     item_asset: [{item_id: '',qty:'',uom: '',scheduled_date:''}],
+                    item_service: [{item_id: '',name:'',description: '',amount:'',scheduled_date:''}],
                     id:''
                 },
                 edit_req: this.edit,
                 req_types:{},
                 departments:{},
                 priorities:{},
-                projects:{},       
+                projects:[],       
                 budgets:{},
                 show_stock:false,
                 show_asset:false,
+                show_service:false,
                 stock_items:{},
                 assets:{},
                 filtered_stock_items:[],
                 filtered_assets:[],
-                uoms:{}
+                filtered_services:[],
+                uoms:{},
+                services:{},
+                service_item:'',
+                filtered_departments:{},
+                unbudgeted_departments:[],
+                filtered_requistions:{}
             }
         },
         created(){
@@ -189,17 +240,40 @@
             this.getRequisitions();
         },
         watch:{
-        fetchItems(){          
+             service_items(){
+              for(let i=0;i<this.services.length;i++){
+               if (Object.values(this.form.item_service[0])[0] !== '') {
+                    for (let j = 0; j < this.form.item_service.length; j++) {
+                        if (this.form.item_service[j]['item_id'] == this.services[i]['id']) {
+                            this.form.item_service[j]['name'] = this.services[i]['name']
+                            this.form.item_service[j]['description'] = this.services[i]['description'] 
+                            this.form.item_service[j]['amount'] = this.services[i]['amount']  
+                        }
+                    }
+                }                
+            }
+          
+            },
+        fetchItems(){
                 let budget_item ={} ;
                 let stk_items = {};
                 let asset_item = {};
+                let service_item = {};
+                if (this.form.department_id =='') {
+                    this.form.item_type ='';
+                    return this.$toastr.e('Please select department first')
+                }
           if (this.form.department_id !=='' && this.form.item_type !=='') {            
            setTimeout(()=>{
+           if(this.edit) {                     
+            this.unbudgeted_departments = this.departments;
+           }
           let budgets = this.budgets.find(b => b.department_id == this.form.department_id);               
          if (budgets ==undefined) {
            this.show_asset = false;
-           this.show_stock = false;                      
-           return this.$toastr.e(`The selected department does not have budgeted ${this.form.item_type}.`);  
+           this.show_stock = false;  
+           this.show_service = false;                    
+          return this.$toastr.e(`The selected department does not have budgeted ${this.form.item_type}.`);  
          }    
              if (this.form.item_type=='asset') {
                     if(budgets['item_asset'][0]['item_id'] != null){
@@ -207,50 +281,89 @@
                     }
                      if (Custom.isEmpty(asset_item)) {
                         this.show_asset = false;
-                        this.show_stock = false;                
+                        this.show_stock = false; 
+                        this.show_service = false; 
                       return this.$toastr.e(`The selected department does not have budgeted Assets.`);
                      }  
                 this.show_stock = false;
-                this.show_asset = true;              
+                this.show_asset = true;  
+                this.show_service = false;             
                 this.filtered_assets = [];           
                for(let i=0;i<asset_item.length;i++){
                 for(let j=0;j<this.assets.length;j++){
                     if (asset_item[i]['item_id'] == this.assets[j]['id']) {
-                        this.filtered_assets.push(this.assets[j]);
+                        this.filtered_assets.push({
+                            'value': this.assets[j]['id'],
+                            'text': this.assets[j]['code'] +'-'+this.assets[j]['description']
+                        });
                     }
                 }
                } 
                          
                 } 
-                 if (this.form.item_type=='stock') {                   
+                 if (this.form.item_type=='stock') {   
+                 console.log('stock')                
                     if(budgets['item_stock'][0]['item_id'] != null){
                         stk_items = budgets['item_stock'];
                     }                 
                      if (Custom.isEmpty(stk_items)) { 
                         this.show_asset = false;
-                        this.show_stock = false;                       
+                        this.show_stock = false; 
+                        this.show_service = false;                        
                       return this.$toastr.e(`The selected department does not have budgeted Stock Items.`);
                      }
                 this.show_stock = true;
-                this.show_asset = false;                       
+                this.show_asset = false;  
+                this.show_service = false;                      
                 this.filtered_stock_items = [];
                 for(let i=0;i<stk_items.length;i++){
                     for(let j=0;j<this.stock_items.length;j++){                     
                         if (stk_items[i]['item_id'] == this.stock_items[j]['id']) {
-                            this.filtered_stock_items.push(this.stock_items[j]);
+                            this.filtered_stock_items.push({
+                                'value': this.stock_items[j]['id'],
+                                'text': this.stock_items[j]['code'] +'-'+this.stock_items[j]['description']
+                            });
                         }
                     }
                 }  
              
                 } 
-         },1000)  
-         
-                 
+
+                  if (this.form.item_type=='service') {                   
+                    if(budgets['item_service'][0]['item_id'] != null){
+                        service_item = budgets['item_service'];
+                    }                 
+                     if (Custom.isEmpty(service_item)) { 
+                        this.show_asset = false;
+                        this.show_stock = false; 
+                        this.show_service = false;                      
+                      return this.$toastr.e(`The selected department does not have budgeted Services.`);
+                     }
+                this.show_stock = false;
+                this.show_asset = false;   
+                this.show_service = true;                      
+                this.filtered_services = [];
+                for(let i=0;i<service_item.length;i++){
+                    for(let j=0;j<this.services.length;j++){                     
+                        if (service_item[i]['item_id'] == this.services[j]['id']) {
+                            this.filtered_services.push({
+                                'value': this.services[j]['id'],
+                                'text': this.services[j]['name']
+                            });
+                        }
+                    }
+                }  
+             
+                }
+         },1000)           
                      
             }
         }
         },
         computed:{
+        service_items(){
+        return [this.service_item,this.form.item_service].join();
+        },
        fetchItems(){
         return [this.form.item_type,this.form.department_id].join();
        }
@@ -271,6 +384,13 @@
             removeAsset(i){
             this.form.item_asset.splice(i,1);
             },
+             addService(i){
+            this.form.item_service.push({item_id: '',name:'',description: '',amount:'',scheduled_date:''});            
+            },
+            removeService(i){
+            this.form.item_service.splice(i,1);
+            },
+            
             checkItems(){
           
             },
@@ -280,22 +400,95 @@
                 .then(res => {
                     this.req_types = res.data.requisition_types,
                     this.departments = res.data.departments,
-                    this.priorities = res.data.priorities,
-                    this.projects = res.data.projects,
+                    this.priorities = res.data.priorities,                
                     this.stock_items = res.data.stock_items,
                     this.assets = res.data.assets,
                     this.budgets = res.data.budgets,
-                    this.uoms    = res.data.uoms
+                    this.uoms    = res.data.uoms,
+                    this.services = res.data.services
+                    this.filtered_departments = res.data.filtered_departments; 
+                    this.filtered_requistions  = res.data.filtered_requistions; 
+                    
+                   res.data.projects.forEach(p => {
+                    this.projects.push({
+                        'value': p.id,
+                        'text': `${p.code}-${p.description}`
+                    })
+                   })
+                  
+              let departments = [];
+              let departments_obj = {};
+           
+             if (this.filtered_departments.length) {
+              this.filtered_departments.forEach(b => {
+               this.departments.forEach(d => {
+              if (d.id == b.department_id) {
+
+              var dateFrom = '01/01/'+moment(Date.now()).format('Y')+'/01/01';
+              var dateTo = '01/01/'+(parseInt(moment(Date.now()).format('Y'))+1);         
+              var dateCheck = moment(d.begins_on).format('DD/MM/YYYY');           
+              var d1 = dateFrom.split("/");
+              var d2 = dateTo.split("/");
+              var c = dateCheck.split("/");
+              
+              var from = new Date(d1[2], parseInt(d1[1])-1, d1[0]);  // -1 because months are from 0 to 11
+              var to   = new Date(d2[2], parseInt(d2[1])-1, d2[0]);
+              var check = new Date(c[2], parseInt(c[1])-1, c[0]);
+                    if(check > from && check < to){                       
+                        if (!departments_obj[d.id]) {
+                            departments_obj[d.id] = d;                       
+                        }                   
+                    }
+                  
+                }
+               })
+             }) 
+       
+             this.unbudgeted_departments = Object.values(departments_obj);
+     
+             if(this.filtered_requistions.length){
+             let my_depts = this.filtered_requistions.map(d => {
+                return d.department_id;
+             })          
+               const all_dpts = Object.values(departments_obj);
+               let wanted = [];
+             
+             for(let p=0;p<all_dpts.length;p++){
+                if (!my_depts.includes(all_dpts[p]['id'])) {
+                    wanted.push(all_dpts[p]);                    
+                }
+             }
+             this.unbudgeted_departments = wanted;
+            }
+       
+             }   
+
+             else {
+                  this.unbudgeted_departments =  this.departments;
+                  } 
                 })
+              
             },
 
             saveRequisition(){
+                let service_obj = {};
+                let stk_obj = {};
+                let asset_obj = {};
                 if (Object.values(this.form.item_stock[0])[0] !== '' || Object.values(this.form.item_stock[0])[1] !== '' || Object.values(this.form.item_stock[0])[2] !== '' || Object.values(this.form.item_stock[0])[3] !== '') {
                     for (let i = 0; i < this.form.item_stock.length; i++) {
                         if (this.form.item_stock[i]['item_id'] === '' || this.form.item_stock[i]['qty'] === '' || this.form.item_stock[i]['uom'] === '' || this.form.item_stock[i]['scheduled_date'] === '') {
                             return this.$toastr.e('Please all Stock Items fields are required.');
                         }
                     }
+
+                 for(let i=0;i<this.form.item_stock.length;i++){        
+                if(!stk_obj[this.form.item_stock[i]['item_id']]){
+                    stk_obj[this.form.item_stock[i]['item_id']] = this.form.item_stock[i];
+                } 
+                else if(stk_obj[this.form.item_stock[i]['item_id']]){
+                  return this.$toastr.e(`Sorry, You have entered an item ${this.stock_items.find(s => s.id ==stk_obj[this.form.item_stock[i]['item_id']]['item_id']).code} twice,Please check before proceeding.`);
+                } 
+            }
                 }
                    if (Object.values(this.form.item_asset[0])[0] !== '' || Object.values(this.form.item_asset[0])[1] !== '' || Object.values(this.form.item_asset[0])[2] !== '' || Object.values(this.form.item_asset[0])[3] !== '') {
                     for (let i = 0; i < this.form.item_asset.length; i++) {
@@ -303,7 +496,33 @@
                             return this.$toastr.e('Please all Assets fields are required.');
                         }
                     }
-                }        
+
+                for(let i=0;i<this.form.item_asset.length;i++){        
+                if(!asset_obj[this.form.item_asset[i]['item_id']]){
+                    asset_obj[this.form.item_asset[i]['item_id']] = this.form.item_asset[i];
+                } 
+                else if(asset_obj[this.form.item_asset[i]['item_id']]){
+                  return this.$toastr.e(`Sorry, You have entered an item ${this.assets.find(a => a.id ==asset_obj[this.form.item_asset[i]['item_id']]['item_id']).code} twice,Please check before proceeding.`);
+                } 
+            } 
+                }   
+                  if (Object.values(this.form.item_service[0])[0] !== '' || Object.values(this.form.item_service[0])[1] !== '' || Object.values(this.form.item_service[0])[2] !== '' || Object.values(this.form.item_service[0])[3] !== '' || Object.values(this.form.item_service[0])[4] !== '') {
+                    for (let i = 0; i < this.form.item_service.length; i++) {
+                        if (this.form.item_service[i]['item_id'] === '' || this.form.item_service[i]['scheduled_date'] === '') {
+                            return this.$toastr.e('Please all Service fields are required.');
+                        }
+                    }
+
+                for(let i=0;i<this.form.item_service.length;i++){        
+                if(!service_obj[this.form.item_service[i]['item_id']]){
+                    service_obj[this.form.item_service[i]['item_id']] = this.form.item_service[i];
+                } 
+                else if(service_obj[this.form.item_service[i]['item_id']]){
+                  return this.$toastr.e(`Sorry, You have entered an item ${service_obj[this.form.item_service[i]['item_id']]['name']} twice,Please check before proceeding.`);
+                } 
+                
+            } 
+                }      
                 this.form.req_date = DateConverter.convertDate(this.form.req_date);
                 this.edit_req ? this.update() : this.save();
             },
@@ -329,24 +548,32 @@
             },          
             listen(){
                 if (this.edit){
-                    this.form = this.$store.state.requisitions;
-                   //  setTimeout(()=>{
-                   // this.fetchItems();
-                   //  },1000);                   
+                    this.form = this.$store.state.requisitions;              
+                 setTimeout(()=>{
+                   this.unbudgeted_departments = this.departments.find(d => d.id == this.form.department_id);                              
+                 },1000)                   
                     if (this.form.item_type == 'stock') {
                         this.show_stock = true;
-                        this.show_asset = false;                        
+                        this.show_asset = false; 
+                        this.show_service = false;                       
                     }
                     if (this.form.item_type == 'asset') {
                         this.show_stock = false;
                         this.show_asset = true;
+                         this.show_service = false;
+                    }
+                     if (this.form.item_type == 'service') {
+                        this.show_stock = false;
+                        this.show_asset = false;
+                         this.show_service = true;
                     }
 
                 }
             },
         },
         components:{
-            datepicker
+            datepicker,
+            ModelSelect
         }
     }
 </script>
@@ -375,4 +602,13 @@
 .bf{
     width:100%
 }
+.m_b{
+    margin-bottom:5px;
+}
+.i_p{
+    width: 250px !important;
+    margin-right: -40px !important;
+    margin-bottom: 5px;
+
+   }
 </style>

@@ -26,6 +26,7 @@ class CreateQuotationsTable extends Migration
             $table->integer('status')->nullable();     
             $table->text('item_stock')->nullable();
             $table->text('item_asset')->nullable(); 
+            $table->text('item_service')->nullable(); 
             $table->timestamps();
         });
     }

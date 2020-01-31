@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
          $this->call(RequisitionTypeSeeder::class);
          $this->call(CustomerTypesSeeder::class);
          $this->call(Uomseeder::class);
+         $this->call(ServicesSeeder::class);
 
 
     }

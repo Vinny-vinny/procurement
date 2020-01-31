@@ -22,7 +22,8 @@ class CreateRequisitionsTable extends Migration
             $table->integer('project_id');
             $table->string('item_type');
             $table->text('item_stock')->nullable();
-            $table->text('item_asset')->nullable();                     
+            $table->text('item_asset')->nullable();
+            $table->text('item_service')->nullable();                     
             $table->integer('priority_id');
             $table->integer('requisition_by');
             $table->string('description');
