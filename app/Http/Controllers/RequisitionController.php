@@ -55,6 +55,7 @@ class RequisitionController extends Controller
         $request['item_stock'] = json_encode($request->get('item_stock'));
         $request['item_asset'] = json_encode($request->get('item_asset'));
         $request['item_service'] = json_encode($request->get('item_service'));
+        
         $requisition = Requisition::create($request->all());
         return response()->json(new RequisitionResource($requisition));
     }

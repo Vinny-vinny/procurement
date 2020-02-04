@@ -50,8 +50,7 @@
                                        <td>{{stk.rate}}</td>
                                        <td>{{stk.delivery_date}}</td>
                                        <td>{{stk.max_qty}}</td>
-                                   </tr>
-                                 
+                                   </tr>                                
 
                                </table>
                            </fieldset>
@@ -119,8 +118,7 @@
                  
                 </div>
                 
-            </div>       
-
+            </div>  
 
             </div>
             
