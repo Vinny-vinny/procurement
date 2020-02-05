@@ -14,9 +14,9 @@ class UsersSeeder extends Seeder
         $faker = Faker::create();
         \App\User::create([
             'name' => 'Admin',
-            'email' => 'admin@technical.com',
+            'email' => 'admin@procurement.com',
             'code_no' => $faker->numberBetween(1,1000),
-            'title' => 'Technical Admin',
+            'title' => 'Procurement Admin',
             'join_date' => now(),
             'email_verified_at' => now(),
             'password' => bcrypt('Qwerty123!'), // password

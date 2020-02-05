@@ -6857,7 +6857,10 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
             'text': sp.name
           });
         });
-      }
+      } //console.log(this.filtered_quotations)
+
+
+      var s_ids;
 
       if (this.filtered_enquiries.length) {
         enquiry = this.filtered_enquiries.find(function (e) {
@@ -6865,13 +6868,22 @@ function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterat
         });
 
         if (this.filtered_quotations.length) {
-          var s_ids = this.filtered_quotations.map(function (sup) {
+          s_ids = this.filtered_quotations.map(function (sup) {
             return sup.supplier_id;
           });
 
           for (var s = 0; s < enquiry.supplier_id.length; s++) {
             if (!s_ids.includes(enquiry.supplier_id[s])) {
               suppliers.push(enquiry.supplier_id[s]);
+            }
+          }
+        } else if (this.filtered_quotations.length == 0) {
+          for (var sup = 0; sup < this.suppliers.length; sup++) {
+            if (enquiry.supplier_id.includes(this.suppliers[sup]['id'])) {
+              this.filtered_suppliers.push({
+                'value': this.suppliers[sup]['id'],
+                'text': this.suppliers[sup]['name']
+              });
             }
           }
         }

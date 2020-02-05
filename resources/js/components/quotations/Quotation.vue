@@ -372,20 +372,34 @@
              })
               
              }
+             //console.log(this.filtered_quotations)
+             let s_ids;
             if (this.filtered_enquiries.length) {
               enquiry = this.filtered_enquiries.find(e => e.id ==this.form.enquiry_id);       
-             
+            
              if (this.filtered_quotations.length) {
-             let s_ids = this.filtered_quotations.map(sup => {
+              s_ids = this.filtered_quotations.map(sup => {
               return sup.supplier_id;
              })
-              for(let s=0; s<enquiry.supplier_id.length; s++){
+           
+              for(let s=0; s<enquiry.supplier_id.length; s++){             
                 if (!s_ids.includes(enquiry.supplier_id[s])) {
                   suppliers.push(enquiry.supplier_id[s]);
                 }
               }
              }
 
+             else if(this.filtered_quotations.length ==0) {
+                for(let sup=0; sup<this.suppliers.length; sup++){                
+                if (enquiry.supplier_id.includes(this.suppliers[sup]['id'])) {
+                  this.filtered_suppliers.push({
+                  'value': this.suppliers[sup]['id'],
+                  'text': this.suppliers[sup]['name']
+                });
+                }
+              }   
+             }
+    
              if (suppliers.length) {
               for(let p=0;p<this.suppliers.length;p++){
                 if(suppliers.includes(this.suppliers[p]['id'])){
@@ -491,7 +505,7 @@
                 this.services = res.data.services;
                 this.filtered_enquiries = res.data.filtered_enquiries;
                 this.filtered_quotations = res.data.filtered_quotations;
-
+             
                  res.data.enquiries.forEach(e => {
                     this.all_enquiries.push({
                         'value': e.id,
