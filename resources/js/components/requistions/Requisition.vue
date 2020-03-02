@@ -210,7 +210,7 @@
                     description:'',
                     item_stock: [{item_id: '',qty:'',uom: '',scheduled_date:''}],
                     item_asset: [{item_id: '',qty:'',uom: '',scheduled_date:''}],
-                    item_service: [{item_id: '',name:'',description: '',amount:'',scheduled_date:''}],
+                    item_service: [{item_id: '',description: '',amount:'',scheduled_date:''}],
                     id:''
                 },
                 edit_req: this.edit,
@@ -244,8 +244,7 @@
               for(let i=0;i<this.services.length;i++){
                if (Object.values(this.form.item_service[0])[0] !== '') {
                     for (let j = 0; j < this.form.item_service.length; j++) {
-                        if (this.form.item_service[j]['item_id'] == this.services[i]['id']) {
-                            this.form.item_service[j]['name'] = this.services[i]['name']
+                        if (this.form.item_service[j]['item_id'] == this.services[i]['id']) {                     
                             this.form.item_service[j]['description'] = this.services[i]['description'] 
                             this.form.item_service[j]['amount'] = this.services[i]['amount']  
                         }
@@ -299,10 +298,31 @@
                     }
                 }
                } 
+
+                  if (this.filtered_assets.length) {                  
+                    if (this.form.item_asset[0]['item_id'] =="") {                     
+                     this.form.item_asset.splice(this.form.item_asset[0],1);
+                    }                    
+                    if (this.form.item_asset.length ==0) {
+
+                    this.filtered_assets.forEach((service) =>{                     
+                           this.form.item_asset.push({
+                            'item_id': service['value'],
+                            'qty': '',
+                            'uom': '',
+                            'scheduled_date': '',
+                            'rate': '',
+                            'delivery_date': '',
+                            'max_qty': ''                  
+                     
+                    })
+                })
+                }
                          
                 } 
+            }
                  if (this.form.item_type=='stock') {   
-                 console.log('stock')                
+                 //console.log('stock')                
                     if(budgets['item_stock'][0]['item_id'] != null){
                         stk_items = budgets['item_stock'];
                     }                 
@@ -326,7 +346,27 @@
                         }
                     }
                 }  
-             
+
+                   if (this.filtered_stock_items.length) {                  
+                    if (this.form.item_stock[0]['item_id'] =="") {                     
+                     this.form.item_stock.splice(this.form.item_stock[0],1);
+                    }                    
+                    if (this.form.item_stock.length ==0) {
+
+                    this.filtered_stock_items.forEach((stk) =>{                     
+                           this.form.item_stock.push({
+                            'item_id': stk['value'],
+                            'qty': '',
+                            'uom': '',
+                            'scheduled_date': '',
+                            'rate': '',
+                            'delivery_date': '',
+                            'max_qty': ''                
+                     
+                    })
+                })
+                }                         
+                }             
                 } 
 
                   if (this.form.item_type=='service') {                   
@@ -352,7 +392,29 @@
                             });
                         }
                     }
-                }  
+                }
+
+                        if (this.filtered_services.length) {                  
+                        if (this.form.item_service[0]['item_id'] =="") {                     
+                         this.form.item_service.splice(this.form.item_service[0],1);
+                        }                    
+                        if (this.form.item_service.length ==0) {
+
+                        this.filtered_services.forEach((service) =>{ 
+                        for(let k=0;k<this.services.length;k++){
+                            if (service.value == this.services[k]['id']) {
+                                this.form.item_service.push({
+                                'item_id': service['value'],
+                                'description': service['description'],
+                                'amount': service['amount'],
+                                'scheduled_date': ''                  
+                         
+                        })
+                        }  
+                        } 
+                    })
+                    }                         
+                    }  
              
                 }
          },1000)           
@@ -385,7 +447,7 @@
             this.form.item_asset.splice(i,1);
             },
              addService(i){
-            this.form.item_service.push({item_id: '',name:'',description: '',amount:'',scheduled_date:''});            
+            this.form.item_service.push({item_id: '',description: '',amount:'',scheduled_date:''});            
             },
             removeService(i){
             this.form.item_service.splice(i,1);
@@ -506,7 +568,7 @@
                 } 
             } 
                 }   
-                  if (Object.values(this.form.item_service[0])[0] !== '' || Object.values(this.form.item_service[0])[1] !== '' || Object.values(this.form.item_service[0])[2] !== '' || Object.values(this.form.item_service[0])[3] !== '' || Object.values(this.form.item_service[0])[4] !== '') {
+                  if (Object.values(this.form.item_service[0])[0] !== '' || Object.values(this.form.item_service[0])[1] !== '' || Object.values(this.form.item_service[0])[2] !== '' || Object.values(this.form.item_service[0])[3] !== '') {
                     for (let i = 0; i < this.form.item_service.length; i++) {
                         if (this.form.item_service[i]['item_id'] === '' || this.form.item_service[i]['scheduled_date'] === '') {
                             return this.$toastr.e('Please all Service fields are required.');
@@ -518,11 +580,12 @@
                     service_obj[this.form.item_service[i]['item_id']] = this.form.item_service[i];
                 } 
                 else if(service_obj[this.form.item_service[i]['item_id']]){
-                  return this.$toastr.e(`Sorry, You have entered an item ${service_obj[this.form.item_service[i]['item_id']]['name']} twice,Please check before proceeding.`);
+                  return this.$toastr.e(`Sorry, You have entered an item ${service_obj[this.form.item_service[i]['item_id']]['description']} twice,Please check before proceeding.`);
                 } 
                 
             } 
-                }      
+                }
+                   
                 this.form.req_date = DateConverter.convertDate(this.form.req_date);
                 this.edit_req ? this.update() : this.save();
             },

@@ -15,24 +15,10 @@ class CreateAssetDisposalsTable extends Migration
     {
         Schema::create('asset_disposals', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->string('Propertyof');
-            $table->date('DisposalDate');
-            $table->text('DisposalReason');
-            $table->text('ItemDescription');
-            $table->integer('AssetId');
-            $table->integer('SerialNo');
-            $table->integer('DepartmentId');
-            $table->enum('DisposalMethod', ['Trade-In', 'Sale', 'Junk', 'Other']);
-            $table->integer('Trade-In')->nullable();
-            $table->integer('Sale')->nullable();
-            $table->integer('Junk')->nullable();
-            $table->integer('Other')->nullable();
-            $table->string('SoldTo');
-            $table->string('sign');
-            $table->float('Amount','10', '2');
-            $table->string('PaymentTerms');
-            $table->string('CharmanProcurement');
-            $table->string('FinanceDept');
+            $table->text('asset_details');
+            $table->date('opening_date');
+            $table->date('deadline_date'); 
+            $table->string('disposal_no');      
             $table->timestamps();
         });
     }

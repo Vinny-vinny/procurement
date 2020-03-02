@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
          $this->call(CustomerTypesSeeder::class);
          $this->call(Uomseeder::class);
          $this->call(ServicesSeeder::class);
+         $this->call(PaymentModeSeeder::class);
 
 
     }

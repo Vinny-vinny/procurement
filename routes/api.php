@@ -43,6 +43,10 @@ Route::apiResource('quotations','QuotationController');
 Route::apiResource('purchase-order','PurchaseOrderController');
 Route::apiResource('services','ServicesController');
 Route::apiResource('users','UserController');
+Route::apiResource('asset-disposal','AssetDisposalController');
+Route::apiResource('payment-modes','PaymentModeController');
+Route::apiResource('bidding','BiddingController');
+Route::apiResource('bid-award','BidAwardController');
 
 Route::group([
     'middleware' => 'api',

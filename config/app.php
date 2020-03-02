@@ -234,6 +234,7 @@ return [
         'Form'      => Collective\Html\FormFacade::class,
         'Html'      => Collective\Html\HtmlFacade::class,
         'Flash'     => Laracasts\Flash\Flash::class,
+        'Input' => Illuminate\Support\Facades\Input::class
 
     ],
 

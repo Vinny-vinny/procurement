@@ -29,7 +29,7 @@
                         </div>
                         <div class="form-group">
                             <label>Item Type</label>
-                            <select class="form-control" v-model="form.item_type" required>
+                            <select class="form-control" v-model="form.item_type" required @change="populateItems()">
                                 <option value="stock">Stock Item</option>
                                 <option value="asset">Asset</option>                              
                                 <option value="service">Service</option>
@@ -38,7 +38,8 @@
                          <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group" v-if="show_stock">
-                                    <label>Stock Items</label>
+                                <fieldset class="the-fieldset">
+                               <legend class="the-legend"><label class="fyr">Stock Items</label></legend>
                                     <table style="width:100%">
                                         <tr>
                                             <th>Item</th>
@@ -56,26 +57,26 @@
                                       <model-select :options="all_stks"
                                         v-model="m.item_id"  
                                         @input="stk_id = m.item_id"                                             
-                                        class="i_p"
+                                        class="i_p_3"
                                         >
                                         </model-select>
                                           </td>                                          
 
-                                            <td><input type="number" class="form-control cost" v-model="m.qty"
+                                            <td><input type="number" class="form-control mb" v-model="m.qty"
                                                        placeholder="Qty" disabled>                                                
                                                    </td>
                                             <td>
-                                                <input type="text" class="form-control" v-model="m.uom" placeholder="UOM" disabled>
+                                                <input type="text" class="form-control mb" v-model="m.uom" placeholder="UOM" disabled>
                                               </td>                                    
                                                        <td>
-                                                       <input type="text" class="form-control" v-model="m.scheduled_date" disabled placeholder="Scheduled Date" disabled>
+                                                       <input type="text" class="form-control mb" v-model="m.scheduled_date" disabled placeholder="Scheduled Date" disabled>
                                                        </td>
-                                                     <td><input type="number" class="form-control cost" v-model="m.rate"
+                                                     <td><input type="number" class="form-control mb" v-model="m.rate"
                                                        placeholder="Delivery Rate" disabled>                                                
                                                    </td>
-                                                    <td><datepicker v-model="m.delivery_date" placeholder="Delivery Date" disabled></datepicker>                 
+                                                    <td><datepicker v-model="m.delivery_date" placeholder="Delivery Date" disabled class="mb"></datepicker>                 
                                                    </td>
-                                                    <td><input type="number" class="form-control cost" v-model="m.max_qty"
+                                                    <td><input type="number" class="form-control mb" v-model="m.max_qty"
                                                        placeholder="Max. Delivery Qty" disabled>                                               
                                                    </td>
                                             <td>
@@ -86,13 +87,15 @@
                                             </td>
                                         </tr>
                                     </table>
+                                </fieldset>
                                        
                                 </div>
                                 <div class="form-group" v-if="show_asset">
-                                    <label>Assets</label>
+                                      <fieldset class="the-fieldset">
+                               <legend class="the-legend"><label class="fyr">Assets</label></legend>
                                     <table style="width:100%">
                                         <tr>
-                                             <th>Item</th>
+                                            <th>Item</th>
                                             <th>Qty</th>
                                             <th>Uom</th>    
                                             <th>Scheduled Date</th>
@@ -100,30 +103,30 @@
                                             <th>Delivery Date</th> 
                                             <th>Max. Delivery Qty</th>  
                                             <th></th>                         
-                                        </tr>
+                                        </tr>                                        
                                         <tr v-for="(m,i) in form.item_asset">                           
                                             <td>
                                            <model-select :options="all_assets"
                                         v-model="m.item_id"  
                                         @input="stk_id = m.item_id"                                             
-                                        class="i_p"
+                                        class="i_p_3 qq"
                                         >
                                         </model-select>
                                           </td>
-                                            <td><input type="number" class="form-control cost" v-model="m.qty"
+                                            <td><input type="number" class="form-control mb" v-model="m.qty"
                                                        placeholder="Qty" disabled>                                               
                                                    </td>
                                             <td>
-                                                 <input type="text" class="form-control" v-model="m.uom" placeholder="UOM" disabled>
+                                                 <input type="text" class="form-control mb" v-model="m.uom" placeholder="UOM" disabled>
                                             </td>                                    
-                                              <td><input type="text" class="form-control" v-model="m.scheduled_date" disabled placeholder="Scheduled Date" disabled>
+                                              <td><input type="text" class="form-control mb" v-model="m.scheduled_date" disabled placeholder="Scheduled Date" disabled>
                                               </td>
-                                               <td><input type="number" class="form-control cost" v-model="m.rate"
+                                               <td><input type="number" class="form-control mb" v-model="m.rate"
                                                        placeholder="Delivery Rate" disabled>                                                
                                                </td>
-                                                    <td><datepicker v-model="m.delivery_date" placeholder="Delivery Date"></datepicker disabled>                 
+                                                    <td><datepicker v-model="m.delivery_date" class="mb" placeholder="Delivery Date"></datepicker disabled>                 
                                                    </td>
-                                                    <td><input type="number" class="form-control cost" v-model="m.max_qty"
+                                                    <td><input type="number" class="form-control mb" v-model="m.max_qty"
                                                        placeholder="Max. Delivery Qty" disabled>                                               
                                                    </td>
                                             <td>
@@ -134,6 +137,7 @@
                                             </td>
                                         </tr>
                                     </table>
+                                </fieldset>
                                 </div>
 
                                    <div class="form-group" v-if="show_service">
@@ -148,26 +152,26 @@
                                             <th>Quote Rate</th>
                                             <th>Service Delivery Date</th>
                                             <th></th>                         
-                                        </tr>
+                                        </tr>                                       
                                         <tr v-for="(m,i) in form.item_service">                           
                                             <td>
                                          <model-select :options="all_services"
                                         v-model="m.item_id" 
                                         @input="stk_id = m.item_id"                    
-                                        class="i_p"
+                                        class="i_p_3 qq"
                                         >
                                         </model-select>
                                         </td>
                                         <td>
-                                         <input type="text" class="form-control cost" v-model="m.description"
+                                         <input type="text" class="form-control mb" v-model="m.description"
                                                        placeholder="Description" disabled></td>
 
-                                         <td><input type="number" class="form-control cost" v-model="m.amount"
+                                         <td><input type="number" class="form-control mb" v-model="m.amount"
                                                        placeholder="Amount" disabled></td>
-                                         <td><datepicker v-model="m.scheduled_date" placeholder="Scheduled Date"></datepicker></td>
-                                         <td><input type="number" class="form-control cost" v-model="m.rate"
+                                         <td><datepicker v-model="m.scheduled_date" placeholder="Scheduled Date" class="mb"></datepicker></td>
+                                         <td><input type="number" class="form-control mb" v-model="m.rate"
                                                        placeholder="Quote Rate"></td>
-                                                        <td><datepicker v-model="m.delivery_date" placeholder="Scheduled Date"></datepicker></td>
+                                                        <td><datepicker v-model="m.delivery_date" placeholder="Scheduled Date" class="mb"></datepicker></td>
 
                                             <td>
                                                 <i class="fa fa-minus-circle remove" @click="removeService(i)"
@@ -207,7 +211,7 @@ import { ModelSelect } from 'vue-search-select';
                     supplier_id:'',
                     item_stock: [{item_id: '',qty:'',uom: '',scheduled_date:'',rate:'',delivery_date:'',max_qty:''}],
                     item_asset: [{item_id: '',qty:'',uom: '',scheduled_date:'',rate:'',delivery_date:'',max_qty:''}],
-                    item_service: [{item_id: '',name:'',description: '',amount:'',scheduled_date:'',rate:'',delivery_date:''}],
+                    item_service: [{item_id: '',description: '',amount:'',scheduled_date:'',rate:'',delivery_date:''}],
                     id:''
                 },
                 edit_po: this.edit,
@@ -232,8 +236,16 @@ import { ModelSelect } from 'vue-search-select';
         created(){
             this.listen();
             this.getpos();
+
+
         },
-        watch:{ 
+        watch:{            
+            'form.item_type'(){
+            if (this.form.quotation_id =='') {
+            this.form.item_type ='';
+            return this.$toastr.e('Please choose quotation first');
+           }
+            },
         reqs(){
             if (this.stk_id !=='') {
                 for(let i=0;i<this.filtered_assets.length;i++){
@@ -271,9 +283,8 @@ import { ModelSelect } from 'vue-search-select';
                for(let i=0;i<this.filtered_services.length;i++){
                if (Object.values(this.form.item_service[0])[0] !== '') {
                     for (let j = 0; j < this.form.item_service.length; j++) {
-                        if (this.form.item_service[j]['item_id'] == this.filtered_services[i]['id']) {    
-                                      
-                            this.form.item_service[j]['name'] = this.filtered_services[i]['name']
+                        if (this.form.item_service[j]['item_id'] == this.filtered_services[i]['id']) {                                  
+                            
                             this.form.item_service[j]['description'] = this.filtered_services[i]['description'] 
                             this.form.item_service[j]['scheduled_date'] = this.filtered_services[i]['scheduled_date'] 
                             this.form.item_service[j]['rate'] = this.filtered_services[i]['rate']  
@@ -288,7 +299,7 @@ import { ModelSelect } from 'vue-search-select';
             }  
             
         },           
-        fetchItems(){          
+       fetchItems(){          
                 let budget_item = {};
                 let stk_items = {};
                 let asset_item = {};
@@ -338,6 +349,27 @@ import { ModelSelect } from 'vue-search-select';
                     }
                 }
                } 
+
+                if (this.filtered_assets.length) {
+                    if (this.form.item_asset[0]['item_id'] =="") {
+                     this.form.item_asset.splice(this.form.item_asset[0],1);
+                    }
+                    if (this.form.item_asset.length ==0) {
+                    this.filtered_assets.forEach((asset) =>{                     
+                           this.form.item_asset.push({
+                            'item_id': asset['id'],
+                            'qty': asset['qty'],
+                            'uom': asset['uom'],
+                            'scheduled_date': asset['scheduled_date'],
+                            'rate': asset['rate'],
+                            'delivery_date': asset['delivery_date'],
+                            'max_qty': asset['max_qty']                           
+                        }) 
+                     
+                    })
+                }
+
+                } 
                 
                 } 
                  if (this.form.item_type=='stock') {                                 
@@ -378,6 +410,27 @@ import { ModelSelect } from 'vue-search-select';
                     }
                 }  
                
+                 if (this.filtered_stock_items.length) {
+                    if (this.form.item_stock[0]['item_id'] =="") {
+                        this.form.item_stock.splice(this.form.item_stock[0],1);
+                    }
+                    if (this.form.item_stock.length ==0) {
+                    this.filtered_stock_items.forEach((stk) =>{                     
+                           this.form.item_stock.push({
+                            'item_id': stk['id'],
+                            'qty': stk['qty'],
+                            'uom': stk['uom'],
+                            'scheduled_date': stk['scheduled_date'],
+                            'rate': stk['rate'],
+                            'delivery_date': stk['delivery_date'],
+                            'max_qty': stk['max_qty']                           
+                        }) 
+                     
+                    })
+                }
+
+                } 
+               console.log(this.form.item_stock)
                 } 
 
                  if (this.form.item_type=='service') {                                 
@@ -404,8 +457,7 @@ import { ModelSelect } from 'vue-search-select';
                             'text': this.services[j]['name'] 
                           })
                             this.filtered_services.push({
-                            'id': this.stock_items[j]['id'],
-                            'name': service_items[i]['name'],
+                            'id': this.stock_items[j]['id'],                          
                             'description': service_items[i]['description'],
                             'scheduled_date': service_items[i]['scheduled_date'],
                             'rate': service_items[i]['rate'],
@@ -415,8 +467,27 @@ import { ModelSelect } from 'vue-search-select';
                         });
                         }
                     }
-                }  
+                }            
                
+                if (this.filtered_services.length) {                  
+                    if (this.form.item_service[0]['item_id'] =="") {                     
+                     this.form.item_service.splice(this.form.item_service[0],1);
+                    }                    
+                    if (this.form.item_service.length ==0) {
+
+                    this.filtered_services.forEach((service) =>{                     
+                           this.form.item_service.push({
+                            'item_id': service['id'],                           
+                            'description': service['description'],
+                            'scheduled_date': service['scheduled_date'],
+                            'rate': service['rate'],
+                            'delivery_date': service['delivery_date'],
+                            'amount': service['amount']                           
+                        })                       
+                     
+                    })
+                }
+                }       
                 }
 
          },1000)                   
@@ -432,12 +503,19 @@ import { ModelSelect } from 'vue-search-select';
         return [this.stk_id,this.form.item_stock,this.form.item_asset,this.form.item_service].join();
         }
         },
-        methods:{
+        methods:{  
+        populateItems(){
+         
+         },      
             getSupplier(){
              let supplier_id = this.quotations.find(q => q.id == this.form.quotation_id).supplier_id;
              let supplier = this.suppliers.find(s => s.id == supplier_id);
              this.form.supplier_id = supplier.id;
              this.supplier = supplier.name; 
+
+             setTimeout(()=>{
+             console.log(this.filtered_stock_items);
+             },2000)
             },
              addItem(i) {
                 this.form.item_stock.push({item_id: '',qty:'',uom: '',scheduled_date:''});
@@ -452,7 +530,7 @@ import { ModelSelect } from 'vue-search-select';
             this.form.item_asset.splice(i,1);
             },
             addService(i){
-            this.form.item_service.push({item_id: '',name:'',description: '',amount:'',scheduled_date:'',rate:'',delivery_date:''});            
+            this.form.item_service.push({item_id: '',description: '',amount:'',scheduled_date:'',rate:'',delivery_date:''});            
             },
             removeService(i){
             this.form.item_service.splice(i,1);
@@ -520,7 +598,7 @@ import { ModelSelect } from 'vue-search-select';
                     service_obj[this.form.item_service[i]['item_id']] = this.form.item_service[i];
                 } 
                 else if(service_obj[this.form.item_service[i]['item_id']]){
-                  return this.$toastr.e(`Sorry, You have entered an item ${service_obj[this.form.item_service[i]['item_id']]['name']} twice,Please check before proceeding.`);
+                  return this.$toastr.e(`Sorry, You have entered an item ${service_obj[this.form.item_service[i]['item_id']]['description']} twice,Please check before proceeding.`);
                 } 
             } 
 
@@ -550,7 +628,7 @@ import { ModelSelect } from 'vue-search-select';
             listen(){
                 if (this.edit){
                     this.form = this.$store.state.purchase_orders
-
+                    console.log(this.form)
                     setTimeout(()=>{
                      this.getSupplier();
                     },1000)
@@ -565,5 +643,13 @@ import { ModelSelect } from 'vue-search-select';
 </script>
 
 <style scoped>
-
+ .i_p_3{
+    width:180px !important;
+ }
+ .qq{
+    margin-bottom:5px;
+ }
+ .mb{
+    margin-bottom:5px;
+ }
 </style>

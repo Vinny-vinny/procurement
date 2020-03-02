@@ -53,6 +53,18 @@
                         <li><router-link to="/approve-quotations" class="fa fa-circle-o"> Approve Quotations</router-link></li>                   
                     </ul>
                 </li>
+                  <li class="treeview">
+                    <a href="#"><i class="fa fa-recycle"></i> <span>Asset Disposal</span>
+                        <span class="pull-right-container">
+                <i class="fa fa-angle-left pull-right"></i>
+              </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li><router-link to="/asset-disposal" class="fa fa-circle-o"> Disposals</router-link></li> 
+                        <li><router-link to="/bidding" class="fa fa-circle-o"> Biddings</router-link></li>
+                        <li><router-link to="/bid-award" class="fa fa-circle-o"> Bid Awards</router-link></li>                   
+                    </ul>
+                </li>
 
                 <li class="treeview">
                     <a href="#"><i class="fa fa-cogs"></i> <span>Settings</span>
@@ -71,6 +83,7 @@
                         <li><router-link to="/all-assets" class="fa fa-circle-o"> Assets</router-link></li>
                         <li><router-link to="/items" class="fa fa-circle-o"> Stock Items</router-link></li>
                          <li><router-link to="/services" class="fa fa-circle-o"> Services</router-link></li>
+                           <li><router-link to="/payment-modes" class="fa fa-circle-o"> Payment Modes</router-link></li>
                     </ul>
                 </li>
 

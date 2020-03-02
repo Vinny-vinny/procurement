@@ -67,7 +67,8 @@
                       <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group" v-if="show_stock">
-                                    <label>Stock Items</label>
+                                   <fieldset class="the-fieldset">
+                               <legend class="the-legend"><label class="fyr">Stock Items</label></legend>
                                     <table style="width:100%">
                                         <tr>
                                             <th>Item</th>
@@ -82,7 +83,7 @@
                                         <model-select :options="all_stks"
                                         v-model="m.item_id"  
                                         @input="stk_id = m.item_id"                                             
-                                        class="i_p"
+                                        class="i_p_3 qq"
                                         >
                                         </model-select>
                                           </td>                                          
@@ -104,10 +105,12 @@
                                             </td>
                                         </tr>
                                     </table>
+                                  </fieldset>
                                        
                                 </div>
                                 <div class="form-group" v-if="show_asset">
-                                    <label>Assets</label>
+                                 <fieldset class="the-fieldset">
+                               <legend class="the-legend"><label class="fyr">Assets</label></legend>
                                     <table style="width:100%">
                                         <tr>
                                             <th>Item</th>
@@ -121,7 +124,7 @@
                                         <model-select :options="all_assets"
                                         v-model="m.item_id"  
                                         @input="stk_id = m.item_id"                                             
-                                        class="i_p"
+                                        class="i_p_3 qq"
                                         >
                                         </model-select>
                                           </td>
@@ -132,7 +135,7 @@
                                                 <input type="text" class="form-control item" v-model="m.uom" disabled>
                                                 </td>                                    
                                                        <td> 
-                                                        <input type="text" class="form-control item" v-model="m.scheduled_date" disabled>
+                                                        <input type="text" class="form-control item" v-model="m.scheduled_date" disabled></td>
                                                        
                                             <td>
                                             <i class="fa fa-minus-circle remove" @click="removeAsset(i)"
@@ -142,6 +145,7 @@
                                             </td>
                                         </tr>
                                     </table>
+                                  </fieldset>
                                 </div>
                                 <div class="form-group" v-if="show_service">
                                     <fieldset class="the-fieldset">
@@ -159,7 +163,7 @@
                                          <model-select :options="all_services"
                                         v-model="m.item_id" 
                                         @input="stk_id = m.item_id"                    
-                                        class="i_p"
+                                        class="i_p qq"
                                         >
                                         </model-select>
                                         </td>
@@ -371,6 +375,25 @@
                       }                       
                     }
                 }
+// item_asset: [{item_id: '',qty:'',uom: '',scheduled_date:''}],
+                 if (this.filtered_assets.length) {                  
+                    if (this.form.item_asset[0]['item_id'] =="") {                     
+                     this.form.item_asset.splice(this.form.item_asset[0],1);
+                    }                    
+                    if (this.form.item_asset.length ==0) {
+
+                    this.filtered_assets.forEach((asset) =>{                     
+                           this.form.item_asset.push({
+                            'item_id': asset['id'],                           
+                            'qty': asset['qty'],
+                            'uom': asset['uom'],
+                            'rate': asset['rate'],
+                            'scheduled_date': asset['scheduled_date']                        
+                        })                       
+                     
+                    })
+                }
+                }
              
             }
 
@@ -425,7 +448,26 @@
                        }
                       }                       
                     }                 
-                 }              
+                 } 
+
+                  if (this.filtered_stocks.length) {                  
+                    if (this.form.item_stock[0]['item_id'] =="") {                     
+                     this.form.item_stock.splice(this.form.item_stock[0],1);
+                    }                    
+                    if (this.form.item_stock.length ==0) {
+
+                    this.filtered_stocks.forEach((stk) =>{                     
+                           this.form.item_stock.push({
+                            'item_id': stk['id'],                           
+                            'qty': stk['qty'],
+                            'uom': stk['uom'],
+                            'rate': stk['rate'],
+                            'scheduled_date': stk['scheduled_date']                        
+                        })                       
+                     
+                    })
+                }
+                }             
               }
 
                if (this.form.item_type =='service') {   
@@ -481,7 +523,25 @@
                        }
                       }                       
                     }                 
-                 }              
+                 }
+
+                 if (this.filtered_services.length) {                  
+                    if (this.form.item_service[0]['item_id'] =="") {                     
+                     this.form.item_service.splice(this.form.item_service[0],1);
+                    }                    
+                    if (this.form.item_service.length ==0) {
+
+                    this.filtered_services.forEach((service) =>{                     
+                           this.form.item_service.push({
+                            'item_id': service['id'],                           
+                            'description': service['description'],
+                            'amount': service['amount'],                  
+                            'scheduled_date': service['scheduled_date']                        
+                        })                       
+                     
+                    })
+                }
+                }              
               }
               })
 
@@ -646,5 +706,7 @@
 </script>
 
 <style scoped>
-
+.qq{
+  margin-bottom:5px;
+}
 </style>

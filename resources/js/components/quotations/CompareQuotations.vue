@@ -10,7 +10,17 @@
                 </div>
                 <div class="card-body">                  
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
+                                 <div class="form-group">
+                            <label>Enquiry#</label>
+                            <model-select :options="all_enquiries"
+                                        v-model="enquiry_id"                           
+                                         @input="getQuotes()"
+                                        >
+                               </model-select>
+                          </div>
+                            </div>
+                              <div class="col-md-4">
                                  <div class="form-group">
                             <label>Quotation</label>
                             <model-select :options="quotations"
@@ -20,7 +30,7 @@
                                </model-select>
                         </div>
                             </div>
-                              <div class="col-md-6">
+                              <div class="col-md-4">
                                   <div class="form-group">
                                       <label>Supplier</label>
                                       <input type="text" class="form-control" v-model="supplier">
@@ -29,7 +39,7 @@
                         </div>
 
                         <div class="row">
-                           <div class="col-md-12"v-if="filtered_stocks.length">
+                           <div class="col-md-12"v-if="filtered_stocks.length && setUp">
                             <fieldset class="the-fieldset">
                                <legend class="the-legend"><label class="fyr">Stock Items</label></legend>
                                <table class="table table-striped">
@@ -58,7 +68,7 @@
                         </div>
                         <br><br>
                          <div class="row">
-                           <div class="col-md-12"v-if="filtered_assets.length">
+                           <div class="col-md-12"v-if="filtered_assets.length && setUp">
                             <fieldset class="the-fieldset">
                                <legend class="the-legend"><label class="fyr">Assets</label></legend>
                                <table class="table table-striped">
@@ -89,7 +99,7 @@
 
                            <br><br>
                          <div class="row">
-                           <div class="col-md-12"v-if="filtered_services.length">
+                           <div class="col-md-12"v-if="filtered_services.length && setUp">
                             <fieldset class="the-fieldset">
                                <legend class="the-legend"><label class="fyr">Services</label></legend>
                                <table class="table table-striped">
@@ -134,6 +144,7 @@
             return {
               quotations:[],
               quotation_id:'',
+              enquiry_id:'',
               supplier:'' ,
               suppliers:{},
               all_quotes:{},
@@ -142,14 +153,21 @@
               services:{},
               filtered_stocks:[],
               filtered_assets:[],
-              filtered_services:[]         
+              filtered_services:[],
+              enquiries:{},
+              all_enquiries:[]         
             
             }
         },
         created(){
         this.getQuotations();
         },
-        methods:{
+        computed:{
+       setUp(){     
+          return this.quotation_id !=='' && this.enquiry_id !=='';
+          }
+        },
+        methods:{         
          getQuotations(){
             axios.get('quotations')
             .then(res => { 
@@ -158,17 +176,35 @@
             this.assets = res.data.assets;
             this.stocks = res.data.stock_items;
             this.services = res.data.services;
+            this.enquiries = res.data.filtered_enquiries;
 
-             res.data.filtered_quotations.forEach(s => {
+            this.enquiries.forEach(enq => {
+             this.all_enquiries.push({
+              'value': enq.id,
+              'text': enq.enquiry_no
+             }) 
+            })           
+         
+            })
+         },
+        getQuotes(){
+        this.quotations = [];
+        this.quotation_id = '';
+         let quotes = this.all_quotes.filter(q => q.enquiry_id == this.enquiry_id);
+         if (quotes.length) {
+            quotes.forEach(s => {
                 this.quotations.push({
                     'value': s.id,
                     'text': s.quote_no
                 })
              })
-         
-            })
+         }
          },
          getSupplier(){
+          if (this.enquiry_id =='') {
+            this.quotation_id = '';
+            return this.$toastr.e('Please select enquiry# first.')
+          }
             let quote = this.all_quotes.find(q => q.id == this.quotation_id);
             this.supplier = this.suppliers.find(s => s.id == quote.supplier_id).name;
             this.filtered_stocks = [];

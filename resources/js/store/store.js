@@ -20,7 +20,11 @@ export default new Vuex.Store({
         enquiries:{},
         quotations:{},
         purchase_orders:{},
-        services:{}
+        services:{},
+        disposals:{},
+        bids:{},
+        modes:{},
+        awards:{}
     },
     mutations:{
      pathTo(state, to) {
@@ -71,6 +75,18 @@ export default new Vuex.Store({
        },
        updateService(state,service){
         state.services = service;
+       },
+       updateDisposal(state,disposal){
+       state.disposals = disposal;
+       },
+       updateMode(state,mode){
+       state.modes = mode;
+       },
+       updateBid(state,bid){
+        state.bids = bid;
+       },
+       updateAward(state,award){
+        state.awards = award;
        }
     },
     actions:{
@@ -121,6 +137,18 @@ export default new Vuex.Store({
        },
        updateService({commit},service){
         commit('updateService',service);
+       },
+       updateDisposal({commit},disposal){
+        commit('updateDisposal',disposal);
+       },
+       updateMode({commit},mode){
+        commit('updateMode',mode);
+       },
+       updateBid({commit},bid){
+        commit('updateBid',bid);
+       },
+       updateAward({commit},award){
+        commit('updateAward',award);
        }
     }
 })

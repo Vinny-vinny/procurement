@@ -23,7 +23,7 @@ class PurchaseOrderResource extends JsonResource
             'item_type' => $this->item_type,
             'item_stock' => json_decode($this->item_stock),
             'item_asset' => json_decode($this->item_asset),
-            'item_service' => json_decode($this->item_services),
+            'item_service' => json_decode($this->item_service),
             'po_description' => $this->po_description,
             'supplier_id' => $this->supplier_id
         ];

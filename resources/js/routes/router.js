@@ -19,7 +19,13 @@ import Quotation from "../components/quotations/Index";
 import PurchaseOrder from "../components/pos/po/Index";
 import Service from "../components/services/Index";
 import CompareQuotations from "../components/quotations/CompareQuotations";
-
+import AssetDisposal from "../components/assetdisposal/Index";
+import PaymentMode from "../components/payments/Index";
+import BiddingForm from "../components/assetdisposal/BiddingForm";
+import BidAward from "../components/assetdisposal/AwardForm";
+import Bidding from "../components/assetdisposal/biddings/Index";
+import Awards from "../components/assetdisposal/awards/Index";
+ 
 Vue.use(VueRouter);
 function guard(to, from, next) {
     if (User.loggedIn()) {
@@ -48,6 +54,12 @@ const routes = [
     {path:'/purchase-order',component:PurchaseOrder, beforeEnter: guard},
     {path:'/services',component:Service, beforeEnter: guard},
     {path:'/approve-quotations',component:CompareQuotations, beforeEnter: guard},
+    {path:'/asset-disposal',component:AssetDisposal, beforeEnter: guard},
+    {path:'/payment-modes',component:PaymentMode, beforeEnter: guard},
+    {path:'/bidding/:id',component:BiddingForm, beforeEnter: guard},
+    {path:'/bid-award/:id',component:BidAward, beforeEnter: guard},
+    {path:'/bidding',component:Bidding, beforeEnter: guard},
+    {path:'/bid-award',component:Awards, beforeEnter: guard},
 
 ];
 

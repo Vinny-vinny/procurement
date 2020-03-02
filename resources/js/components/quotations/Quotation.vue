@@ -66,7 +66,7 @@
                                        <model-select :options="all_stks"
                                         v-model="m.item_id"  
                                         @input="stk_id = m.item_id"                                             
-                                        class="i_p_4"
+                                        class="i_p_4 qq"
                                         >
                                         </model-select>
                                         </td>                                          
@@ -118,7 +118,7 @@
                                           <model-select :options="all_assets"
                                         v-model="m.item_id"  
                                         @input="stk_id = m.item_id"                                             
-                                        class="i_p_4"
+                                        class="i_p_4 qq"
                                         >
                                         </model-select>
                                         </td>
@@ -167,7 +167,7 @@
                                          <model-select :options="all_services"
                                         v-model="m.item_id" 
                                         @input="stk_id = m.item_id"                    
-                                        class="i_p_4"
+                                        class="i_p_4 qq"
                                         >
                                         </model-select>
                                         </td>
@@ -221,7 +221,7 @@
                     item_type:'',                  
                     item_stock: [{item_id: '',qty:'',uom: '',scheduled_date:'',rate:'',delivery_date:'',max_qty:''}],
                     item_asset: [{item_id: '',qty:'',uom: '',scheduled_date:'',rate:'',delivery_date:'',max_qty:''}],
-                    item_service: [{item_id: '',name:'',description: '',amount:'',scheduled_date:'',rate:'',delivery_date:''}],
+                    item_service: [{item_id: '',description: '',amount:'',scheduled_date:'',rate:'',delivery_date:''}],
                     id:''
                 },
                 edit_quotation: this.edit,
@@ -283,8 +283,7 @@
              for(let i=0;i<this.filtered_services.length;i++){
                if (Object.values(this.form.item_service[0])[0] !== '') {
                     for (let j = 0; j < this.form.item_service.length; j++) {
-                        if (this.form.item_service[j]['item_id'] == this.filtered_services[i]['id']) {
-                            this.form.item_service[j]['name'] = this.filtered_services[i]['name']
+                        if (this.form.item_service[j]['item_id'] == this.filtered_services[i]['id']) {                          
                             this.form.item_service[j]['amount'] = this.filtered_services[i]['amount'] 
                             this.form.item_service[j]['description'] = this.filtered_services[i]['description'] 
                             this.form.item_service[j]['scheduled_date'] = this.filtered_services[i]['scheduled_date']  
@@ -442,6 +441,28 @@
                         }
                     }
                 }
+
+
+                   if (this.filtered_assets.length) {                  
+                    if (this.form.item_asset[0]['item_id'] =="") {                     
+                     this.form.item_asset.splice(this.form.item_asset[0],1);
+                    }                    
+                    if (this.form.item_asset.length ==0) {
+
+                    this.filtered_assets.forEach((asset) =>{                     
+                           this.form.item_asset.push({
+                            'item_id': asset['id'],                           
+                            'qty': asset['qty'],
+                            'uom': asset['uom'],
+                            'rate': '',
+                            'scheduled_date': asset['scheduled_date'],
+                            'delivery_date': '',
+                             'max_qty': ''                       
+                        })                       
+                     
+                    })
+                }
+                }
              
             }
             if (enquiry.item_stock[0]['item_id'] !==null) {
@@ -466,6 +487,28 @@
                         }
                     }
                 } 
+                // item_stock: [{item_id: '',qty:'',uom: '',scheduled_date:'',rate:'',delivery_date:'',max_qty:''}],
+
+                   if (this.filtered_stocks.length) {                  
+                    if (this.form.item_stock[0]['item_id'] =="") {                     
+                     this.form.item_stock.splice(this.form.item_stock[0],1);
+                    }                    
+                    if (this.form.item_stock.length ==0) {
+
+                    this.filtered_stocks.forEach((stk) =>{                     
+                           this.form.item_stock.push({
+                            'item_id': stk['id'],                           
+                            'qty': stk['qty'],
+                            'uom': stk['uom'],
+                            'rate': '',
+                            'scheduled_date': stk['scheduled_date'],
+                            'delivery_date': '',
+                             'max_qty': ''                       
+                        })                       
+                     
+                    })
+                }
+                }
           
             }
 
@@ -482,8 +525,7 @@
                                 'text': this.services[j]['name']  
                             })
                             this.filtered_services.push({
-                                'id' : filtered_services[k]['item_id'],
-                                'name' : filtered_services[k]['name'],
+                                'id' : filtered_services[k]['item_id'],                        
                                 'amount' : filtered_services[k]['amount'],
                                 'description' : filtered_services[k]['description'],
                                 'scheduled_date' : filtered_services[k]['scheduled_date']                                
@@ -491,6 +533,26 @@
                         }
                     }
                 } 
+
+                if (this.filtered_services.length) {                  
+                    if (this.form.item_service[0]['item_id'] =="") {                     
+                     this.form.item_service.splice(this.form.item_service[0],1);
+                    }                    
+                    if (this.form.item_service.length ==0) {
+
+                    this.filtered_services.forEach((service) =>{                     
+                           this.form.item_service.push({
+                            'item_id': service['id'],                           
+                            'description': service['description'],
+                            'amount': service['amount'],
+                            'rate': '',
+                            'scheduled_date': service['scheduled_date'],
+                            'delivery_date': '',                                                
+                        })                       
+                     
+                    })
+                }
+                }
           
             }
             },
@@ -527,7 +589,7 @@
             this.form.item_asset.splice(i,1);
             },
             addService(i){
-            this.form.item_service.push({item_id: '',name:'',description: '',amount:'',scheduled_date:'',rate:'',delivery_date:''});            
+            this.form.item_service.push({item_id: '',description: '',amount:'',scheduled_date:'',rate:'',delivery_date:''});            
             },
             removeService(i){
             this.form.item_service.splice(i,1);
@@ -572,7 +634,7 @@
                 } 
 
 
-                 if (Object.values(this.form.item_service[0])[0] !== '' || Object.values(this.form.item_service[0])[1] !== '' || Object.values(this.form.item_service[0])[2] !== '' || Object.values(this.form.item_service[0])[3] !== '' || Object.values(this.form.item_service[0])[4] !== '' || Object.values(this.form.item_service[0])[4] !== '' || Object.values(this.form.item_service[0])[5] !== '' || Object.values(this.form.item_service[0])[6] !== '') {
+                 if (Object.values(this.form.item_service[0])[0] !== '' || Object.values(this.form.item_service[0])[1] !== '' || Object.values(this.form.item_service[0])[2] !== '' || Object.values(this.form.item_service[0])[3] !== '' || Object.values(this.form.item_service[0])[4] !== '' || Object.values(this.form.item_service[0])[4] !== '' || Object.values(this.form.item_service[0])[5] !== '') {
                     for (let i = 0; i < this.form.item_service.length; i++) {
                         if (this.form.item_service[i]['item_id'] === '' || this.form.item_service[i]['rate'] === '' || this.form.item_service[i]['delivery_date'] === '') {
                             return this.$toastr.e('Please all Services fields are required.');
@@ -584,7 +646,7 @@
                     service_obj[this.form.item_service[i]['item_id']] = this.form.item_service[i];
                 } 
                 else if(service_obj[this.form.item_service[i]['item_id']]){
-                  return this.$toastr.e(`Sorry, You have entered an item ${service_obj[this.form.item_service[i]['item_id']]['name']} twice,Please check before proceeding.`);
+                  return this.$toastr.e(`Sorry, You have entered an item ${service_obj[this.form.item_service[i]['item_id']]['description']} twice,Please check before proceeding.`);
                 } 
             }
 
@@ -638,7 +700,9 @@
 
 <style scoped>
 .i_p_4{
-    width: 180px !important;
-    
+    width: 180px !important;    
+}
+.qq{
+  margin-bottom:5px;
 }
 </style>
