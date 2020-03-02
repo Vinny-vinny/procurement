@@ -58,7 +58,7 @@
                         <span class="pull-right-container">
                 <i class="fa fa-angle-left pull-right"></i>
               </span>
-                    </a>
+                 </a>
                     <ul class="treeview-menu">
                         <li><router-link to="/asset-disposal" class="fa fa-circle-o"> Disposals</router-link></li> 
                         <li><router-link to="/bidding" class="fa fa-circle-o"> Biddings</router-link></li>
