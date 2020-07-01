@@ -22,7 +22,7 @@ class BiddingController extends Controller
             'assets' => Machine::all(),
             'disposals' => AssetDisposalResource::collection(AssetDisposal::all()),
             'payment_modes' => PaymentMode::all(),
-            'biddings' => BiddingResource::collection(Bidding::all())
+            'biddings' => BiddingResource::collection(Bidding::all()),            
         ]);
     }
     /**

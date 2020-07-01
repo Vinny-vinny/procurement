@@ -32,6 +32,8 @@
 </template>
 
 <script>
+    import services from "../../store/modules/services";
+
     export default {
         props:['edit'],
         data(){
@@ -56,6 +58,7 @@
                 delete this.form.id;
                 axios.post('services',this.form)
                     .then(res => {
+                        this.$store.state.services.all_my_services.unshift(res.data);
                         eventBus.$emit('listServices',res.data)
                     })
                     .catch(error => error.response)
@@ -73,7 +76,7 @@
             },
             listen(){
                 if (this.edit){
-                    this.form = this.$store.state.services
+                    this.form = this.$store.state.services.service
                 }
             },
         }

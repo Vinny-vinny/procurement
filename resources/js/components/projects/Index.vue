@@ -4,56 +4,81 @@
         <section class="content">
             <!-- Default box -->
             <div class="box">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Projects</h3>
-                    <button class="btn btn-success pull-right" @click="importProjects()" :disabled="importing">{{importing ? 'Importing...' : 'Import from Sage'}}</button>
-                </div>
                 <div class="box-body">
-                    <table class="table table-striped dt">
-                        <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Code</th>
-                            <th>Name</th>
-                            <th>Description</th>
-
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr v-for="project in tableData">
-                            <td>{{project.id}}</td>
-                            <td>{{project.code}}</td>
-                            <td>{{project.name}}</td>
-                            <td>{{project.description}}</td>
-                        </tr>
-                        </tbody>
-                    </table>
+                    <v-app id="inspire">
+                        <v-card>
+                            <v-card-title>
+                                Projects
+                                <v-spacer></v-spacer>
+                                <v-text-field
+                                    v-model="search"
+                                    append-icon="mdi-magnify"
+                                    label="Search"
+                                    single-line
+                                    hide-details
+                                ></v-text-field>
+                                <v-spacer></v-spacer>
+                                <v-btn small color="indigo" dark @click="importProjects()">{{importing ? 'Importing...' : 'Import from Sage'}}
+                                </v-btn>
+                            </v-card-title>
+                            <v-data-table
+                                v-model="selected"
+                                :headers="headers"
+                                :items="items"
+                                :single-select="singleSelect"
+                                :sort-by.sync="sortBy"
+                                :sort-desc.sync="sortDesc"
+                                :search="search"
+                                item-key="name"
+                                class="elevation-1"
+                                :footer-props="{
+                              showFirstLastPage: true,
+                              firstIcon: 'mdi-arrow-collapse-left',
+                              lastIcon: 'mdi-arrow-collapse-right',
+                              prevIcon: 'mdi-minus',
+                              nextIcon: 'mdi-plus'
+                              }"
+                            >
+                            </v-data-table>
+                            <center>
+                                <pulse-loader :loading="loading" :color="color" :size="size"></pulse-loader>
+                            </center>
+                        </v-card>
+                    </v-app>
                 </div>
             </div>
         </section>
     </div>
 </template>
 <script>
-
+    import datatable from "../../mixins/datatable";
+    import {mapGetters} from "vuex";
+    import FieldDefs from "./FieldDefs";
+    import spinner from "../../mixins/spinner"
     export default {
+        mixins:[datatable,spinner],
         data(){
             return {
-                tableData: [],
                importing:false,
-
-
+               headers: FieldDefs
             }
         },
         created(){
             this.getProjects();
-        },        
+        },
+        computed:{
+            ...mapGetters({
+                tableData:'all_projects'
+            })
+        },
+        watch:{
+            tableData(){
+                this.getItems();
+            }
+        },
         methods:{
             getProjects(){
-                axios.get('projects')
-                    .then(res => {
-                      this.tableData = res.data
-                      this.initDatable();
-                    })
+                this.$store.dispatch('my_projects');
             },
             importProjects(){
                 this.importing = true;
@@ -64,26 +89,7 @@
                         this.$router.go();
                     })
             },
-
-            initDatable(){
-                setTimeout(()=>{
-                    $('.dt').DataTable({
-                        "pagingType": "full_numbers",
-                        "lengthMenu": [
-                            [10, 25, 50, -1],
-                            [10, 25, 50, "All"]
-                        ],
-                        order: [[ 0, 'asc' ], [ 3, 'desc' ]],
-                        responsive: true,
-                        destroy: true,
-                        retrieve:true,
-                        autoFill: true,
-                        colReorder: true,
-
-                    });
-                },1000)
-            },
-        },
+        }
 
     }
 </script>

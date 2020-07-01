@@ -5,34 +5,52 @@
         <section class="content" v-if="!add_service">
             <!-- Default box -->
             <div class="box">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Services</h3>
-                    <button class="btn btn-primary pull-right" @click="add_service=true">Add Service</button>
-                </div>
                 <div class="box-body">
-                    <table class="table table-striped dt">
-                        <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Name</th>
-                            <th>Description</th>
-                            <th>Amount</th>
-                            <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr v-for="service in tableData">
-                            <td>{{service.id}}</td>
-                            <td>{{service.name}}</td>
-                            <td>{{service.description}}</td>
-                            <td>{{service.amount | number}}</td>
-                            <td>
-                                <button class="btn btn-success btn-sm" @click="editService(service)"><i class="fa fa-edit"></i></button>
-                                <button class="btn btn-danger btn-sm" @click="deleteService(service.id)"><i class="fa fa-trash"></i></button>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+                    <v-app id="inspire">
+                        <v-card>
+                            <v-card-title>
+                                Services
+                                <v-spacer></v-spacer>
+                                <v-text-field
+                                    v-model="search"
+                                    append-icon="mdi-magnify"
+                                    label="Search"
+                                    single-line
+                                    hide-details
+                                ></v-text-field>
+                                <v-spacer></v-spacer>
+                                <v-btn small color="indigo" dark @click="add_service=true">Add Service
+                                </v-btn>
+                            </v-card-title>
+                            <v-data-table
+                                v-model="selected"
+                                :headers="headers"
+                                :items="items"
+                                :single-select="singleSelect"
+                                :sort-by.sync="sortBy"
+                                :sort-desc.sync="sortDesc"
+                                :search="search"
+                                item-key="name"
+                                class="elevation-1"
+                                :footer-props="{
+                              showFirstLastPage: true,
+                              firstIcon: 'mdi-arrow-collapse-left',
+                              lastIcon: 'mdi-arrow-collapse-right',
+                              prevIcon: 'mdi-minus',
+                              nextIcon: 'mdi-plus'
+                              }"
+                            >
+                                <template v-slot:item.actions="{ item }">
+                                    <v-icon class="outlined" @click="editService(item)">mdi-pencil</v-icon>
+                                    <v-icon   class="outlined-trash"  @click="deleteService(item.id)">mdi-delete</v-icon>
+
+                                </template>
+                            </v-data-table>
+                            <center>
+                                <pulse-loader :loading="loading" :color="color" :size="size"></pulse-loader>
+                            </center>
+                        </v-card>
+                    </v-app>
                 </div>
             </div>
         </section>
@@ -41,26 +59,36 @@
 <script>
 
     import Service from "./Service";
+    import datatable from "../../mixins/datatable";
+    import {mapGetters} from "vuex";
+    import FieldDefs from "./FieldDefs";
+    import spinner from "../../mixins/spinner";
     export default {
+        mixins:[datatable,spinner],
         data(){
             return {
-                tableData: [],
                 add_service: false,
-                editing: false
+                editing: false,
+                headers: FieldDefs
             }
         },
         created(){
             this.listen();
             this.getServices();
-        },       
+        },
+        computed:{
+            ...mapGetters({
+                tableData:'all_services'
+            })
+        },
+        watch:{
+            tableData(){
+                this.getItems();
+            }
+        },
         methods:{
             getServices(){
-                axios.get('services')
-                    .then(res => {
-                        this.tableData = res.data
-                        this.initDatable()
-                    })
-                    .catch(error => Exception.handle(error))
+                this.$store.dispatch('my_services');
             },
             editService(service){
                 this.$store.dispatch('updateService',service)
@@ -82,14 +110,12 @@
             },
             listen(){
                 eventBus.$on('listServices',(service) =>{
-                    this.tableData.unshift(service);
+                    this.getItems();
                     this.add_service =false;
-                    this.initDatable();
                 });
                 eventBus.$on('cancel',()=>{
                     this.add_service = false;
                     this.editing = false;
-                    this.initDatable();
                 });
                 eventBus.$on('updateService',(service)=>{
                     this.add_service = false;
@@ -100,26 +126,8 @@
                         }
                     }
                     this.tableData.unshift(service);
-                    this.initDatable();
-                });
-            },
-            initDatable(){
-                setTimeout(()=>{
-                    $('.dt').DataTable({
-                        "pagingType": "full_numbers",
-                        "lengthMenu": [
-                            [10, 25, 50, -1],
-                            [10, 25, 50, "All"]
-                        ],
-                        order: [[ 0, 'asc' ], [ 3, 'desc' ]],
-                        responsive: true,
-                        destroy: true,
-                        retrieve:true,
-                        autoFill: true,
-                        colReorder: true,
 
-                    });
-                },1000)
+                });
             },
         },
         components:{

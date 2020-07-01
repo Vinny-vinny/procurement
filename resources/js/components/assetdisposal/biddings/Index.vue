@@ -29,6 +29,7 @@
                             <td>{{bid.payment_mode}}</td>
                             <td>
                              <button class="btn btn-info btn-sm" @click="editDisposal(bid)"><i class="fa fa-eye"></i></button>
+                             <button class="btn btn-success btn-sm" @click="disposalForm(bid)"><i class="fa fa-eye"> Disposal Form</i></button>
                                 
                             </td>
                         </tr>
@@ -46,7 +47,8 @@
         data(){
             return {
                 tableData: [],
-                show_bid: false        
+                show_bid: false,
+                disposal_form:false        
             }
         },
         created(){
@@ -67,7 +69,13 @@
                     .then(() =>{                       
                         this.show_bid=true;
                     })
-            },          
+            },    
+            disposalForm(bid){
+             this.$store.dispatch('updateBid',bid)
+                    .then(() =>{                       
+                        this.disposal_form=true;
+                    })
+            },      
             listen(){
                 eventBus.$on('listBid',(bid) =>{
                     this.tableData.unshift(bid);

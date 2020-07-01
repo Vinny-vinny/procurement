@@ -43,6 +43,7 @@ Route::apiResource('quotations','QuotationController');
 Route::apiResource('purchase-order','PurchaseOrderController');
 Route::apiResource('services','ServicesController');
 Route::apiResource('users','UserController');
+Route::apiResource('uom','UmoController');
 Route::apiResource('asset-disposal','AssetDisposalController');
 Route::apiResource('payment-modes','PaymentModeController');
 Route::apiResource('bidding','BiddingController');
@@ -54,6 +55,8 @@ Route::group([
 
 ], function () {
     Route::post('login', 'AuthController@login');
+    Route::post('signin', 'AuthController@signIn');
+    Route::get('signout', 'AuthController@signout');
     Route::post('logout', 'AuthController@logout');
     Route::post('refresh', 'AuthController@refresh');
     Route::post('me', 'AuthController@me');

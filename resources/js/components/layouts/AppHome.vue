@@ -21,8 +21,23 @@
             }
         },
         created(){
+
             if (!User.loggedIn()){
-                  this.$router.push('/login');
+                if ($cookies.isKey('auth_email')){
+                    axios.post('/auth/signin',{email:$cookies.get('auth_email')})
+                        .then(res => {
+                            if (res.data==='nouser'){
+                                this.$toastr.e(`Sorry, Email ${$cookies.get('auth_email')} does not exits.`)
+                                setTimeout(()=>{
+                                    window.location.href = dashboad_url;
+                                },1500)
+                            }else{
+                                return User.responseAfterLogin(res)
+                            }
+                        })
+                }else{
+                    window.location.href = dashboad_url;
+                }
             }
         },
       components:{

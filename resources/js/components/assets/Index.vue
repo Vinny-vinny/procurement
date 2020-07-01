@@ -5,34 +5,55 @@
         <section class="content" v-if="!add_machine">
             <!-- Default box -->
             <div class="box">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Assets</h3>
-                    <button class="btn btn-success pull-right" @click="importMachines()" :disabled="importing">{{importing ? 'Importing...' : 'Import from Sage'}}</button>
-                    <button class="btn btn-primary pull-right mr" @click="add_machine=true">Add Asset</button>
-                    </div>
                 <div class="box-body">
-                    <table class="table table-striped dt">
-                        <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Code</th>
-                            <th>Description</th>
-                            <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr v-for="machine in tableData">
-                            <td>{{machine.id}}</td>
-                            <td>{{machine.code}}</td>
-                            <td>{{machine.description}}</td>
+                    <v-app id="inspire">
+                        <v-card>
+                            <v-card-title>
+                                Assets
+                                <v-spacer></v-spacer>
+                                <v-text-field
+                                    v-model="search"
+                                    append-icon="mdi-magnify"
+                                    label="Search"
+                                    single-line
+                                    hide-details
+                                ></v-text-field>
+                                <v-spacer></v-spacer>
+                                <v-btn small color="indigo" dark @click="add_machine=true">Add Asset
+                                </v-btn>
+                                <v-spacer></v-spacer>
+                                <v-btn small color="indigo" dark @click="importMachines()">{{importing ? 'Importing...' : 'Import from Sage'}}
+                                </v-btn>
+                            </v-card-title>
+                            <v-data-table
+                                v-model="selected"
+                                :headers="headers"
+                                :items="items"
+                                :single-select="singleSelect"
+                                :sort-by.sync="sortBy"
+                                :sort-desc.sync="sortDesc"
+                                :search="search"
+                                item-key="name"
+                                class="elevation-1"
+                                :footer-props="{
+                              showFirstLastPage: true,
+                              firstIcon: 'mdi-arrow-collapse-left',
+                              lastIcon: 'mdi-arrow-collapse-right',
+                              prevIcon: 'mdi-minus',
+                              nextIcon: 'mdi-plus'
+                              }"
+                            >
+                                <template v-slot:item.actions="{ item }">
+                                    <v-icon class="outlined" @click="editMachine(item)">mdi-pencil</v-icon>
+                                    <v-icon   class="outlined-trash"  @click="deleteMachine(item.id)">mdi-delete</v-icon>
 
-                            <td>
-                                <button class="btn btn-success btn-sm" @click="editMachine(machine)"><i class="fa fa-edit"></i></button>
-                                <button class="btn btn-danger btn-sm" @click="deleteMachine(machine.id)"><i class="fa fa-trash"></i></button>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+                                </template>
+                            </v-data-table>
+                            <center>
+                                <pulse-loader :loading="loading" :color="color" :size="size"></pulse-loader>
+                            </center>
+                        </v-card>
+                    </v-app>
                 </div>
             </div>
         </section>
@@ -40,30 +61,37 @@
 </template>
 <script>
     import Machines from "./Assets";
+    import datatable from "../../mixins/datatable";
+    import {mapGetters} from "vuex";
+    import FieldDefs from "./FieldDefs";
+    import spinner from "../../mixins/spinner";
     export default {
+        mixins:[datatable,spinner],
         data(){
             return {
-                tableData: [],
                 add_machine: false,
                 editing: false,
-                importing: false
+                importing: false,
+                headers: FieldDefs
             }
         },
         created(){
-            this.listen();
             this.getMachines();
+            this.listen();
         },
-        mounted(){
-            this.initDatable();
+        computed:{
+            ...mapGetters({
+                tableData:'all_machines'
+            })
+        },
+        watch:{
+            tableData(){
+                this.getItems();
+            }
         },
         methods:{
             getMachines(){
-                axios.get('machines')
-                    .then(res => {
-                        this.tableData = res.data
-                        this.initDatable();
-                    })
-                    .catch(error => Exception.handle(error))
+                this.$store.dispatch('my_machines');
             },
             editMachine(machine){
                 this.$store.dispatch('updateMachine',machine)
@@ -98,15 +126,12 @@
             },
             listen(){
                 eventBus.$on('listMachines',(machine) =>{
-                    this.tableData.unshift(machine);
+                    this.getItems();
                     this.add_machine =false;
-                    this.initDatable();
                 });
                 eventBus.$on('cancel',()=>{
                     this.add_machine = false;
                     this.editing = false;
-                    this.initDatable();
-                    this.getMachines();
                 });
                 eventBus.$on('updateMachine',(machine)=>{
                     this.add_machine = false;
@@ -117,27 +142,9 @@
                         }
                     }
                     this.tableData.unshift(machine);
-                    this.initDatable();
                 });
             },
-            initDatable(){
-                setTimeout(()=>{
-                    $('.dt').DataTable({
-                        "pagingType": "full_numbers",
-                        "lengthMenu": [
-                            [10, 25, 50, -1],
-                            [10, 25, 50, "All"]
-                        ],
-                        order: [[ 0, 'asc' ], [ 3, 'desc' ]],
-                        responsive: true,
-                        destroy: true,
-                        retrieve:true,
-                        autoFill: true,
-                        colReorder: true,
 
-                    });
-                },1000)
-            },
         },
         components:{
           'all-asset':Machines

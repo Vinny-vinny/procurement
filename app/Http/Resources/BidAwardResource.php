@@ -18,7 +18,7 @@ class BidAwardResource extends JsonResource
             'id' => $this->id,
             'asset_details' => json_decode($this->asset_details),
             'ref_no' => $this->ref_no,
-            'disposal_no' => $this->disposal->disposal_no,
+            'disposal_no' => $this->disposal->disposal_no,        
             'created' => Carbon::parse($this->created_at)->format('d-m-Y')
         ];
     }

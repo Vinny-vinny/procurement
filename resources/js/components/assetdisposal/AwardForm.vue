@@ -66,7 +66,7 @@
                                             placeholder="Staff">
                                             <input type="text" class="form-control ite_m" v-model="m.staff_id" style="display:none">
                                         </td>                                                                            
-                                            <td>                                                                            
+                                            <td>                                                     
                                              <button class="btn btn-primary btn-sm" v-if="form.asset_details.length && asset_id && m.staff_id" @click="award(i)"> <i class="fa fa-trophy"></i>Award</button>
                                             </td>
                                         </tr>
@@ -114,7 +114,7 @@
         created(){
            this.getDetails();
            this.fetchDetails();
-           console.log(this.$route.params['id'])
+
               },
        methods:{
          award(i){
@@ -130,8 +130,7 @@
           })
         }  
        
-       let bids = this.bids.filter(b => b.disposal_id == this.$route.params['id']);
-       console.log(bids)
+       let bids = this.bids.filter(b => b.disposal_id == this.$route.params['id']);    
        this.form.asset_details=[];  
         for(let k=0;k<bids.length;k++){
          let asset_details = JSON.parse(bids[k]['asset_details']);
@@ -191,6 +190,13 @@
           this.awards = res.data.awards;
           this.assets = res.data.assets;
           this.users = res.data.users;
+
+          if (this.awards.find(award => award.disposal_id ==this.$route.params['id'])) {
+            this.$toastr.e('Sorry,This disposal has already been awarded.');
+            setTimeout(()=>{
+            this.$router.push('/asset-disposal');
+            },3000)
+           }  
          })
          },         
             saveAward(){ 
@@ -202,15 +208,16 @@
             } 
                    axios.post('bid-award',this.form)
                     .then(res => {
-                     console.log(res.data);
+                    //console.log(res.data);
                       //eventBus.$emit('listCategory',res.data)
+                      this.$router.push('/asset-disposal');
                     })
                     .catch(error => error.response)
             },
           
             cancel(){
-                eventBus.$emit('cancel')
-            },
+                 this.$router.push('/asset-disposal');
+                 },
            
         },
         components:{

@@ -3,8 +3,8 @@ class Token {
         const payload =this.payload(token);
 
         if(payload){
-
-            return payload.iss == base_url+"auth/login" || payload.iss == base_url+"auth/signup" ? true : false
+            return true;
+            //return payload.iss == base_url+"auth/login" || payload.iss == base_url+"auth/signup" ? true : false
         }
         return false;
     }

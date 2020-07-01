@@ -56,7 +56,12 @@
     export default {
         methods:{
             logout(){
-                User.logout();
+                axios.get('/auth/signout')
+                    .then(res=> {
+                        User.logout();
+                        window.location.href = dashboad_url+'/logout';
+                    })
+
             },
             username(){
                 return User.name();

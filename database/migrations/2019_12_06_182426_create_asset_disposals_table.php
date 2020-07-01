@@ -18,7 +18,8 @@ class CreateAssetDisposalsTable extends Migration
             $table->text('asset_details');
             $table->date('opening_date');
             $table->date('deadline_date'); 
-            $table->string('disposal_no');      
+            $table->string('disposal_no'); 
+            $table->integer('status')->default(1)->nullable();     
             $table->timestamps();
         });
     }

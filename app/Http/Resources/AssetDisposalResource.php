@@ -20,9 +20,10 @@ class AssetDisposalResource extends JsonResource
             'opening_date'=> $this->opening_date,
             'deadline_date'=> $this->deadline_date,
             'disposal_no'=> $this->disposal_no,
-            'date_opened'=> Carbon::parse($this->opening_date)->format('d-m-Y'),
-            'date_closed'=> Carbon::parse($this->deadline_date)->format('d-m-Y'),
-            'asset_details' => json_decode($this->asset_details)
+            'date_opened'=> Carbon::parse($this->opening_date)->format('d/m/Y H:m a'),
+            'date_closed'=> Carbon::parse($this->deadline_date)->format('d/m/Y H:m a'),
+            'asset_details' => json_decode($this->asset_details),
+            'status' => $this->status
         ];
     }
 }

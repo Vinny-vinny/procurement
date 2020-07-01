@@ -5,32 +5,52 @@
         <section class="content" v-if="!add_req_type">
             <!-- Default box -->
             <div class="box">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Requisition Types</h3>
-                    <button class="btn btn-primary pull-right" @click="add_req_type=true">Add Requisition Type</button>
-                </div>
                 <div class="box-body">
-                    <table class="table table-striped dt">
-                        <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Name</th>
-                            <th style="display: none">Name</th>
-                            <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr v-for="rq in tableData">
-                            <td>{{rq.id}}</td>
-                            <td>{{rq.name}}</td>
-                            <td style="display: none">{{rq.name}}</td>
-                            <td>
-                                <button class="btn btn-success btn-sm" @click="editReqType(rq)"><i class="fa fa-edit"></i></button>
-                                 <button class="btn btn-danger btn-sm" @click="deleteReqType(rq.id)"><i class="fa fa-trash"></i></button>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+                    <v-app id="inspire">
+                        <v-card>
+                            <v-card-title>
+                                Requisition Types
+                                <v-spacer></v-spacer>
+                                <v-text-field
+                                    v-model="search"
+                                    append-icon="mdi-magnify"
+                                    label="Search"
+                                    single-line
+                                    hide-details
+                                ></v-text-field>
+                                <v-spacer></v-spacer>
+                                <v-btn small color="indigo" dark @click="add_req_type=true">Add Requisition Type
+                                </v-btn>
+                            </v-card-title>
+                            <v-data-table
+                                v-model="selected"
+                                :headers="headers"
+                                :items="items"
+                                :single-select="singleSelect"
+                                :sort-by.sync="sortBy"
+                                :sort-desc.sync="sortDesc"
+                                :search="search"
+                                item-key="name"
+                                class="elevation-1"
+                                :footer-props="{
+                              showFirstLastPage: true,
+                              firstIcon: 'mdi-arrow-collapse-left',
+                              lastIcon: 'mdi-arrow-collapse-right',
+                              prevIcon: 'mdi-minus',
+                              nextIcon: 'mdi-plus'
+                              }"
+                            >
+                                <template v-slot:item.actions="{ item }">
+                                    <v-icon class="outlined" @click="editReqType(item)">mdi-pencil</v-icon>
+                                    <v-icon   class="outlined-trash"  @click="deleteReqType(item.id)">mdi-delete</v-icon>
+
+                                </template>
+                            </v-data-table>
+                            <center>
+                                <pulse-loader :loading="loading" :color="color" :size="size"></pulse-loader>
+                            </center>
+                        </v-card>
+                    </v-app>
                 </div>
             </div>
         </section>
@@ -38,26 +58,36 @@
 </template>
 <script>
     import ReqType from "./ReqType";
+    import datatable from "../../../mixins/datatable";
+    import {mapGetters} from "vuex";
+    import FieldDefs from "./FieldDefs";
+    import spinner from "../../../mixins/spinner";
     export default {
+        mixins:[datatable,spinner],
         data(){
             return {
-                tableData: [],
                 add_req_type: false,
-                editing: false
+                editing: false,
+                headers: FieldDefs
             }
         },
         created(){
             this.listen();
             this.getReqTypes();
         },
-        mounted(){
-            this.initDatable();
+        computed:{
+            ...mapGetters({
+                tableData:'all_req_types'
+            })
+        },
+        watch:{
+            tableData(){
+                this.getItems();
+            }
         },
         methods:{
             getReqTypes(){
-                axios.get('requisition-types')
-                    .then(res => this.tableData = res.data)
-                    .catch(error => Exception.handle(error))
+                this.$store.dispatch('my_req_types');
             },
             editReqType(req){
                 this.$store.dispatch('updateReqType',req)
@@ -79,14 +109,12 @@
             },
             listen(){
                 eventBus.$on('listReqTypes',(rq) =>{
-                    this.tableData.unshift(rq);
+                    this.getItems();
                     this.add_req_type =false;
-                    this.initDatable();
                 });
                 eventBus.$on('cancel',()=>{
                     this.add_req_type = false;
                     this.editing = false;
-                    this.initDatable();
                 });
                 eventBus.$on('updateReqType',(rq)=>{
                     this.add_req_type = false;
@@ -97,27 +125,9 @@
                         }
                     }
                     this.tableData.unshift(rq);
-                    this.initDatable();
                 });
             },
-            initDatable(){
-                setTimeout(()=>{
-                    $('.dt').DataTable({
-                        "pagingType": "full_numbers",
-                        "lengthMenu": [
-                            [10, 25, 50, -1],
-                            [10, 25, 50, "All"]
-                        ],
-                        order: [[ 0, 'asc' ], [ 3, 'desc' ]],
-                        responsive: true,
-                        destroy: true,
-                        retrieve:true,
-                        autoFill: true,
-                        colReorder: true,
 
-                    });
-                },1000)
-            },
         },
         components:{
             ReqType

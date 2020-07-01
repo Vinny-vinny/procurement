@@ -25,6 +25,7 @@ import BiddingForm from "../components/assetdisposal/BiddingForm";
 import BidAward from "../components/assetdisposal/AwardForm";
 import Bidding from "../components/assetdisposal/biddings/Index";
 import Awards from "../components/assetdisposal/awards/Index";
+import DisposalMemo from "../components/assetdisposal/disposalmemo/DisposalMemo";
  
 Vue.use(VueRouter);
 function guard(to, from, next) {
@@ -60,6 +61,7 @@ const routes = [
     {path:'/bid-award/:id',component:BidAward, beforeEnter: guard},
     {path:'/bidding',component:Bidding, beforeEnter: guard},
     {path:'/bid-award',component:Awards, beforeEnter: guard},
+    {path:'/disposal-memo',component:DisposalMemo, beforeEnter: guard},
 
 ];
 

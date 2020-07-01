@@ -96,13 +96,15 @@
                 disposal_no:'',
                 asset_id:'',
                 items:{},  
-                asset_details:[]              
+                asset_details:[],
+                all_bids:{}              
 
             }
         },
         created(){
            this.getDetails();       
            this.listen();
+
              },
          methods:{
          getDetails(){
@@ -113,6 +115,9 @@
           this.awards = res.data.awards;
           this.assets = res.data.assets;
           this.users = res.data.users;
+          this.all_bids = res.data.all_bids;
+  
+          
          })
          },      
           

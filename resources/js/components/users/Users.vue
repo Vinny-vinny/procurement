@@ -44,6 +44,7 @@
 
 <script>
     import datepicker from 'vuejs-datepicker';
+    import users from "../../store/modules/users";
     export default {
         props:['edit'],
         data(){
@@ -61,7 +62,7 @@
             }
         },
         created(){
-            this.listen();
+         this.listen();
         },
         methods:{
             saveUser(){
@@ -74,7 +75,10 @@
                     return this.$toastr.e('Password field cannot be empty.');
                 }
                 axios.post('users',this.form)
-                    .then(res => eventBus.$emit('listUsers',res.data))
+                    .then(res => {
+                        this.$store.state.users.all_my_users.unshift(res.data);
+                        eventBus.$emit('listUsers',res.data)
+                    })
                     .catch(error => error.response)
             },
             update(){
@@ -90,7 +94,7 @@
             },
             listen(){
                 if (this.edit){
-                    this.form = this.$store.state.users
+                  this.form = this.$store.state.users.user
                 }
             },
         },
@@ -100,6 +104,28 @@
     }
 </script>
 
-<style scoped>
-
+<style>
+    .v-icon.outlined {
+        border: 1px solid currentColor;
+        border-radius:50%;
+        height: 30px;
+        width: 30px;
+        background-color: #3c8dbc;
+        color: white;
+    }
+    .v-application .indigo{
+        background-color: #3c8dbc !important;
+        border-color: #3c8dbc !important;
+    }
+    .outlined-trash{
+        border: 1px solid currentColor;
+        border-radius:50%;
+        height: 30px;
+        width: 30px;
+        background-color: transparent;
+        color: white;
+    }
+    .v-menu__content.theme--light.menuable__content__active{
+        left: 833px !important;
+    }
 </style>

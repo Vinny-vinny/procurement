@@ -32,6 +32,8 @@
 </template>
 
 <script>
+    import parts from "../../store/modules/parts";
+
     export default {
         props:['edit'],
         data(){
@@ -55,7 +57,10 @@
             save(){
                 delete this.form.id;
                 axios.post('parts',this.form)
-                    .then(res => eventBus.$emit('listParts',res.data))
+                    .then(res =>{
+                        this.$store.state.parts.all_my_parts.unshift(res.data);
+                        eventBus.$emit('listParts',res.data)
+                    })
                     .catch(error => error.response)
             },
             update(){
@@ -71,7 +76,7 @@
             },
             listen(){
                 if (this.edit){
-                    this.form = this.$store.state.parts
+                    this.form = this.$store.state.parts.part
                 }
             },
         }

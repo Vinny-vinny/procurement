@@ -5,34 +5,52 @@
         <section class="content" v-if="!add_enquiry">
             <!-- Default box -->
             <div class="box">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Enquiries</h3>
-                    <button class="btn btn-primary pull-right" @click="add_enquiry=true">Add Enquiry</button>
-                </div>
                 <div class="box-body">
-                    <table class="table table-striped dt">
-                        <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Enquiry Date</th>
-                            <th>Title</th>
-                            <th>Description</th>
-                            <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr v-for="enquiry in tableData">
-                            <td>{{enquiry.enquiry_no}}</td>
-                             <td>{{enquiry.date_requested}}</td>
-                            <td>{{enquiry.title}}</td>
-                            <td>{{enquiry.description}}</td>
-                            <td>
-                                <button class="btn btn-success btn-sm" @click="editEnquiry(enquiry)"><i class="fa fa-edit"></i></button>
-                                <button class="btn btn-danger btn-sm" @click="deleteEnquiry(enquiry.id)"><i class="fa fa-trash"></i></button>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+                    <v-app id="inspire">
+                        <v-card>
+                            <v-card-title>
+                                Enquiries
+                                <v-spacer></v-spacer>
+                                <v-text-field
+                                    v-model="search"
+                                    append-icon="mdi-magnify"
+                                    label="Search"
+                                    single-line
+                                    hide-details
+                                ></v-text-field>
+                                <v-spacer></v-spacer>
+                                <v-btn small color="indigo" dark @click="add_enquiry=true">Add Enquiry
+                                </v-btn>
+                            </v-card-title>
+                            <v-data-table
+                                v-model="selected"
+                                :headers="headers"
+                                :items="items"
+                                :single-select="singleSelect"
+                                :sort-by.sync="sortBy"
+                                :sort-desc.sync="sortDesc"
+                                :search="search"
+                                item-key="name"
+                                class="elevation-1"
+                                :footer-props="{
+                              showFirstLastPage: true,
+                              firstIcon: 'mdi-arrow-collapse-left',
+                              lastIcon: 'mdi-arrow-collapse-right',
+                              prevIcon: 'mdi-minus',
+                              nextIcon: 'mdi-plus'
+                              }"
+                            >
+                                <template v-slot:item.actions="{ item }">
+                                    <v-icon class="outlined" @click="editEnquiry(item)">mdi-pencil</v-icon>
+                                    <v-icon   class="outlined-trash"  @click="deleteEnquiry(item.id)">mdi-delete</v-icon>
+
+                                </template>
+                            </v-data-table>
+                            <center>
+                                <pulse-loader :loading="loading" :color="color" :size="size"></pulse-loader>
+                            </center>
+                        </v-card>
+                    </v-app>
                 </div>
             </div>
         </section>
@@ -41,26 +59,36 @@
 <script>
 
     import Enquiry from "./Enquiry";
+    import datatable from "../../../mixins/datatable";
+    import {mapGetters} from "vuex";
+    import FieldDefs from "./FieldDefs";
+    import spinner from "../../../mixins/spinner";
     export default {
+        mixins:[datatable,spinner],
         data(){
             return {
-                tableData: [],
                 add_enquiry: false,
-                editing: false
+                editing: false,
+                headers: FieldDefs
             }
         },
         created(){
-            this.listen();
             this.getEnquiries();
-        },       
+            this.listen();
+        },
+        computed:{
+            ...mapGetters({
+                tableData:'all_enquiries'
+            })
+        },
+        watch:{
+            tableData(){
+                this.getItems();
+            }
+        },
         methods:{
             getEnquiries(){
-                axios.get('enquiry')
-                    .then(res => {
-                        this.tableData = res.data.enquiries
-                        this.initDatable()
-                    })
-                    .catch(error => Exception.handle(error))
+                this.$store.dispatch('my_enquiries');
             },
             editEnquiry(enquiry){
                 this.$store.dispatch('updateEnquiry',enquiry)
@@ -82,14 +110,12 @@
             },
             listen(){
                 eventBus.$on('listEnquiry',(enquiry) =>{
-                    this.tableData.unshift(enquiry);
+                    this.getItems();
                     this.add_enquiry =false;
-                    this.initDatable();
                 });
                 eventBus.$on('cancel',()=>{
                     this.add_enquiry = false;
                     this.editing = false;
-                    this.initDatable();
                 });
                 eventBus.$on('updateEnquiry',(enquiry)=>{
                     this.add_enquiry = false;
@@ -100,27 +126,9 @@
                         }
                     }
                     this.tableData.unshift(enquiry);
-                    this.initDatable();
                 });
             },
-            initDatable(){
-                setTimeout(()=>{
-                    $('.dt').DataTable({
-                        "pagingType": "full_numbers",
-                        "lengthMenu": [
-                            [10, 25, 50, -1],
-                            [10, 25, 50, "All"]
-                        ],
-                        order: [[ 0, 'asc' ], [ 3, 'desc' ]],
-                        responsive: true,
-                        destroy: true,
-                        retrieve:true,
-                        autoFill: true,
-                        colReorder: true,
 
-                    });
-                },1000)
-            },
         },
         components:{
             Enquiry

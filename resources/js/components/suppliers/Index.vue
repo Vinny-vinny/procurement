@@ -5,37 +5,55 @@
         <section class="content" v-if="!add_supplier">
             <!-- Default box -->
             <div class="box">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Suppliers</h3>
-                    <button class="btn btn-info pull-right" @click="importSuppliers()" :disabled="importing">{{importing ? 'Importing...' : 'Import from Sage'}}</button>
-                    <button class="btn btn-primary pull-right mr" @click="add_supplier=true">Add Supplier</button>
-                </div>
                 <div class="box-body">
-                    <table class="table table-striped dt">
-                        <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Name</th>
-                            <th>Account</th>
-                            <th>Phone</th>
-                            <th>Email</th>
-                            <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr v-for="supplier in tableData">
-                            <td>{{supplier.id}}</td>
-                            <td>{{supplier.name}}</td>
-                            <td>{{supplier.account}}</td>
-                            <td>{{supplier.phone}}</td>
-                            <td>{{supplier.email}}</td>
-                            <td>
-                                <button class="btn btn-success btn-sm" @click="editSupplier(supplier)"><i class="fa fa-edit"></i></button>
-                                <button class="btn btn-danger btn-sm" @click="deleteSupplier(supplier.id)"><i class="fa fa-trash"></i></button>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+                    <v-app id="inspire">
+                    <v-card>
+                        <v-card-title>
+                            Suppliers
+                            <v-spacer></v-spacer>
+                            <v-text-field
+                                v-model="search"
+                                append-icon="mdi-magnify"
+                                label="Search"
+                                single-line
+                                hide-details
+                            ></v-text-field>
+                            <v-spacer></v-spacer>
+                            <v-btn small color="indigo" dark @click="add_supplier=true">Add Supplier
+                            </v-btn>
+                            <v-spacer></v-spacer>
+                            <v-btn small color="indigo" dark @click="importSuppliers()">{{importing ? 'Importing...' : 'Import from Sage'}}
+                            </v-btn>
+                        </v-card-title>
+                        <v-data-table
+                            v-model="selected"
+                            :headers="headers"
+                            :items="items"
+                            :single-select="singleSelect"
+                            :sort-by.sync="sortBy"
+                            :sort-desc.sync="sortDesc"
+                            :search="search"
+                            item-key="name"
+                            class="elevation-1"
+                            :footer-props="{
+                              showFirstLastPage: true,
+                              firstIcon: 'mdi-arrow-collapse-left',
+                              lastIcon: 'mdi-arrow-collapse-right',
+                              prevIcon: 'mdi-minus',
+                              nextIcon: 'mdi-plus'
+                              }"
+                        >
+                            <template v-slot:item.actions="{ item }">
+                                <v-icon class="outlined" @click="editSupplier(item)">mdi-pencil</v-icon>
+                                <v-icon   class="outlined-trash"  @click="deleteSupplier(item.id)">mdi-delete</v-icon>
+
+                            </template>
+                        </v-data-table>
+                        <center>
+                            <pulse-loader :loading="loading" :color="color" :size="size"></pulse-loader>
+                        </center>
+                    </v-card>
+                    </v-app>
                 </div>
             </div>
         </section>
@@ -43,27 +61,37 @@
 </template>
 <script>
     import Suppliers from "./Supplier";
+    import datatable from "../../mixins/datatable";
+    import {mapGetters} from "vuex";
+    import FieldDefs from "./FieldDefs";
+    import spinner from "../../mixins/spinner";
     export default {
+        mixins:[datatable,spinner],
         data(){
             return {
-                tableData: [],
                 add_supplier: false,
                 editing: false,
-                importing: false
+                importing: false,
+                headers: FieldDefs
             }
         },
         created(){
             this.listen();
             this.getSuppliers();
-        },      
+        },
+        computed:{
+            ...mapGetters({
+                tableData:'all_suppliers'
+            })
+        },
+        watch:{
+            tableData(){
+                this.getItems();
+            }
+        },
         methods:{
             getSuppliers(){
-                axios.get('suppliers')
-                    .then(res => {
-                        this.tableData = res.data
-                        this.initDatable();
-                    })
-                    .catch(error => Exception.handle(error))
+                this.$store.dispatch('my_suppliers');
             },
             editSupplier(supplier){
                 this.$store.dispatch('updateSupplier',supplier)
@@ -84,13 +112,10 @@
                     .catch(error => Exception.handle(error))
             },
             importSuppliers(){
-                this.importing = true;
+                 this.importing = true;
                    axios.get('import-suppliers')
                   .then(suppliers => {
-                      console.log(suppliers.data.length)
-                        if(suppliers.data.length){
-                         this.getSuppliers();                         
-                         }
+                    this.getItems();
                     this.$toastr.s('Suppliers successfully imported.')
                     this.importing=false;
                     this.$router.go();
@@ -98,14 +123,12 @@
             },
             listen(){
                 eventBus.$on('listSuppliers',(supplier) =>{
-                    this.tableData.unshift(supplier);
+                    this.getItems();
                     this.add_supplier =false;
-                    this.initDatable();
                 });
                 eventBus.$on('cancel',()=>{
                     this.add_supplier = false;
                     this.editing = false;
-                    this.initDatable();
                 });
                 eventBus.$on('updateSupplier',(supplier)=>{
                     this.add_supplier = false;
@@ -116,27 +139,9 @@
                         }
                     }
                     this.tableData.unshift(supplier);
-                    this.initDatable();
                 });
             },
-            initDatable(){
-                setTimeout(()=>{
-                    $('.dt').DataTable({
-                        "pagingType": "full_numbers",
-                        "lengthMenu": [
-                            [10, 25, 50, -1],
-                            [10, 25, 50, "All"]
-                        ],
-                        order: [[ 0, 'asc' ], [ 3, 'desc' ]],
-                        responsive: true,
-                        destroy: true,
-                        retrieve:true,
-                        autoFill: true,
-                        colReorder: true,
 
-                    });
-                },1000)
-            },
         },
         components:{
             Suppliers
@@ -145,7 +150,5 @@
 </script>
 
 <style>
-    .mr{
-        margin-right: 10px;
-    }
+
 </style>

@@ -19,14 +19,7 @@ class EnquiryController extends Controller
      */
     public function index()
     {
-        return response()->json([
-            'enquiries' => EnquiryResource::collection(Enquiry::all()),
-            'suppliers' => Supplier::all(),
-            'assets' => Machine::all(),
-            'stocks' => Part::all(),
-            'uoms' => Uom::all(),
-            'services' => Service::all()
-        ]);
+        return response()->json(EnquiryResource::collection(Enquiry::all()));
     }
 
     /**

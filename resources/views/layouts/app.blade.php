@@ -7,6 +7,10 @@
 <!-- Left side column. contains the logo and sidebar-->
 {{--@include('layouts.admin-liloginte.includes.sidebar')--}}
 <!-- Content Wrapper. Contains page content -->
+<script>
+    window.url ="{{url('/')}}";
+    window.dashboad_url ="{{env('DASHBOARD_URL')}}";
+</script>
           <div id="app">
            <app-home></app-home>
           </div>

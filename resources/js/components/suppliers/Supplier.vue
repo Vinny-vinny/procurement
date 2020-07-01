@@ -44,6 +44,8 @@
 </template>
 
 <script>
+    import suppliers from "../../store/modules/suppliers";
+
     export default {
         props:['edit'],
         data(){
@@ -70,7 +72,10 @@
             save(){
                 delete this.form.id;
                     axios.post('suppliers',this.form)
-                    .then(res => eventBus.$emit('listSuppliers',res.data))
+                    .then(res => {
+                        this.$store.state.suppliers.all_my_suppliers.unshift(res.data);
+                        eventBus.$emit('listSuppliers',res.data)
+                    })
                     .catch(error => error.response)
             },
             update(){
@@ -86,7 +91,7 @@
             },
             listen(){
                 if (this.edit){
-                    this.form = this.$store.state.supplier;
+                    this.form = this.$store.state.suppliers.supplier;
                     }
             },
         }

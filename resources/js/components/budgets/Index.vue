@@ -5,36 +5,51 @@
         <section class="content" v-if="!add_budget">
             <!-- Default box -->
             <div class="box">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Department Budgets</h3>
-                    <button class="btn btn-primary pull-right" @click="add_budget=true">Add Department Budget</button>
-                </div>
                 <div class="box-body">
-                    <table class="table table-striped dt">
-                        <thead>
-                        <tr>
-                            <th>#</th>                          
-                            <th>Department</th>
-                            <th>Begins On</th>
-                            <th>Ends On</th>
-                            <th>Budget Amount</th>
-                            <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr v-for="budget in tableData">
-                            <td>{{budget.id}}</td>
-                            <td>{{budget.department}}</td>
-                            <td>{{budget.start_date_fr}}</td>
-                            <td>{{budget.end_date}}</td>
-                            <td>{{budget.total_amount | number}}</td>
-                            <td>
-                                <button class="btn btn-success btn-sm" @click="editBudget(budget)"><i class="fa fa-edit"></i></button>
-                                <!--<button class="btn btn-danger btn-sm" @click="deleteCategory(category.id)"><i class="fa fa-trash"></i></button>-->
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+                    <v-app id="inspire">
+                        <v-card>
+                            <v-card-title>
+                                Department Budgets
+                                <v-spacer></v-spacer>
+                                <v-text-field
+                                    v-model="search"
+                                    append-icon="mdi-magnify"
+                                    label="Search"
+                                    single-line
+                                    hide-details
+                                ></v-text-field>
+                                <v-spacer></v-spacer>
+                                <v-btn small color="indigo" dark @click="add_budget=true">Add Department Budget
+                                </v-btn>
+                            </v-card-title>
+                            <v-data-table
+                                v-model="selected"
+                                :headers="headers"
+                                :items="items"
+                                :single-select="singleSelect"
+                                :sort-by.sync="sortBy"
+                                :sort-desc.sync="sortDesc"
+                                :search="search"
+                                item-key="name"
+                                class="elevation-1"
+                                :footer-props="{
+                              showFirstLastPage: true,
+                              firstIcon: 'mdi-arrow-collapse-left',
+                              lastIcon: 'mdi-arrow-collapse-right',
+                              prevIcon: 'mdi-minus',
+                              nextIcon: 'mdi-plus'
+                              }"
+                            >
+                                <template v-slot:item.actions="{ item }">
+                                    <v-icon class="outlined" @click="editBudget(item)">mdi-pencil</v-icon>
+
+                                </template>
+                            </v-data-table>
+                            <center>
+                                <pulse-loader :loading="loading" :color="color" :size="size"></pulse-loader>
+                            </center>
+                        </v-card>
+                    </v-app>
                 </div>
             </div>
         </section>
@@ -42,28 +57,37 @@
 </template>
 <script>
     import Budget from "./Budget";
+    import datatable from "../../mixins/datatable";
+    import {mapGetters} from "vuex";
+    import FieldDefs from "./FieldDefs";
+    import spinner from "../../mixins/spinner";
     export default {
+        mixins:[datatable,spinner],
         data(){
             return {
-                tableData: [],
                 add_budget: false,
-                editing: false
+                editing: false,
+                headers: FieldDefs
 
             }
         },
         created(){
-            this.listen();
             this.getBudgets();
+            this.listen();
+        },
+        computed:{
+            ...mapGetters({
+                tableData:'all_budgets'
+            })
+        },
+        watch:{
+            tableData(){
+                this.getItems();
+            }
         },
         methods:{
             getBudgets(){
-                axios.get('department-budget')
-                    .then(res =>{
-                        this.tableData = res.data.budgets
-                        console.log()
-                        this.initDatable();
-                    })
-                    .catch(error => Exception.handle(error))
+                this.$store.dispatch('my_budgets');
             },
             editBudget(budget){
                 this.$store.dispatch('updateBudget',budget)
@@ -85,14 +109,12 @@
             },
             listen(){
                 eventBus.$on('listBudgets',(budget) =>{
-                    this.tableData.unshift(budget);
+                    this.getItems();
                     this.add_budget =false;
-                    this.initDatable();
                 });
                 eventBus.$on('cancel',()=>{
                     this.add_budget = false;
                     this.editing = false;
-                    this.initDatable();
                 });
                 eventBus.$on('updateBudget',(budget)=>{
                     this.add_budget = false;
@@ -103,27 +125,9 @@
                         }
                     }
                     this.tableData.unshift(budget);
-                    this.initDatable();
                 });
             },
-            initDatable(){
-                setTimeout(()=>{
-                    $('.dt').DataTable({
-                        "pagingType": "full_numbers",
-                        "lengthMenu": [
-                            [10, 25, 50, -1],
-                            [10, 25, 50, "All"]
-                        ],
-                        order: [[ 0, 'asc' ], [ 3, 'desc' ]],
-                        responsive: true,
-                        destroy: true,
-                        retrieve:true,
-                        autoFill: true,
-                        colReorder: true,
 
-                    });
-                },1000)
-            },
         },
         components:{
             Budget

@@ -24,6 +24,8 @@
 </template>
 
 <script>
+    import categories from "../../store/modules/categories";
+
     export default {
         props:['edit'],
         data(){
@@ -46,6 +48,7 @@
                 delete this.form.id;
                 axios.post('categories',this.form)
                     .then(res => {
+                        this.$store.state.categories.all_my_categories.unshift(res.data);
                         eventBus.$emit('listCategory',res.data)
                     })
                     .catch(error => error.response)
@@ -63,7 +66,7 @@
             },
             listen(){
                 if (this.edit){
-                    this.form = this.$store.state.categories
+                    this.form = this.$store.state.categories.category
                 }
             },
         }

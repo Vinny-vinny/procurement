@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
+use Tymon\JWTAuth\Facades\JWTAuth;
+
 class AuthController extends Controller
 {
 
@@ -17,7 +19,7 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('JWT', ['except' => ['login','signup']]);
+      //  $this->middleware('JWT', ['except' => ['login','signup']]);
     }
 
     /**
@@ -41,6 +43,37 @@ class AuthController extends Controller
 
         User::create($request->all());
         return $this->login($request->all());
+    }
+    public function signIn(Request $request)
+    {
+        $user = User::where('email',$request->email)->first();
+        if ($user){
+            Auth::login($user);
+            if (Auth::check()){
+                return $this->jwt_login($user);
+            }else{
+                return response('error');
+            }
+        }
+        return response()->json('nouser');
+    }
+    public function jwt_login($user)
+    {
+        if (! $token = JWTAuth::fromUser($user)) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+        return $this->respondWithToken($token);
+    }
+    public function signout(Request $request)
+    {
+
+        // $this->guard()->logout();
+        if (isset($_COOKIE['auth_email'])) {
+            unset($_COOKIE['auth_email']);
+            setcookie("auth_email", "", time() - 300,"/",env('COOKIE_EXTENSION'));
+        }
+        return response()->json('logout');
+        // return redirect()->away(env('DASHBOARD_URL').'/logout');
     }
 
     /**

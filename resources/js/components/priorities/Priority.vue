@@ -24,6 +24,8 @@
 </template>
 
 <script>
+    import priorities from "../../store/modules/priorities";
+
     export default {
         props:['edit'],
         data(){
@@ -46,6 +48,7 @@
                 delete this.form.id;
                 axios.post('priorities',this.form)
                     .then(res => {
+                        this.$store.state.priorities.all_my_priorities.unshift(res.data);
                         eventBus.$emit('listPriorities',res.data)
                     })
                     .catch(error => error.response)
@@ -63,7 +66,7 @@
             },
             listen(){
                 if (this.edit){
-                    this.form = this.$store.state.priorities
+                    this.form = this.$store.state.priorities.priority
                 }
             },
         }

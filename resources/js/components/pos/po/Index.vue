@@ -5,32 +5,52 @@
         <section class="content" v-if="!add_po">
             <!-- Default box -->
             <div class="box">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Purchase Orders</h3>
-                    <button class="btn btn-primary pull-right" @click="add_po=true">Add Purchase Order</button>
-                </div>
                 <div class="box-body">
-                    <table class="table table-striped dt">
-                        <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>PO Date</th>
-                            <th>Description</th>
-                            <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr v-for="po in tableData">
-                            <td>{{po.po_no}}</td>
-                            <td>{{po.po_date}}</td>
-                            <td>{{po.po_description}}</td>
-                            <td>
-                                <button class="btn btn-success btn-sm" @click="editPo(po)"><i class="fa fa-edit"></i></button>
-                                <button class="btn btn-danger btn-sm" @click="deletePo(po.id)"><i class="fa fa-trash"></i></button>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+                    <v-app id="inspire">
+                        <v-card>
+                            <v-card-title>
+                                Purchase Orders
+                                <v-spacer></v-spacer>
+                                <v-text-field
+                                    v-model="search"
+                                    append-icon="mdi-magnify"
+                                    label="Search"
+                                    single-line
+                                    hide-details
+                                ></v-text-field>
+                                <v-spacer></v-spacer>
+                                <v-btn small color="indigo" dark @click="add_po=true">Add Purchase Order
+                                </v-btn>
+                            </v-card-title>
+                            <v-data-table
+                                v-model="selected"
+                                :headers="headers"
+                                :items="items"
+                                :single-select="singleSelect"
+                                :sort-by.sync="sortBy"
+                                :sort-desc.sync="sortDesc"
+                                :search="search"
+                                item-key="name"
+                                class="elevation-1"
+                                :footer-props="{
+                              showFirstLastPage: true,
+                              firstIcon: 'mdi-arrow-collapse-left',
+                              lastIcon: 'mdi-arrow-collapse-right',
+                              prevIcon: 'mdi-minus',
+                              nextIcon: 'mdi-plus'
+                              }"
+                            >
+                                <template v-slot:item.actions="{ item }">
+                                    <v-icon class="outlined" @click="editPo(item)">mdi-pencil</v-icon>
+                                    <v-icon   class="outlined-trash"  @click="deletePo(item.id)">mdi-delete</v-icon>
+
+                                </template>
+                            </v-data-table>
+                            <center>
+                                <pulse-loader :loading="loading" :color="color" :size="size"></pulse-loader>
+                            </center>
+                        </v-card>
+                    </v-app>
                 </div>
             </div>
         </section>
@@ -39,26 +59,36 @@
 <script>
 
     import PurchaseOrder from "./PurchaseOrder";
+    import datatable from "../../../mixins/datatable";
+    import {mapGetters} from "vuex";
+    import FieldDefs from "./FieldDefs";
+    import spinner from "../../../mixins/spinner";
     export default {
+        mixins:[datatable,spinner],
         data(){
             return {
-                tableData: [],
                 add_po: false,
-                editing: false
+                editing: false,
+                headers: FieldDefs
             }
         },
         created(){
-            this.listen();
             this.getPos();
-        },       
+            this.listen();
+        },
+        computed:{
+            ...mapGetters({
+                tableData:'all_pos'
+            })
+        },
+        watch:{
+            tableData(){
+                this.getItems();
+            }
+        },
         methods:{
             getPos(){
-                axios.get('purchase-order')
-                    .then(res => {
-                        this.tableData = res.data.pos
-                        this.initDatable()
-                    })
-                    .catch(error => Exception.handle(error))
+                this.$store.dispatch('my_pos');
             },
             editPo(po){
                 this.$store.dispatch('updatePurchaseOrder',po)
@@ -80,14 +110,12 @@
             },
             listen(){
                 eventBus.$on('listPurchaseOrders',(po) =>{
-                    this.tableData.unshift(po);
+                    this.getItems();
                     this.add_po =false;
-                    this.initDatable();
                 });
                 eventBus.$on('cancel',()=>{
                     this.add_po = false;
                     this.editing = false;
-                    this.initDatable();
                 });
                 eventBus.$on('updatePurchaseOrder',(po)=>{
                     this.add_po = false;
@@ -98,27 +126,9 @@
                         }
                     }
                     this.tableData.unshift(po);
-                    this.initDatable();
                 });
             },
-            initDatable(){
-                setTimeout(()=>{
-                    $('.dt').DataTable({
-                        "pagingType": "full_numbers",
-                        "lengthMenu": [
-                            [10, 25, 50, -1],
-                            [10, 25, 50, "All"]
-                        ],
-                        order: [[ 0, 'asc' ], [ 3, 'desc' ]],
-                        responsive: true,
-                        destroy: true,
-                        retrieve:true,
-                        autoFill: true,
-                        colReorder: true,
 
-                    });
-                },1000)
-            },
         },
         components:{
             PurchaseOrder

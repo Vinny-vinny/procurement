@@ -5,32 +5,52 @@
         <section class="content" v-if="!add_req">
             <!-- Default box -->
             <div class="box">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Requisitions</h3>
-                    <button class="btn btn-primary pull-right" @click="add_req=true">Add Requisition</button>
-                </div>
                 <div class="box-body">
-                    <table class="table table-striped dt">
-                        <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Date</th>
-                            <th>Description</th>
-                            <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr v-for="req in tableData">
-                            <td>{{req.req_no}}</td>
-                            <td>{{req.date_requested}}</td>
-                            <td>{{req.description}}</td>
-                            <td>
-                                <button class="btn btn-success btn-sm" @click="editReq(req)"><i class="fa fa-edit"></i></button>
-                                <button class="btn btn-danger btn-sm" @click="deleteReq(req.id)"><i class="fa fa-trash"></i></button>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+                    <v-app id="inspire">
+                        <v-card>
+                            <v-card-title>
+                                Requisitions
+                                <v-spacer></v-spacer>
+                                <v-text-field
+                                    v-model="search"
+                                    append-icon="mdi-magnify"
+                                    label="Search"
+                                    single-line
+                                    hide-details
+                                ></v-text-field>
+                                <v-spacer></v-spacer>
+                                <v-btn small color="indigo" dark @click="add_req=true">Add Requisition
+                                </v-btn>
+                            </v-card-title>
+                            <v-data-table
+                                v-model="selected"
+                                :headers="headers"
+                                :items="items"
+                                :single-select="singleSelect"
+                                :sort-by.sync="sortBy"
+                                :sort-desc.sync="sortDesc"
+                                :search="search"
+                                item-key="name"
+                                class="elevation-1"
+                                :footer-props="{
+                              showFirstLastPage: true,
+                              firstIcon: 'mdi-arrow-collapse-left',
+                              lastIcon: 'mdi-arrow-collapse-right',
+                              prevIcon: 'mdi-minus',
+                              nextIcon: 'mdi-plus'
+                              }"
+                            >
+                                <template v-slot:item.actions="{ item }">
+                                    <v-icon class="outlined" @click="editReq(item)">mdi-pencil</v-icon>
+
+
+                                </template>
+                            </v-data-table>
+                            <center>
+                                <pulse-loader :loading="loading" :color="color" :size="size"></pulse-loader>
+                            </center>
+                        </v-card>
+                    </v-app>
                 </div>
             </div>
         </section>
@@ -38,26 +58,37 @@
 </template>
 <script>
     import Requisition from "./Requisition";
+    import datatable from "../../mixins/datatable";
+    import {mapGetters} from "vuex";
+    import FieldDefs from "./FieldDefs";
+    import spinner from "../../mixins/spinner";
+
     export default {
+        mixins:[datatable,spinner],
         data(){
             return {
-                tableData: [],
                 add_req: false,
-                editing: false
+                editing: false,
+                headers: FieldDefs
             }
         },
         created(){
-            this.listen();
             this.getRqs();
-        },       
+            this.listen();
+        },
+        computed:{
+            ...mapGetters({
+                tableData:'all_requisitions'
+            })
+        },
+        watch:{
+            tableData(){
+                this.getItems();
+            }
+        },
         methods:{
             getRqs(){
-                axios.get('requisitions')
-                    .then(res => {
-                        this.tableData = res.data.requisitions
-                        this.initDatable();
-                    })
-                    .catch(error => Exception.handle(error))
+                this.$store.dispatch('my_requisitions');
             },
             editReq(rq){
                 this.$store.dispatch('updateRequisition',rq)
@@ -79,14 +110,12 @@
             },
             listen(){
                 eventBus.$on('listRequisitions',(rq) =>{
-                    this.tableData.unshift(rq);
+                    this.getItems();
                     this.add_req =false;
-                    this.initDatable();
                 });
                 eventBus.$on('cancel',()=>{
                     this.add_req = false;
                     this.editing = false;
-                    this.initDatable();
                 });
                 eventBus.$on('updateRequisition',(rq)=>{
                     this.add_req = false;
@@ -97,27 +126,9 @@
                         }
                     }
                     this.tableData.unshift(rq);
-                    this.initDatable();
                 });
             },
-            initDatable(){
-                setTimeout(()=>{
-                    $('.dt').DataTable({
-                        "pagingType": "full_numbers",
-                        "lengthMenu": [
-                            [10, 25, 50, -1],
-                            [10, 25, 50, "All"]
-                        ],
-                        order: [[ 0, 'asc' ], [ 3, 'desc' ]],
-                        responsive: true,
-                        destroy: true,
-                        retrieve:true,
-                        autoFill: true,
-                        colReorder: true,
 
-                    });
-                },1000)
-            },
         },
         components:{
             Requisition

@@ -28,6 +28,8 @@
 </template>
 
 <script>
+    import payment_modes from "../../store/modules/payment_modes";
+
     export default {
         props:['edit'],
         data(){
@@ -51,6 +53,7 @@
                 delete this.form.id;
                 axios.post('payment-modes',this.form)
                     .then(res => {
+                        this.$store.state.payment_modes.all_my_modes.unshift(res.data);
                         eventBus.$emit('listMode',res.data)
                     })
                     .catch(error => error.response)
@@ -68,7 +71,7 @@
             },
             listen(){
                 if (this.edit){
-                    this.form = this.$store.state.modes
+                    this.form = this.$store.state.payment_modes.mode
                 }
             },
         }

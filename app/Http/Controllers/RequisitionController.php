@@ -28,18 +28,22 @@ class RequisitionController extends Controller
     {
         return response()->json([
             'requisitions' => RequisitionResource::collection(Requisition::all()),
-            'requisition_types' => RequisitionType::all(),
-            'projects' => Project::all(),
-            'departments' => Department::all(),
-            'budgets' => DepartmentBudgetResource::collection(DepartmentBudget::all()),           
-            'priorities' => Priority::all(),
-            'stock_items' => Part::all(),
-            'assets' => Machine::all(),
-            'uoms' => Uom::all(),
-            'services' => Service::all(),
-            'filtered_departments' => DepartmentBudgetResource::collection(DepartmentBudget::whereBetween('begins_on',[date('Y').'-01-01',date('Y').'-12-31'])->get()),
-             'filtered_requistions' => RequisitionResource::collection(Requisition::whereBetween('created_at',[date('Y').'-01-01',date('Y').'-12-31'])->get()) 
+            'filtered_requisitions' => RequisitionResource::collection(Requisition::whereBetween('created_at',[date('Y').'-01-01',date('Y').'-12-31'])->get())
         ]);
+//        return response()->json([
+//            'requisitions' => RequisitionResource::collection(Requisition::all()),
+//            'requisition_types' => RequisitionType::all(),
+//            'projects' => Project::all(),
+//            'departments' => Department::all(),
+//            'budgets' => DepartmentBudgetResource::collection(DepartmentBudget::all()),
+//            'priorities' => Priority::all(),
+//            'stock_items' => Part::all(),
+//            'assets' => Machine::all(),
+        //  'uoms' => Uom::all(),
+//            'services' => Service::all(),
+//            'filtered_departments' => DepartmentBudgetResource::collection(DepartmentBudget::whereBetween('begins_on',[date('Y').'-01-01',date('Y').'-12-31'])->get()),
+//             'filtered_requistions' => RequisitionResource::collection(Requisition::whereBetween('created_at',[date('Y').'-01-01',date('Y').'-12-31'])->get())
+//        ]);
     }
 
     /**
@@ -55,7 +59,7 @@ class RequisitionController extends Controller
         $request['item_stock'] = json_encode($request->get('item_stock'));
         $request['item_asset'] = json_encode($request->get('item_asset'));
         $request['item_service'] = json_encode($request->get('item_service'));
-        
+
         $requisition = Requisition::create($request->all());
         return response()->json(new RequisitionResource($requisition));
     }
@@ -74,7 +78,7 @@ class RequisitionController extends Controller
 //requistions between dates
     public function customRequisitions(Request $request){
         $from = Carbon::parse($request->from)->startOfDay()->format('Y-m-d H:m:s');
-        $to = Carbon::parse($request->to)->endOfDay()->format('Y-m-d H:m:s');    
+        $to = Carbon::parse($request->to)->endOfDay()->format('Y-m-d H:m:s');
         $requsitions = RequisitionResource::collection(Requisition::whereBetween('req_date',[$from,$to])->get());
         return response()->json($requsitions);
 

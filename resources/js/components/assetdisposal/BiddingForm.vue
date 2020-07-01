@@ -109,13 +109,15 @@
                 all_assets:[],
                 disposals:{},
                 disposal_no:'',
-                payment_modes:{}
+                payment_modes:{},
+                bids:{}
 
             }
         },
         created(){          
             this.getAssetsDetails();
-            this.fetchDetails();            
+            this.fetchDetails(); 
+
         },
         methods:{
             fetchDetails(){
@@ -150,7 +152,14 @@
              this.assets = res.data.assets;
              this.disposals = res.data.disposals;
              this.payment_modes = res.data.payment_modes;
+             this.bids = res.data.biddings;
 
+         if (this.bids.find(bid => bid.disposal_id ==this.$route.params['id'] && User.id() == bid.user_id)) {
+            this.$toastr.e('Sorry,You cannot bid more than once.');
+            setTimeout(()=>{
+            this.$router.push('/bidding');
+            },3000)
+           } 
              })
             },
             removeItem(i){
@@ -168,7 +177,13 @@
                         return this.$toastr.e('Sorry,all asset details fields are required.');
                     }
                 }
-                //return console.log(this.form);               
+                let bids = this.bids.filter(b => b.disposal_id == this.form.disposal_id);
+                      if (bids.length > 0) {
+                      if (bids.find(b => b.user_id == this.form.user_id)) {
+                        return this.$toastr.e('Sorry,you cannot bid more than once.');
+                    }
+                }
+               // return console.log(this.form);               
                 this.form.bid_date = moment(this.form.bid_date).format('YYYY-MM-DD HH:MM:ss');
                 axios.post('bidding',this.form)
                     .then(res => {
@@ -178,7 +193,8 @@
                     .catch(error => error.response)
             },           
             cancel(){
-                eventBus.$emit('cancel')
+                this.$router.push('/bidding');
+                //eventBus.$emit('cancel')
             },
            },
         components:{

@@ -1,8 +1,9 @@
 <template>
     <div>
         <disposal v-if="add_disposal" :edit="editing"></disposal>
+        <disposal-memo v-if="show_memo"></disposal-memo>
         <!-- Main content -->
-        <section class="content" v-if="!add_disposal">
+        <section class="content" v-if="!add_disposal && !show_memo">
             <!-- Default box -->
             <div class="box">
                 <div class="box-header with-border">
@@ -13,7 +14,7 @@
                     <table class="table table-striped dt">
                         <thead>
                         <tr>
-                            <th>#</th>
+                            <th>Ref#</th>
                             <th>Bid Opening Date</th>
                             <th>Bid Deadline Date</th>
                             <th>Actions</th>
@@ -25,8 +26,8 @@
                             <td>{{asset.date_opened}}</td>
                             <td>{{asset.date_closed}}</td>
                             <td>
-                                <button class="btn btn-success btn-sm" @click="editDisposal(asset)" style="display:none"><i class="fa fa-edit"></i></button>
-                                <button class="btn btn-danger btn-sm" @click="deleteDisposal(asset.id)"><i class="fa fa-trash"></i></button>
+                              <router-link :to="'/bid-award/'+asset.id" class="btn btn-success btn-sm" v-if="checkBid(asset.id)"><i class="fa fa-trophy"></i></router-link>                         
+                                <button class="btn btn-info btn-sm" @click="showMemo(asset)"><i class="fa fa-eye"></i>Memo</button>
                             </td>
                         </tr>
                         </tbody>
@@ -39,23 +40,35 @@
 <script>
 
     import Disposal from "./AssetDisposal";
+    import DisposalMemo from "./disposalmemo/DisposalMemo";
     export default {
         data(){
             return {
                 tableData: [],
                 add_disposal: false,
-                editing: false
+                editing: false,
+                bids:{},
+                show_memo:false
             }
         },
         created(){
             this.listen();
             this.getDisposals();
-        },       
+        },
+        computed:{
+        
+        },    
         methods:{
+            checkBid(asset_id){
+           let item = this.tableData.find(asset => asset.id == asset_id);  
+           let bids = this.bids.filter(bid => bid.disposal_id == asset_id);          
+           return item.status == 1 && bids.length;
+        },
             getDisposals(){
                 axios.get('asset-disposal')
                     .then(res => {
                         this.tableData = res.data.disposals
+                        this.bids = res.data.bids
                         this.initDatable()
                     })
                     .catch(error => Exception.handle(error))
@@ -65,6 +78,12 @@
                     .then(() =>{
                         this.editing=true;
                         this.add_disposal=true;
+                    })
+            },
+             showMemo(disposal){
+                this.$store.dispatch('updateDisposal',disposal)
+                    .then(() =>{
+                     this.show_memo=true;
                     })
             },
             deleteDisposal(id){
@@ -87,6 +106,7 @@
                 eventBus.$on('cancel',()=>{
                     this.add_disposal = false;
                     this.editing = false;
+                    this.show_memo = false;
                     this.initDatable();
                 });
                 eventBus.$on('updateDisposal',(disposal)=>{
@@ -121,7 +141,8 @@
             },
         },
         components:{
-            Disposal
+            Disposal,
+            DisposalMemo
         }
     }
 </script>

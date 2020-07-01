@@ -33,16 +33,6 @@ class BidAwardController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -54,6 +44,7 @@ class BidAwardController extends Controller
         $award_no = BidAward::count()+1;
         $request['ref_no'] = 'AWD00'.$award_no;
         $award = BidAward::create($request->except('awarded'));
+        AssetDisposal::find($request->get('disposal_id'))->update(['status'=>0]);
         return response()->json($award);
     }
 

@@ -24,6 +24,8 @@
 </template>
 
 <script>
+    import reqTypes from "../../../store/modules/requisition/types";
+
     export default {
         props:['edit'],
         data(){
@@ -46,6 +48,7 @@
                 delete this.form.id;
                 axios.post('requisition-types',this.form)
                     .then(res => {
+                        this.$store.state.reqTypes.all_my_req_types.unshift(res.data);
                         eventBus.$emit('listReqTypes',res.data)
                     })
                     .catch(error => error.response)
@@ -63,7 +66,7 @@
             },
             listen(){
                 if (this.edit){
-                    this.form = this.$store.state.req_types
+                    this.form = this.$store.state.reqTypes.req_type
                 }
             },
         }

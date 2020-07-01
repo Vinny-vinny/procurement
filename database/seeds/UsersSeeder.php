@@ -32,5 +32,16 @@ class UsersSeeder extends Seeder
             'password' => bcrypt('Qwerty123!'), // password
             'remember_token' => Str::random(10),
         ]);
+
+        \App\User::create([
+            'name' => 'Evans Ngala',
+            'email' => 'evans.ngala@esl-eastafrica.com',
+            'code_no' => $faker->numberBetween(1,1000),
+            'title' => 'ICT Manager',
+            'join_date' => now(),
+            'email_verified_at' => now(),
+            'password' => bcrypt('Qwerty123!'), // password
+            'remember_token' => Str::random(10),
+        ]);
     }
 }

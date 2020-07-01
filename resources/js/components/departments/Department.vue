@@ -52,6 +52,7 @@
                 delete this.form.id;
                 axios.post('departments',this.form)
                     .then(res => {
+                        this.$store.state.departments.all_my_departments.unshift(res.data);
                         eventBus.$emit('listDepartments',res.data)
                     })
                     .catch(error => error.response)
@@ -75,7 +76,7 @@
             },
             listen(){
                 if (this.edit){
-                    this.form = this.$store.state.departments
+                    this.form = this.$store.state.departments.department
                 }
             },
         },

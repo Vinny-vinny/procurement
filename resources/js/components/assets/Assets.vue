@@ -44,8 +44,6 @@
             created() {
             this.listen();
         },
-
-
         methods: {
             saveMachine() {
                 this.edit_machine ? this.update() : this.save();
@@ -54,6 +52,7 @@
                 delete this.form.id;
                 axios.post('machines', this.form)
                     .then(res => {
+                        this.$store.state.assets.all_my_machines.unshift(res.data);
                         this.$toastr.s('Asset created Successfully.');
                         eventBus.$emit('listMachines', res.data)
                     })
@@ -73,7 +72,7 @@
             },
             listen() {
                 if (this.edit) {
-                    this.form = this.$store.state.machines
+                    this.form = this.$store.state.assets.machine
 
                 }
             },

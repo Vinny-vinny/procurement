@@ -5,8 +5,16 @@
  */
 
 window.Vue = require('vue');
+import Vuetify from 'vuetify';
+import "vuetify/dist/vuetify.min.css";
 import VueToastr from 'vue-toastr';
+import "vue-select/dist/vue-select.css";
+import '@mdi/font/css/materialdesignicons.css'
+import VueCookies from 'vue-cookies'
+Vue.use(VueCookies)
+
 Vue.use(VueToastr);
+Vue.use(Vuetify);
 import moment from 'moment'
 import JsonExcel from 'vue-json-excel'
 import VueHtmlToPaper from 'vue-html-to-paper'
@@ -69,7 +77,8 @@ router.beforeEach((to, from, next) => {
 });
 window.eventBus = new Vue();
 window.axios = require('axios')
-axios.defaults.baseURL ='http://localhost:8000/api/';
+axios.defaults.baseURL =url+'/api/';
+axios.defaults.dashboad_url =dashboad_url;
 
 /**
  * The following block of code may be used to automatically register your
@@ -79,7 +88,7 @@ axios.defaults.baseURL ='http://localhost:8000/api/';
  * Eg. ./components/ExampleComponent.vue -> <example-component></example-component>
  */
 window.base_url = axios.defaults.baseURL;
-window.site_url = 'http://localhost:8000/';
+window.site_url = url;
 // const files = require.context('./', true, /\.vue$/i);
 // files.keys().map(key => Vue.component(key.split('/').pop().split('.')[0], files(key).default));
 Vue.component('example-component', require('./components/ExampleComponent.vue').default);
@@ -97,6 +106,7 @@ Vue.component('app-top-nav', require('./components/layouts/AppTopNav').default);
 const app = new Vue({
     el: '#app',
     router,
-    store
+    store,
+    vuetify: new Vuetify()
 
 });

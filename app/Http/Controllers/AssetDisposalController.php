@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 use App\AssetDisposal;
 use App\Machine;
+use App\Bidding;
 use App\Http\Resources\AssetDisposalResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
@@ -18,7 +19,8 @@ class AssetDisposalController extends Controller
     {
         return response()->json([
             'assets'=> Machine::all(),
-            'disposals' => AssetDisposalResource::collection(AssetDisposal::all())
+            'disposals' => AssetDisposalResource::collection(AssetDisposal::all()),
+            'bids' => Bidding::all() 
         ]);
     }
 
