@@ -8,13 +8,13 @@
                 <div class="card-header with-border">
                     <h5 class="card-title">Approve Quotations</h5>
                 </div>
-                <div class="card-body">                  
+                <div class="card-body">
                         <div class="row">
                             <div class="col-md-4">
                                  <div class="form-group">
                             <label>Enquiry#</label>
                             <model-select :options="all_enquiries"
-                                        v-model="enquiry_id"                           
+                                        v-model="enquiry_id"
                                          @input="getQuotes()"
                                         >
                                </model-select>
@@ -24,8 +24,8 @@
                                  <div class="form-group">
                             <label>Quotation</label>
                             <model-select :options="quotations"
-                                        v-model="quotation_id"                              
-                                        @input="getSupplier()"  
+                                        v-model="quotation_id"
+                                        @input="getSupplier()"
                                         >
                                </model-select>
                         </div>
@@ -60,7 +60,7 @@
                                        <td>{{stk.rate}}</td>
                                        <td>{{stk.delivery_date}}</td>
                                        <td>{{stk.max_qty}}</td>
-                                   </tr>                                
+                                   </tr>
 
                                </table>
                            </fieldset>
@@ -90,12 +90,12 @@
                                        <td>{{asset.delivery_date}}</td>
                                        <td>{{asset.max_qty}}</td>
                                    </tr>
-                                 
+
 
                                </table>
                            </fieldset>
                            </div>
-                        </div>  
+                        </div>
 
                            <br><br>
                          <div class="row">
@@ -109,7 +109,7 @@
                                        <th>Amount</th>
                                        <th>Scheduled Date</th>
                                        <th>Quote Rate</th>
-                                       <th>Delivery Date</th>                                   
+                                       <th>Delivery Date</th>
                                    </tr>
                                    <tr v-for="service in filtered_services" :key="service.item_id">
                                        <td>{{service.item}}</td>
@@ -117,21 +117,21 @@
                                        <td>{{service.amount}}</td>
                                        <td>{{service.scheduled_date}}</td>
                                        <td>{{service.rate}}</td>
-                                       <td>{{service.delivery_date}}</td>                               
+                                       <td>{{service.delivery_date}}</td>
                                    </tr>
-                                 
+
 
                                </table>
                            </fieldset>
                            </div>
-                        </div>                  
-                 
+                        </div>
+
                 </div>
-                
-            </div>  
 
             </div>
-            
+
+            </div>
+
         </section>
 
     </div>
@@ -139,53 +139,71 @@
 
 <script>
  import { ModelSelect } from 'vue-search-select';
+ import {mapGetters} from 'vuex';
     export default {
         data(){
             return {
               quotations:[],
               quotation_id:'',
               enquiry_id:'',
-              supplier:'' ,
-              suppliers:{},
-              all_quotes:{},
-              stocks:{},
-              assets:{},
-              services:{},
+              supplier:'',
               filtered_stocks:[],
               filtered_assets:[],
               filtered_services:[],
-              enquiries:{},
-              all_enquiries:[]         
-            
+              all_enquiries:[]
+
             }
         },
         created(){
         this.getQuotations();
         },
+        watch:{
+            suppliers(){
+             return this.suppliers;
+            },
+            all_quotes(){
+             return this.all_quotes;
+            },
+            assets(){
+             return this.assets;
+            },
+            stocks(){
+             return this.stocks;
+            },
+            services(){
+             return this.services;
+            },
+            enquiries(){
+                this.enquiries.forEach(enq => {
+                    this.all_enquiries.push({
+                        'value': enq.id,
+                        'text': enq.enquiry_no
+                    })
+                })
+            return this.enquiries;
+            }
+        },
         computed:{
-       setUp(){     
+          ...mapGetters({
+              suppliers:'all_suppliers',
+              all_quotes:'all_quotations',
+              assets:'all_machines',
+              stocks:'all_parts',
+              services:'all_services',
+              enquiries:'all_filtered_enquiries'
+          }),
+       setUp(){
           return this.quotation_id !=='' && this.enquiry_id !=='';
           }
         },
-        methods:{         
+        methods:{
          getQuotations(){
-            axios.get('quotations')
-            .then(res => { 
-            this.suppliers = res.data.suppliers; 
-            this.all_quotes = res.data.filtered_quotations; 
-            this.assets = res.data.assets;
-            this.stocks = res.data.stock_items;
-            this.services = res.data.services;
-            this.enquiries = res.data.filtered_enquiries;
-
-            this.enquiries.forEach(enq => {
-             this.all_enquiries.push({
-              'value': enq.id,
-              'text': enq.enquiry_no
-             }) 
-            })           
-         
-            })
+             this.$store.dispatch('my_suppliers');
+             this.$store.dispatch('my_quotations');
+             this.$store.dispatch('my_machines');
+             this.$store.dispatch('my_services');
+             this.$store.dispatch('my_enquiries');
+             this.$store.dispatch('my_services');
          },
         getQuotes(){
         this.quotations = [];
@@ -220,11 +238,11 @@
                     'scheduled_date': quote.item_stock[i]['scheduled_date'],
                     'rate': quote.item_stock[i]['rate'],
                     'delivery_date': moment(quote.item_stock[i]['delivery_date']).format('DD-MM-YYYY'),
-                    'max_qty': quote.item_stock[i]['max_qty'], 
+                    'max_qty': quote.item_stock[i]['max_qty'],
                 })
             }
           }
-          if (quote.item_asset[0]['item_id']) {           
+          if (quote.item_asset[0]['item_id']) {
             for(let i=0;i<quote.item_asset.length;i++){
                 this.filtered_assets.push({
                     'item': this.assets.find(a => a.id == quote.item_asset[i]['item_id']).code +'-'+ this.assets.find(a => a.id == quote.item_asset[i]['item_id']).description,
@@ -233,19 +251,19 @@
                     'scheduled_date': quote.item_asset[i]['scheduled_date'],
                     'rate': quote.item_asset[i]['rate'],
                     'delivery_date': moment(quote.item_asset[i]['delivery_date']).format('DD-MM-YYYY'),
-                    'max_qty': quote.item_asset[i]['max_qty'], 
+                    'max_qty': quote.item_asset[i]['max_qty'],
                 })
             }
           }
            if (quote.item_service[0]['item_id']) {
             for(let i=0;i<quote.item_service.length;i++){
                 this.filtered_services.push({
-                    'item': this.services.find(s => s.id == quote.item_service[i]['item_id']).name,            
+                    'item': this.services.find(s => s.id == quote.item_service[i]['item_id']).name,
                     'description': quote.item_service[i]['description'],
                     'amount': quote.item_service[i]['amount'],
                     'scheduled_date': moment(quote.item_service[i]['scheduled_date']).format('DD-MM-YYYY'),
                     'rate': quote.item_service[i]['rate'],
-                    'delivery_date': moment(quote.item_service[i]['delivery_date']).format('DD-MM-YYYY')            
+                    'delivery_date': moment(quote.item_service[i]['delivery_date']).format('DD-MM-YYYY')
                 })
             }
           }

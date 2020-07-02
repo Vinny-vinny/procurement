@@ -8,6 +8,7 @@ use App\Part;
 use App\Machine;
 use App\Service;
 use App\Http\Resources\EnquiryResource;
+use App\User;
 use Illuminate\Http\Request;
 
 class QuotationController extends Controller
@@ -21,14 +22,18 @@ class QuotationController extends Controller
     {
         return response()->json([
             'quotations' => QuotationResource::collection(Quotation::all()),
-            'suppliers' => Supplier::all(),
-            'enquiries' => EnquiryResource::collection(Enquiry::all()),
-            'stock_items' => Part::all(),
-            'assets' => Machine::all(),
-            'services' => Service::all(),
-            'filtered_enquiries' => EnquiryResource::collection(Enquiry::whereBetween('created_at',[date('Y').'-01-01',date('Y').'-12-31'])->get()),
-             'filtered_quotations' => QuotationResource::collection(Quotation::whereBetween('created_at',[date('Y').'-01-01',date('Y').'-12-31'])->get())
-        ]); 
+            'filtered_quotations' => QuotationResource::collection(Quotation::whereBetween('created_at',[date('Y').'-01-01',date('Y').'-12-31'])->get())
+        ]);
+//        return response()->json([
+//            'quotations' => QuotationResource::collection(Quotation::all()),
+//            'suppliers' => Supplier::all(),
+//            'enquiries' => EnquiryResource::collection(Enquiry::all()),
+//            'stock_items' => Part::all(),
+//            'assets' => Machine::all(),
+//            'services' => Service::all(),
+//            'filtered_enquiries' => EnquiryResource::collection(Enquiry::whereBetween('created_at',[date('Y').'-01-01',date('Y').'-12-31'])->get()),
+//             'filtered_quotations' => QuotationResource::collection(Quotation::whereBetween('created_at',[date('Y').'-01-01',date('Y').'-12-31'])->get())
+//        ]);
     }
     /**
      * Store a newly created resource in storage.

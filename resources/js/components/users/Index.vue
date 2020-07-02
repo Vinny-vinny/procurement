@@ -87,7 +87,7 @@
         },
         methods:{
             getUsers(){
-                this.$store.dispatch('my_users');
+             this.$store.dispatch('my_users');
             },
             editUser(user){
                 this.$store.dispatch('updateUser',user)

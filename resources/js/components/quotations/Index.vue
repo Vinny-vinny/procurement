@@ -83,7 +83,7 @@
         },
         watch:{
             tableData(){
-                this.getItems();
+              this.getItems();
             }
         },
         methods:{

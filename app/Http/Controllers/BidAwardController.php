@@ -21,15 +21,7 @@ class BidAwardController extends Controller
      */
     public function index()
     {
-        return response()->json([
-            'awards'=> BidAward::all(),
-            'all_awards' => BidAwardResource::collection(BidAward::all()),
-            'disposals'=> AssetDisposalResource::collection(AssetDisposal::all()),
-            'bids'=> BiddingResource::collection(Bidding::all()),
-            'all_bids'=> Bidding::all(),
-            'assets'=> Machine::all(),
-            'users' => User::all()
-        ]);
+        return response()->json(BidAwardResource::collection(BidAward::all()));
     }
 
     /**

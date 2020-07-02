@@ -18,6 +18,9 @@ import uoms from "./modules/uoms";
 import purchase_enquiries from "./modules/purchase_enquiries";
 import purchaseorders from "./modules/purchaseorders";
 import quotations from "./modules/quotations";
+import disposals from "./modules/disposals";
+import awards from "./modules/awards";
+import bids from "./modules/bids";
 
 
 Vue.use(Vuex);
@@ -41,16 +44,15 @@ export default new Vuex.Store({
     uoms,
     purchase_enquiries,
     purchaseorders,
-    quotations
+    quotations,
+    disposals,
+    awards,
+    bids
     },
 
     state:{
         path_to:'/',
         customers:{},
-        machines:{},
-        disposals:{},
-        bids:{},
-        awards:{},
     },
     mutations:{
      pathTo(state, to) {
@@ -60,16 +62,9 @@ export default new Vuex.Store({
         updateCustomer(state,customer){
          state.customers = customer;
         },
-       updateDisposal(state,disposal){
-       state.disposals = disposal;
-       },
-
        updateBid(state,bid){
         state.bids = bid;
-       },
-       updateAward(state,award){
-        state.awards = award;
-       },
+       }
 
     },
 
@@ -85,16 +80,8 @@ export default new Vuex.Store({
        updatePurchaseOrder({commit},po){
         commit('updatePurchaseOrder',po);
        },
-       updateDisposal({commit},disposal){
-        commit('updateDisposal',disposal);
-       },
-
        updateBid({commit},bid){
         commit('updateBid',bid);
        },
-       updateAward({commit},award){
-        commit('updateAward',award);
-       },
-
-    }
+      }
 })

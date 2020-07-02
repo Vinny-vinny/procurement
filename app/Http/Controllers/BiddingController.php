@@ -18,12 +18,7 @@ class BiddingController extends Controller
      */
     public function index()
     {
-        return response()->json([
-            'assets' => Machine::all(),
-            'disposals' => AssetDisposalResource::collection(AssetDisposal::all()),
-            'payment_modes' => PaymentMode::all(),
-            'biddings' => BiddingResource::collection(Bidding::all()),            
-        ]);
+        return response()->json( BiddingResource::collection(Bidding::all()));
     }
     /**
      * Store a newly created resource in storage.
@@ -35,7 +30,7 @@ class BiddingController extends Controller
     {
         $bid_count = Bidding::count()+1;
         $request['bid_no'] = 'Bid00'.$bid_count;
-        $request['asset_details'] = json_encode($request->get('asset_details')); 
+        $request['asset_details'] = json_encode($request->get('asset_details'));
         $bid = Bidding::create($request->all());
        return response()->json($bid);
        }

@@ -20,14 +20,7 @@ class PurchaseOrderController extends Controller
      */
     public function index()
     {
-        return response()->json([
-            'pos' => PurchaseOrderResource::collection(PurchaseOrder::all()),
-            'quotations' => QuotationResource::collection(Quotation::all()),
-            'stock_items' => Part::all(),
-            'assets' => Machine::all(),
-            'suppliers' => Supplier::all(),
-            'services' => Service::all() 
-        ]);
+        return response()->json(PurchaseOrderResource::collection(PurchaseOrder::all()));
     }
 
 

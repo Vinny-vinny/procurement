@@ -29,7 +29,7 @@
                         </div>
                         <div class="form-group">
                             <label>Item Type</label>
-                            <select class="form-control" v-model="form.item_type" required @change="populateItems()">
+                            <select class="form-control" v-model="form.item_type" required>
                                 <option value="stock">Stock Item</option>
                                 <option value="asset">Asset</option>
                                 <option value="service">Service</option>
@@ -199,6 +199,7 @@
 <script>
 import datepicker from 'vuejs-datepicker';
 import { ModelSelect } from 'vue-search-select';
+import {mapGetters} from 'vuex';
     export default {
         props:['edit'],
         data(){
@@ -215,7 +216,6 @@ import { ModelSelect } from 'vue-search-select';
                     id:''
                 },
                 edit_po: this.edit,
-                quotations:{},
                 show_asset:false,
                 show_stock:false,
                 show_service:false,
@@ -225,12 +225,8 @@ import { ModelSelect } from 'vue-search-select';
                 all_assets:[],
                 all_stks:[],
                 all_services:[],
-                services:{},
                 supplier:'',
                 stk_id:'',
-                stock_items:{},
-                assets:{},
-                suppliers:{}
             }
         },
         created(){
@@ -238,6 +234,21 @@ import { ModelSelect } from 'vue-search-select';
             this.listen();
         },
         watch:{
+            quotations(){
+              return this.quotations;
+            },
+            assets(){
+             return this.assets;
+            },
+            suppliers(){
+             return this.suppliers;
+            },
+            services(){
+             return this.services;
+            },
+            stock_items(){
+             return this.stock_items;
+            },
             'form.item_type'(){
             if (this.form.quotation_id =='') {
             this.form.item_type ='';
@@ -265,7 +276,7 @@ import { ModelSelect } from 'vue-search-select';
                if (Object.values(this.form.item_stock[0])[0] !== '') {
                     for (let j = 0; j < this.form.item_stock.length; j++) {
                         if (this.form.item_stock[j]['item_id'] == this.filtered_stock_items[i]['id']) {
-                        console.log(this.filtered_stock_items[i])
+                        //console.log(this.filtered_stock_items[i])
                             this.form.item_stock[j]['qty'] = this.filtered_stock_items[i]['qty']
                             this.form.item_stock[j]['uom'] = this.filtered_stock_items[i]['uom']
                             this.form.item_stock[j]['scheduled_date'] = this.filtered_stock_items[i]['scheduled_date']
@@ -302,9 +313,8 @@ import { ModelSelect } from 'vue-search-select';
                 let stk_items = {};
                 let asset_item = {};
                 let service_items = {};
-          if (this.form.quotation_id !=='' && this.form.item_type !=='') {
 
-           setTimeout(()=>{
+          if (this.form.quotation_id !=='' && this.form.item_type !=='' && this.quotations.length !==undefined) {
           let quotations = this.quotations.find(q => q.id == this.form.quotation_id);
          if (quotations ==undefined) {
            this.show_asset = false;
@@ -488,12 +498,17 @@ import { ModelSelect } from 'vue-search-select';
                 }
                 }
 
-         },1000)
-
             }
         }
         },
         computed:{
+        ...mapGetters({
+            quotations:'all_quotations',
+            assets:'all_machines',
+            suppliers:'all_suppliers',
+            services:'all_services',
+            stock_items:'all_parts',
+        }),
        fetchItems(){
         return [this.form.item_type,this.form.quotation_id].join();
        },
@@ -502,18 +517,13 @@ import { ModelSelect } from 'vue-search-select';
         }
         },
         methods:{
-        populateItems(){
-
-         },
             getSupplier(){
-             let supplier_id = this.quotations.find(q => q.id == this.form.quotation_id).supplier_id;
-             let supplier = this.suppliers.find(s => s.id == supplier_id);
-             this.form.supplier_id = supplier.id;
-             this.supplier = supplier.name;
-
-             setTimeout(()=>{
-             console.log(this.filtered_stock_items);
-             },2000)
+              if (this.quotations.length !==undefined) {
+                  let supplier_id = this.quotations.find(q => q.id == this.form.quotation_id).supplier_id;
+                  let supplier = this.suppliers.find(s => s.id == supplier_id);
+                  this.form.supplier_id = supplier.id;
+                  this.supplier = supplier.name;
+              }
             },
              addItem(i) {
                 this.form.item_stock.push({item_id: '',qty:'',uom: '',scheduled_date:''});
@@ -544,6 +554,7 @@ import { ModelSelect } from 'vue-search-select';
                  let service_obj = {};
                   let stk_obj = {};
                   let asset_obj = {};
+
                  if (Object.values(this.form.item_stock[0])[0] !== '' || Object.values(this.form.item_stock[0])[1] !== '' || Object.values(this.form.item_stock[0])[2] !== '' || Object.values(this.form.item_stock[0])[3] !== '' || Object.values(this.form.item_stock[0])[4] !== '' || Object.values(this.form.item_stock[0])[5] !== '' || Object.values(this.form.item_stock[0])[6] !== '') {
                     for (let i = 0; i < this.form.item_stock.length; i++) {
                         if (this.form.item_stock[i]['item_id'] === '' || this.form.item_stock[i]['rate'] === '' || this.form.item_stock[i]['delivery_date'] === '' || this.form.item_stock[i]['max_qty'] === '') {
@@ -580,7 +591,7 @@ import { ModelSelect } from 'vue-search-select';
                 }
 
 
-                 if (Object.values(this.form.item_service[0])[0] !== '' || Object.values(this.form.item_service[0])[1] !== '' || Object.values(this.form.item_service[0])[2] !== '' || Object.values(this.form.item_service[0])[3] !== '' || Object.values(this.form.item_service[0])[4] !== '' || Object.values(this.form.item_service[0])[4] !== '' || Object.values(this.form.item_service[0])[5] !== '' || Object.values(this.form.item_service[0])[6] !== '') {
+                 if (Object.values(this.form.item_service[0])[0] !== '' || Object.values(this.form.item_service[0])[1] !== '' || Object.values(this.form.item_service[0])[2] !== '' || Object.values(this.form.item_service[0])[3] !== '' || Object.values(this.form.item_service[0])[4] !== '' || Object.values(this.form.item_service[0])[4] !== '' || Object.values(this.form.item_service[0])[5] !== '') {
                     for (let i = 0; i < this.form.item_service.length; i++) {
                         if (this.form.item_service[i]['item_id'] === '' || this.form.item_service[i]['rate'] === '' || this.form.item_service[i]['delivery_date'] === '') {
                             return this.$toastr.e('Please all Services fields are required.');
@@ -604,6 +615,7 @@ import { ModelSelect } from 'vue-search-select';
                 delete this.form.id;
                 axios.post('purchase-order',this.form)
                     .then(res => {
+                        this.$store.state.purchaseorders.all_my_pos.unshift(res.data);
                         eventBus.$emit('listPurchaseOrders',res.data)
                     })
                     .catch(error => error.response)
@@ -621,11 +633,11 @@ import { ModelSelect } from 'vue-search-select';
             },
             listen(){
                 if (this.edit){
-                    this.form = this.$store.state.purchase_orders
-                    console.log(this.form)
-                    setTimeout(()=>{
+                    this.form = this.$store.state.purchaseorders.po
+                //    console.log(this.form)
+                   // setTimeout(()=>{
                      this.getSupplier();
-                    },1000)
+                  //  },1000)
                 }
             },
         },

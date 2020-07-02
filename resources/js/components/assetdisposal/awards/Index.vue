@@ -5,31 +5,50 @@
         <section class="content" v-if="!show_award">
             <!-- Default box -->
             <div class="box">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Bid Awards</h3>
-                </div>
                 <div class="box-body">
-                    <table class="table table-striped dt">
-                        <thead>
-                        <tr>
-                            <th>Ref#</th>
-                            <th>Created At</th>
-                            <th>Disposal#</th>                           
-                            <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr v-for="award in tableData">
-                            <td>{{award.ref_no}}</td>
-                            <td>{{award.created}}</td>
-                            <td>{{award.disposal_no}}</td>                      
-                            <td>
-                             <button class="btn btn-info btn-sm" @click="editDisposal(award)"><i class="fa fa-eye"></i></button>
-                                
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+                    <v-app id="inspire">
+                        <v-card>
+                            <v-card-title>
+                                Bid Awards
+                                <v-spacer></v-spacer>
+                                <v-text-field
+                                    v-model="search"
+                                    append-icon="mdi-magnify"
+                                    label="Search"
+                                    single-line
+                                    hide-details
+                                ></v-text-field>
+                                <v-spacer></v-spacer>
+                                <v-btn small color="indigo" dark @click="add_disposal=true">Add New
+                                </v-btn>
+                            </v-card-title>
+                            <v-data-table
+                                v-model="selected"
+                                :headers="headers"
+                                :items="items"
+                                :single-select="singleSelect"
+                                :sort-by.sync="sortBy"
+                                :sort-desc.sync="sortDesc"
+                                :search="search"
+                                item-key="name"
+                                class="elevation-1"
+                                :footer-props="{
+                              showFirstLastPage: true,
+                              firstIcon: 'mdi-arrow-collapse-left',
+                              lastIcon: 'mdi-arrow-collapse-right',
+                              prevIcon: 'mdi-minus',
+                              nextIcon: 'mdi-plus'
+                              }"
+                            >
+                                <template v-slot:item.actions="{ item }">
+                                    <v-icon class="outlined"  @click="editDisposal(award)"><i class="fa fa-eye"></i>Memo</v-icon>
+                                </template>
+                            </v-data-table>
+                            <center>
+                                <pulse-loader :loading="loading" :color="color" :size="size"></pulse-loader>
+                            </center>
+                        </v-card>
+                    </v-app>
                 </div>
             </div>
         </section>
@@ -38,61 +57,52 @@
 <script>
 
     import Award from "./Award";
+    import {mapGetters} from "vuex";
+    import datatable from "../../../mixins/datatable";
+    import FieldDefs from "./FieldDefs";
+    import spinner from "../../../mixins/spinner";
+
     export default {
+        mixins:[datatable,spinner],
         data(){
             return {
-                tableData: [],
-                show_award: false        
+                show_award: false,
+                headers: FieldDefs
             }
         },
         created(){
-            this.listen();
             this.getAwards();
-        },       
+            this.listen();
+        },
+        computed:{
+            ...mapGetters({
+                tableData:'all_awards'
+            })
+        },
+        watch:{
+            tableData(){
+                this.getItems();
+            }
+        },
         methods:{
             getAwards(){
-                axios.get('bid-award')
-                    .then(res => {
-                        this.tableData = res.data.all_awards
-                        this.initDatable()
-                    })
-                    .catch(error => Exception.handle(error))
+              this.$store.dispatch('my_awards');
             },
             editDisposal(award){
                 this.$store.dispatch('updateAward',award)
-                    .then(() =>{                       
+                    .then(() =>{
                         this.show_award=true;
                     })
-            },          
+            },
             listen(){
                 eventBus.$on('listAward',(award) =>{
-                    this.tableData.unshift(award);
+                   this.getItems();
                     this.show_award =false;
-                    this.initDatable();
                 });
                 eventBus.$on('cancel',()=>{
                     this.show_award = false;
-                    this.initDatable();
                 });
-               },
-            initDatable(){
-                setTimeout(()=>{
-                    $('.dt').DataTable({
-                        "pagingType": "full_numbers",
-                        "lengthMenu": [
-                            [10, 25, 50, -1],
-                            [10, 25, 50, "All"]
-                        ],
-                        order: [[ 0, 'asc' ], [ 3, 'desc' ]],
-                        responsive: true,
-                        destroy: true,
-                        retrieve:true,
-                        autoFill: true,
-                        colReorder: true,
-
-                    });
-                },1000)
-            },
+               }
         },
         components:{
             Award

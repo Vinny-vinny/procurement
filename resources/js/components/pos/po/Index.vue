@@ -83,7 +83,7 @@
         },
         watch:{
             tableData(){
-                this.getItems();
+             this.getItems();
             }
         },
         methods:{
@@ -91,7 +91,7 @@
                 this.$store.dispatch('my_pos');
             },
             editPo(po){
-                this.$store.dispatch('updatePurchaseOrder',po)
+                this.$store.dispatch('updatePo',po)
                     .then(() =>{
                         this.editing=true;
                         this.add_po=true;

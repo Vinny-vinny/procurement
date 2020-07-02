@@ -19,7 +19,10 @@ class EnquiryController extends Controller
      */
     public function index()
     {
-        return response()->json(EnquiryResource::collection(Enquiry::all()));
+        return response()->json([
+            'enquiries' => EnquiryResource::collection(Enquiry::all()),
+            'filtered_enquiries' => EnquiryResource::collection(Enquiry::whereBetween('created_at',[date('Y').'-01-01',date('Y').'-12-31'])->get())
+            ]);
     }
 
     /**

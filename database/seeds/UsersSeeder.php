@@ -43,5 +43,15 @@ class UsersSeeder extends Seeder
             'password' => bcrypt('Qwerty123!'), // password
             'remember_token' => Str::random(10),
         ]);
+        \App\User::create([
+            'name' => 'Admin',
+            'email' => 'admiin@esl.com',
+            'code_no' => $faker->numberBetween(1,1000),
+            'title' => 'System Admin',
+            'join_date' => now(),
+            'email_verified_at' => now(),
+            'password' => bcrypt('1234'), // password
+            'remember_token' => Str::random(10),
+        ]);
     }
 }

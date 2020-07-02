@@ -6,32 +6,51 @@
         <section class="content" v-if="!add_disposal && !show_memo">
             <!-- Default box -->
             <div class="box">
-                <div class="box-header with-border">
-                    <h3 class="box-title">Asset Disposal</h3>
-                    <button class="btn btn-primary pull-right" @click="add_disposal=true">Add New</button>
-                </div>
                 <div class="box-body">
-                    <table class="table table-striped dt">
-                        <thead>
-                        <tr>
-                            <th>Ref#</th>
-                            <th>Bid Opening Date</th>
-                            <th>Bid Deadline Date</th>
-                            <th>Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr v-for="asset in tableData">
-                            <td>{{asset.disposal_no}}</td>
-                            <td>{{asset.date_opened}}</td>
-                            <td>{{asset.date_closed}}</td>
-                            <td>
-                              <router-link :to="'/bid-award/'+asset.id" class="btn btn-success btn-sm" v-if="checkBid(asset.id)"><i class="fa fa-trophy"></i></router-link>                         
-                                <button class="btn btn-info btn-sm" @click="showMemo(asset)"><i class="fa fa-eye"></i>Memo</button>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
+                    <v-app id="inspire">
+                        <v-card>
+                            <v-card-title>
+                                Asset Disposal
+                                <v-spacer></v-spacer>
+                                <v-text-field
+                                    v-model="search"
+                                    append-icon="mdi-magnify"
+                                    label="Search"
+                                    single-line
+                                    hide-details
+                                ></v-text-field>
+                                <v-spacer></v-spacer>
+                                <v-btn small color="indigo" dark @click="add_disposal=true">Add New
+                                </v-btn>
+                            </v-card-title>
+                            <v-data-table
+                                v-model="selected"
+                                :headers="headers"
+                                :items="items"
+                                :single-select="singleSelect"
+                                :sort-by.sync="sortBy"
+                                :sort-desc.sync="sortDesc"
+                                :search="search"
+                                item-key="name"
+                                class="elevation-1"
+                                :footer-props="{
+                              showFirstLastPage: true,
+                              firstIcon: 'mdi-arrow-collapse-left',
+                              lastIcon: 'mdi-arrow-collapse-right',
+                              prevIcon: 'mdi-minus',
+                              nextIcon: 'mdi-plus'
+                              }"
+                            >
+                                <template v-slot:item.actions="{ item }">
+                                    <router-link :to="'/bid-award/'+item.id" class="btn btn-success btn-sm" v-if="checkBid(item.id)"><i class="fa fa-trophy"></i></router-link>
+                                    <v-icon class="outlined"  @click="showMemo(item)"><i class="fa fa-eye"></i>Memo</v-icon>
+                                </template>
+                            </v-data-table>
+                            <center>
+                                <pulse-loader :loading="loading" :color="color" :size="size"></pulse-loader>
+                            </center>
+                        </v-card>
+                    </v-app>
                 </div>
             </div>
         </section>
@@ -41,37 +60,52 @@
 
     import Disposal from "./AssetDisposal";
     import DisposalMemo from "./disposalmemo/DisposalMemo";
+    import datatable from "../../mixins/datatable";
+    import {mapGetters} from "vuex";
+    import FieldDefs from "./FieldDefs";
+    import spinner from "../../mixins/spinner";
     export default {
+        mixins:[datatable,spinner],
         data(){
             return {
-                tableData: [],
                 add_disposal: false,
                 editing: false,
-                bids:{},
-                show_memo:false
+                show_memo:false,
+                headers: FieldDefs
             }
         },
         created(){
-            this.listen();
             this.getDisposals();
+            this.listen();
         },
         computed:{
-        
-        },    
+            ...mapGetters({
+                tableData:'all_disposals',
+                bids:'all_bids'
+            })
+        },
+        watch:{
+            tableData(){
+             this.getItems();
+            },
+            bids(){
+            return this.bids;
+            }
+        },
         methods:{
-            checkBid(asset_id){
-           let item = this.tableData.find(asset => asset.id == asset_id);  
-           let bids = this.bids.filter(bid => bid.disposal_id == asset_id);          
-           return item.status == 1 && bids.length;
+           checkBid(asset_id){
+               console.log(`lll -> ${this.bids.length}`)
+           let item = this.tableData.find(asset => asset.id == asset_id);
+           if (this.bids.length !==undefined && this.bids.length > 0){
+               alert('ooo')
+               let bids = this.bids.filter(bid => bid.disposal_id == asset_id);
+               return item.status == 1;
+           }
+           return  false;
         },
             getDisposals(){
-                axios.get('asset-disposal')
-                    .then(res => {
-                        this.tableData = res.data.disposals
-                        this.bids = res.data.bids
-                        this.initDatable()
-                    })
-                    .catch(error => Exception.handle(error))
+              this.$store.dispatch('my_disposals');
+              this.$store.dispatch('my_bids');
             },
             editDisposal(disposal){
                 this.$store.dispatch('updateDisposal',disposal)
@@ -99,15 +133,14 @@
             },
             listen(){
                 eventBus.$on('listDisposal',(disposal) =>{
-                    this.tableData.unshift(disposal);
+                    console.log('walla')
+                    this.getItems();
                     this.add_disposal =false;
-                    this.initDatable();
                 });
                 eventBus.$on('cancel',()=>{
                     this.add_disposal = false;
                     this.editing = false;
                     this.show_memo = false;
-                    this.initDatable();
                 });
                 eventBus.$on('updateDisposal',(disposal)=>{
                     this.add_disposal = false;
@@ -118,27 +151,8 @@
                         }
                     }
                     this.tableData.unshift(disposal);
-                    this.initDatable();
                 });
-            },
-            initDatable(){
-                setTimeout(()=>{
-                    $('.dt').DataTable({
-                        "pagingType": "full_numbers",
-                        "lengthMenu": [
-                            [10, 25, 50, -1],
-                            [10, 25, 50, "All"]
-                        ],
-                        order: [[ 0, 'asc' ], [ 3, 'desc' ]],
-                        responsive: true,
-                        destroy: true,
-                        retrieve:true,
-                        autoFill: true,
-                        colReorder: true,
-
-                    });
-                },1000)
-            },
+            }
         },
         components:{
             Disposal,

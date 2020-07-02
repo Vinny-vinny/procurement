@@ -208,7 +208,7 @@
 <script>
  import datepicker from 'vuejs-datepicker';
  import { ModelSelect } from 'vue-search-select';
-
+ import {mapGetters} from 'vuex';
     export default {
         props:['edit'],
         data(){
@@ -225,12 +225,9 @@
                     id:''
                 },
                 edit_quotation: this.edit,
-                quotations:{},
                 show_stock:false,
                 show_asset:false,
                 show_service:false,
-                supplers:{},
-                enquiries:{},
                 all_enquiries:[],
                 filtered_suppliers:[],
                 filtered_assets:[],
@@ -239,12 +236,7 @@
                 all_assets:[],
                 all_stks:[],
                 all_services:[],
-                stocks:{},
-                assets:{},
-                services:{},
-                stk_id:'',
-                filtered_enquiries:{},
-                filtered_quotations:{}
+                stk_id:''
             }
         },
 
@@ -253,6 +245,42 @@
             this.listen();
         },
         watch:{
+            quotations(){
+              return this.quotations;
+            },
+            suppliers(){
+                this.suppliers.forEach(sp => {
+                    this.filtered_suppliers.push({
+                        'value': sp.id,
+                        'text': sp.name
+                    })
+                })
+              return this.suppliers;
+            },
+            enquiries(){
+                this.enquiries.forEach(e => {
+                    this.all_enquiries.push({
+                        'value': e.id,
+                        'text': e.enquiry_no
+                    })
+                })
+              return this.enquiries;
+            },
+            stocks(){
+              return this.stocks;
+            },
+            assets(){
+              return this.assets;
+            },
+            services(){
+              return this.services;
+            },
+            filtered_enquiries(){
+             return this.filtered_enquiries;
+            },
+            filtered_quotations(){
+             return this.filtered_quotations;
+            },
         reqs(){
             for(let i=0;i<this.filtered_assets.length;i++){
                if (Object.values(this.form.item_asset[0])[0] !== '') {
@@ -296,6 +324,16 @@
             },
         },
         computed:{
+         ...mapGetters({
+             quotations:'all_quotations',
+             suppliers:'all_suppliers',
+             enquiries:'all_enquiries',
+             stocks:'all_parts',
+             assets:'all_machines',
+             services:'all_services',
+             filtered_enquiries:'all_filtered_enquiries',
+             filtered_quotations:'all_filtered_quotations'
+         }),
          reqs(){
         return [this.stk_id,this.form.item_stock,this.form.item_asset,this.form.item_service].join();
         }
@@ -306,254 +344,229 @@
              this.form.item_type =='';
              return this.$toastr.e('Please select Enquiry No first.');
             }
-            if (this.form.item_type =='asset') {
-                setTimeout(()=>{
+            if (this.form.item_type =='asset' && this.assets.length !==undefined) {
                 if (Custom.isEmpty(this.filtered_assets)) {
                 this.show_asset = false;
                 this.show_stock = false;
                 this.show_service = false;
               return this.$toastr.e('Sorry,you do not have assets for the selected Enquiry No.');
              }
-             },500)
-              setTimeout(()=>{
+
               this.show_asset = true;
              this.show_stock = false;
              this.show_service = false;
-                },501)
 
             }
-             if (this.form.item_type =='stock') {
-               setTimeout(()=>{
+             if (this.form.item_type =='stock' && this.stocks.length !==undefined) {
                 if (Custom.isEmpty(this.filtered_stocks)) {
                 this.show_asset = false;
                 this.show_stock = false;
                 this.show_service = false;
               return this.$toastr.e('Sorry,you do not have stock items for the selected Enquiry No.');
              }
-               },500)
-              setTimeout(()=>{
+
              this.show_asset = false;
              this.show_stock = true;
              this.show_service = false;
-              },501)
-
             }
 
-            if (this.form.item_type =='service') {
-               setTimeout(()=>{
+            if (this.form.item_type =='service' && this.services.length !==undefined) {
                 if (Custom.isEmpty(this.filtered_services)) {
                 this.show_asset = false;
                 this.show_stock = false;
                 this.show_service = false;
               return this.$toastr.e('Sorry,you do not have Service items for the selected Enquiry No.');
              }
-               },500)
-              setTimeout(()=>{
+
              this.show_asset = false;
              this.show_stock = false;
              this.show_service = true;
-              },501)
-
             }
-
             },
             getSuppliers(){
             this.filtered_suppliers = [];
             let suppliers = [];
             let enquiry;
+            let s_ids;
 
-             if (this.edit) {
-             this.suppliers.forEach(sp => {
-              this.filtered_suppliers.push({
-                'value': sp.id,
-                'text': sp.name
-              })
-             })
+            if (this.filtered_enquiries.length !==undefined) {
+                enquiry = this.filtered_enquiries.find(e => e.id == this.form.enquiry_id);
 
-             }
-             //console.log(this.filtered_quotations)
-             let s_ids;
-            if (this.filtered_enquiries.length) {
-              enquiry = this.filtered_enquiries.find(e => e.id ==this.form.enquiry_id);
+                if (this.filtered_quotations.length) {
+                    s_ids = this.filtered_quotations.map(sup => {
+                        return sup.supplier_id;
+                    })
 
-             if (this.filtered_quotations.length) {
-              s_ids = this.filtered_quotations.map(sup => {
-              return sup.supplier_id;
-             })
-
-              for(let s=0; s<enquiry.supplier_id.length; s++){
-                if (!s_ids.includes(enquiry.supplier_id[s])) {
-                  suppliers.push(enquiry.supplier_id[s]);
+                    for (let s = 0; s < enquiry.supplier_id.length; s++) {
+                        if (!s_ids.includes(enquiry.supplier_id[s])) {
+                            suppliers.push(enquiry.supplier_id[s]);
+                        }
+                    }
+                } else if (this.filtered_quotations.length == 0) {
+                    for (let sup = 0; sup < this.suppliers.length; sup++) {
+                        if (enquiry.supplier_id.includes(this.suppliers[sup]['id'])) {
+                            this.filtered_suppliers.push({
+                                'value': this.suppliers[sup]['id'],
+                                'text': this.suppliers[sup]['name']
+                            });
+                        }
+                    }
                 }
-              }
-             }
 
-             else if(this.filtered_quotations.length ==0) {
-                for(let sup=0; sup<this.suppliers.length; sup++){
-                if (enquiry.supplier_id.includes(this.suppliers[sup]['id'])) {
-                  this.filtered_suppliers.push({
-                  'value': this.suppliers[sup]['id'],
-                  'text': this.suppliers[sup]['name']
-                });
-                }
-              }
-             }
-
-             if (suppliers.length) {
-              for(let p=0;p<this.suppliers.length;p++){
-                if(suppliers.includes(this.suppliers[p]['id'])){
-                this.filtered_suppliers.push({
-                  'value': this.suppliers[p]['id'],
-                  'text': this.suppliers[p]['name']
-                });
-                }
-              }
-             }
-            }
-
-
-            let filtered_assets = [];
-            let filtered_stocks = [];
-            let filtered_services = [];
-            this.filtered_assets = [];
-            this.filtered_stocks = [];
-            this.all_assets = [];
-            this.all_stks = [];
-            this.all_services = [];
-            if (enquiry.item_asset[0]['item_id'] !==null) {
-                for(let i=0;i<enquiry.item_asset.length;i++){
-                filtered_assets.push(enquiry.item_asset[i])
-                }
-                for(let i=0;i<filtered_assets.length;i++){
-                    for(let j=0;j<this.assets.length;j++){
-                        if (filtered_assets[i]['item_id'] == this.assets[j]['id']) {
-                            this.all_assets.push({
-                                'value': filtered_assets[i]['item_id'],
-                                'text': this.assets[j]['code'] +'-'+ this.assets[j]['description']
-                            })
-                            this.filtered_assets.push({
-                                'id' : filtered_assets[i]['item_id'],
-                                'qty' : filtered_assets[i]['qty'],
-                                'uom' : filtered_assets[i]['uom'],
-                                'scheduled_date' : filtered_assets[i]['scheduled_date'],
-                                'description' : this.assets[j]['code'] +'-'+ this.assets[j]['description']
-                            })
+                if (suppliers.length) {
+                    for (let p = 0; p < this.suppliers.length; p++) {
+                        if (suppliers.includes(this.suppliers[p]['id'])) {
+                            this.filtered_suppliers.push({
+                                'value': this.suppliers[p]['id'],
+                                'text': this.suppliers[p]['name']
+                            });
                         }
                     }
                 }
 
 
-                   if (this.filtered_assets.length) {
-                    if (this.form.item_asset[0]['item_id'] =="") {
-                     this.form.item_asset.splice(this.form.item_asset[0],1);
+                let filtered_assets = [];
+                let filtered_stocks = [];
+                let filtered_services = [];
+                this.filtered_assets = [];
+                this.filtered_stocks = [];
+                this.all_assets = [];
+                this.all_stks = [];
+                this.all_services = [];
+                if (enquiry.item_asset[0]['item_id'] !== null) {
+                    for (let i = 0; i < enquiry.item_asset.length; i++) {
+                        filtered_assets.push(enquiry.item_asset[i])
                     }
-                    if (this.form.item_asset.length ==0) {
+                    for (let i = 0; i < filtered_assets.length; i++) {
+                        for (let j = 0; j < this.assets.length; j++) {
+                            if (filtered_assets[i]['item_id'] == this.assets[j]['id']) {
+                                this.all_assets.push({
+                                    'value': filtered_assets[i]['item_id'],
+                                    'text': this.assets[j]['code'] + '-' + this.assets[j]['description']
+                                })
+                                this.filtered_assets.push({
+                                    'id': filtered_assets[i]['item_id'],
+                                    'qty': filtered_assets[i]['qty'],
+                                    'uom': filtered_assets[i]['uom'],
+                                    'scheduled_date': filtered_assets[i]['scheduled_date'],
+                                    'description': this.assets[j]['code'] + '-' + this.assets[j]['description']
+                                })
+                            }
+                        }
+                    }
 
-                    this.filtered_assets.forEach((asset) =>{
-                           this.form.item_asset.push({
-                            'item_id': asset['id'],
-                            'qty': asset['qty'],
-                            'uom': asset['uom'],
-                            'rate': '',
-                            'scheduled_date': asset['scheduled_date'],
-                            'delivery_date': '',
-                             'max_qty': ''
-                        })
 
-                    })
-                }
-                }
+                    if (this.filtered_assets.length) {
+                        if (this.form.item_asset[0]['item_id'] == "") {
+                            this.form.item_asset.splice(this.form.item_asset[0], 1);
+                        }
+                        if (this.form.item_asset.length == 0) {
 
-            }
-            if (enquiry.item_stock[0]['item_id'] !==null) {
-                for(let i=0;i<enquiry.item_stock.length;i++){
-                filtered_stocks.push(enquiry.item_stock[i]);
-                }
+                            this.filtered_assets.forEach((asset) => {
+                                this.form.item_asset.push({
+                                    'item_id': asset['id'],
+                                    'qty': asset['qty'],
+                                    'uom': asset['uom'],
+                                    'rate': '',
+                                    'scheduled_date': asset['scheduled_date'],
+                                    'delivery_date': '',
+                                    'max_qty': ''
+                                })
 
-                for(let k=0;k<filtered_stocks.length;k++){
-                    for(let j=0;j<this.stocks.length;j++){
-                        if (filtered_stocks[k]['item_id'] == this.stocks[j]['id']) {
-                            this.all_stks.push({
-                                'value': filtered_stocks[k]['item_id'],
-                                'text': this.stocks[j]['code'] +'-'+ this.stocks[j]['description']
                             })
-                            this.filtered_stocks.push({
-                                'id' : filtered_stocks[k]['item_id'],
-                                'qty' : filtered_stocks[k]['qty'],
-                                'uom' : filtered_stocks[k]['uom'],
-                                'scheduled_date' : filtered_stocks[k]['scheduled_date'],
-                                'description' : this.stocks[j]['code'] +'-'+ this.stocks[j]['description']
+                        }
+                    }
+
+                }
+                if (enquiry.item_stock[0]['item_id'] !== null) {
+                    for (let i = 0; i < enquiry.item_stock.length; i++) {
+                        filtered_stocks.push(enquiry.item_stock[i]);
+                    }
+
+                    for (let k = 0; k < filtered_stocks.length; k++) {
+                        for (let j = 0; j < this.stocks.length; j++) {
+                            if (filtered_stocks[k]['item_id'] == this.stocks[j]['id']) {
+                                this.all_stks.push({
+                                    'value': filtered_stocks[k]['item_id'],
+                                    'text': this.stocks[j]['code'] + '-' + this.stocks[j]['description']
+                                })
+                                this.filtered_stocks.push({
+                                    'id': filtered_stocks[k]['item_id'],
+                                    'qty': filtered_stocks[k]['qty'],
+                                    'uom': filtered_stocks[k]['uom'],
+                                    'scheduled_date': filtered_stocks[k]['scheduled_date'],
+                                    'description': this.stocks[j]['code'] + '-' + this.stocks[j]['description']
+                                })
+                            }
+                        }
+                    }
+                    // item_stock: [{item_id: '',qty:'',uom: '',scheduled_date:'',rate:'',delivery_date:'',max_qty:''}],
+
+                    if (this.filtered_stocks.length) {
+                        if (this.form.item_stock[0]['item_id'] == "") {
+                            this.form.item_stock.splice(this.form.item_stock[0], 1);
+                        }
+                        if (this.form.item_stock.length == 0) {
+
+                            this.filtered_stocks.forEach((stk) => {
+                                this.form.item_stock.push({
+                                    'item_id': stk['id'],
+                                    'qty': stk['qty'],
+                                    'uom': stk['uom'],
+                                    'rate': '',
+                                    'scheduled_date': stk['scheduled_date'],
+                                    'delivery_date': '',
+                                    'max_qty': ''
+                                })
+
+                            })
+                        }
+                    }
+
+                }
+
+                if (enquiry.item_service[0]['item_id'] !== null) {
+                    for (let i = 0; i < enquiry.item_service.length; i++) {
+                        filtered_services.push(enquiry.item_service[i]);
+                    }
+
+                    for (let k = 0; k < filtered_services.length; k++) {
+                        for (let j = 0; j < this.services.length; j++) {
+                            if (filtered_services[k]['item_id'] == this.services[j]['id']) {
+                                this.all_services.push({
+                                    'value': filtered_services[k]['item_id'],
+                                    'text': this.services[j]['name']
+                                })
+                                this.filtered_services.push({
+                                    'id': filtered_services[k]['item_id'],
+                                    'amount': filtered_services[k]['amount'],
+                                    'description': filtered_services[k]['description'],
+                                    'scheduled_date': filtered_services[k]['scheduled_date']
+                                })
+                            }
+                        }
+                    }
+
+                    if (this.filtered_services.length) {
+                        if (this.form.item_service[0]['item_id'] == "") {
+                            this.form.item_service.splice(this.form.item_service[0], 1);
+                        }
+                        if (this.form.item_service.length == 0) {
+
+                            this.filtered_services.forEach((service) => {
+                                this.form.item_service.push({
+                                    'item_id': service['id'],
+                                    'description': service['description'],
+                                    'amount': service['amount'],
+                                    'rate': '',
+                                    'scheduled_date': service['scheduled_date'],
+                                    'delivery_date': '',
+                                })
+
                             })
                         }
                     }
                 }
-                // item_stock: [{item_id: '',qty:'',uom: '',scheduled_date:'',rate:'',delivery_date:'',max_qty:''}],
-
-                   if (this.filtered_stocks.length) {
-                    if (this.form.item_stock[0]['item_id'] =="") {
-                     this.form.item_stock.splice(this.form.item_stock[0],1);
-                    }
-                    if (this.form.item_stock.length ==0) {
-
-                    this.filtered_stocks.forEach((stk) =>{
-                           this.form.item_stock.push({
-                            'item_id': stk['id'],
-                            'qty': stk['qty'],
-                            'uom': stk['uom'],
-                            'rate': '',
-                            'scheduled_date': stk['scheduled_date'],
-                            'delivery_date': '',
-                             'max_qty': ''
-                        })
-
-                    })
-                }
-                }
-
-            }
-
-             if (enquiry.item_service[0]['item_id'] !==null) {
-                for(let i=0;i<enquiry.item_service.length;i++){
-                filtered_services.push(enquiry.item_service[i]);
-                }
-
-                for(let k=0;k<filtered_services.length;k++){
-                    for(let j=0;j<this.services.length;j++){
-                        if (filtered_services[k]['item_id'] == this.services[j]['id']) {
-                            this.all_services.push({
-                                'value': filtered_services[k]['item_id'],
-                                'text': this.services[j]['name']
-                            })
-                            this.filtered_services.push({
-                                'id' : filtered_services[k]['item_id'],
-                                'amount' : filtered_services[k]['amount'],
-                                'description' : filtered_services[k]['description'],
-                                'scheduled_date' : filtered_services[k]['scheduled_date']
-                            })
-                        }
-                    }
-                }
-
-                if (this.filtered_services.length) {
-                    if (this.form.item_service[0]['item_id'] =="") {
-                     this.form.item_service.splice(this.form.item_service[0],1);
-                    }
-                    if (this.form.item_service.length ==0) {
-
-                    this.filtered_services.forEach((service) =>{
-                           this.form.item_service.push({
-                            'item_id': service['id'],
-                            'description': service['description'],
-                            'amount': service['amount'],
-                            'rate': '',
-                            'scheduled_date': service['scheduled_date'],
-                            'delivery_date': '',
-                        })
-
-                    })
-                }
-                }
-
             }
             },
             getQuotations(){
@@ -562,25 +575,7 @@
              this.$store.dispatch('my_enquiries');
              this.$store.dispatch('my_parts');
              this.$store.dispatch('my_services');
-            axios.get('quotations')
-            .then(res => {
-                //to be cont.
-                this.quotations = res.data.quotations;
-                this.suppliers = res.data.suppliers;
-                this.enquiries =  res.data.enquiries;
-                this.stocks = res.data.stock_items;
-                this.assets = res.data.assets;
-                this.services = res.data.services;
-                this.filtered_enquiries = res.data.filtered_enquiries;
-                this.filtered_quotations = res.data.filtered_quotations;
-
-                 res.data.enquiries.forEach(e => {
-                    this.all_enquiries.push({
-                        'value': e.id,
-                        'text': e.enquiry_no
-                    })
-                 })
-            })
+             this.$store.dispatch('my_machines');
             },
              addItem(i) {
                 this.form.item_stock.push({item_id: '',qty:'',uom: '',scheduled_date:'',rate:'',delivery_date:'',max_qty:''});
@@ -671,6 +666,7 @@
                 delete this.form.id;
                 axios.post('quotations',this.form)
                     .then(res => {
+                        this.$store.state.quotations.all_my_quotations.unshift(res.data);
                         eventBus.$emit('listQuotations',res.data)
                     })
                     .catch(error => error.response)
@@ -688,12 +684,12 @@
             },
             listen(){
                 if (this.edit){
-                    this.form = this.$store.state.quotations
+                    this.form = this.$store.state.quotations.quotation
                     console.log(this.form)
-                    setTimeout(()=>{
+                    //setTimeout(()=>{
                     this.getItems();
                     this.getSuppliers();
-                    },1000)
+                    //},1000)
                 }
             },
         },

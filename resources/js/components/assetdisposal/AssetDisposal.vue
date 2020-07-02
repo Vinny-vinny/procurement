@@ -20,7 +20,7 @@
                                <div class="form-group">
                             <label>Bid Deadline Date of Submission</label>
                             <datepicker v-model="form.deadline_date" required></datepicker>
-                        </div> 
+                        </div>
                             </div>
                         </div>
                         <br>
@@ -33,24 +33,24 @@
                                         <tr>
                                             <th>Item</th>
                                             <th>Reserved Price(NBV)</th>
-                                            <th>Picture</th>  
-                                            <th></th>                                            
+                                            <th>Picture</th>
+                                            <th></th>
                                         </tr>
-                                        <tr v-for="(m,i) in form.asset_details">              
+                                        <tr v-for="(m,i) in form.asset_details">
 
-                                            <td>                                             
+                                            <td>
                                         <model-select :options="all_assets"
                                         v-model="m.asset_id"
                                         class="i_p_3 qq"
                                         >
                                         </model-select>
-                                          </td>                                          
+                                          </td>
                                           <td><input type="number" step="0.001" class="form-control ite_m" v-model="m.amount"
                                                        placeholder="Reserved Price"></td>
-                                            <td>                                            
+                                            <td>
                                                <input type="file" v-on:change="onImageChange($event,m.asset_id)" class="form-control ite_m">
-                                              </td>                                  
-                                                   
+                                              </td>
+
                                             <td>
                                                 <i class="fa fa-minus-circle remove" @click="removeItem(i)"
                                                    v-show="i || (!i && form.asset_details.length > 1)"></i>
@@ -60,11 +60,11 @@
                                         </tr>
                                     </table>
                                   </fieldset>
-                                       
-                                </div> 
+
+                                </div>
                             </div>
                         </div>
-                    
+
                         <button type="submit" class="btn btn-primary">{{edit_disposal ? 'Update' : 'Save'}}</button>
                         <button type="button" class="btn btn-outline-danger" @click="cancel">Cancel</button>
                     </form>
@@ -78,6 +78,7 @@
 <script>
   import datepicker from 'vuejs-datepicker';
   import { ModelSelect } from 'vue-search-select';
+  import {mapGetters} from 'vuex';
     export default {
         props:['edit'],
         data(){
@@ -85,19 +86,33 @@
                 form:{
                     asset_details:[{asset_id:'',amount:'',picture:''}],
                     opening_date:'',
-                    deadline_date:''                   
+                    deadline_date:''
                 },
                 edit_disposal: this.edit,
                 all_assets:[],
-                assets:{}
             }
         },
         created(){
-            this.listen();
             this.getAssets();
+            this.listen();
+        },
+        watch:{
+          assets(){
+              this.assets.forEach(asset => {
+                  this.all_assets.push({
+                      'value': asset.id,
+                      'text': `${asset.code}-${asset.description}`
+                  })
+              })
+          }
+        },
+        computed:{
+          ...mapGetters({
+           assets:'all_machines'
+          })
         },
         methods:{
-            onImageChange(e,item_id) {  
+            onImageChange(e,item_id) {
                 let files = e.target.files || e.dataTransfer.files;
                 if (!files.length)
                     return;
@@ -110,22 +125,13 @@
                 reader.onload = (e) => {
                 vm.form.asset_details.find(item => item.asset_id ==item_id).picture = e.target.result;
                 };
-                reader.readAsDataURL(file);              
-               
+                reader.readAsDataURL(file);
+
                //console.log(this.form.asset_details);
 
             },
             getAssets(){
-            axios.get('asset-disposal')
-            .then(res => {
-                this.assets = res.data.assets;
-                res.data.assets.forEach(asset => {
-                    this.all_assets.push({
-                        'value': asset.id,
-                        'text': `${asset.code}-${asset.description}`
-                    })
-                })  
-            })
+            this.$store.dispatch('my_machines');
             },
             removeItem(i){
             this.form.asset_details.splice(i,1);
@@ -133,11 +139,11 @@
             addItem(){
             this.form.asset_details.push({asset_id:'',amount:'',picture:''});
             },
-            saveDisposal(){  
+            saveDisposal(){
             if (this.form.opening_date=='' || this.form.deadline_date=='') {
                 return this.$toastr.e('Sorry,Bid opening and deadline dates are required');
-            }  
-            this.form.opening_date = moment(this.form.opening_date).format('YYYY-MM-DD HH:mm:ss')  
+            }
+            this.form.opening_date = moment(this.form.opening_date).format('YYYY-MM-DD HH:mm:ss')
             this.form.deadline_date = moment(this.form.deadline_date).format('YYYY-MM-DD HH:mm:ss')
             if(this.form.opening_date > this.form.deadline_date){
                 return this.$toastr.e('Sorry,Bid opening date cannot be greater than Bid deadline date.')
@@ -152,28 +158,28 @@
                             return this.$toastr.e('Please all Assets fields are required.');
                         }
                     }
-                 
-                 for(let i=0;i<this.form.asset_details.length;i++){        
+
+                 for(let i=0;i<this.form.asset_details.length;i++){
                 if(!asset_obj[this.form.asset_details[i]['asset_id']]){
                     asset_obj[this.form.asset_details[i]['asset_id']] = this.form.asset_details[i];
-                } 
+                }
                 else if(asset_obj[this.form.asset_details[i]['asset_id']]){
                   return this.$toastr.e(`Sorry, You have entered an item ${this.assets.find(a => a.id ==asset_obj[this.form.asset_details[i]['asset_id']]['asset_id']).code} twice,Please check before proceeding.`);
-                } 
-            } 
-                      
+                }
+            }
+
             this.edit_disposal ? this.update() : this.save();
             },
             save(){
                    axios.post('asset-disposal',this.form)
                     .then(res => {
-                     //console.log(res.data);
+                        console.log('success')
+                      this.$store.state.disposals.all_my_disposals.unshift(res.data);
                       eventBus.$emit('listDisposal',res.data)
                     })
                     .catch(error => error.response)
             },
             update(){
-                return console.log('oooooooo')
                 axios.patch(`asset-disposal/${this.form.id}`,this.form)
                     .then(res => {
                         this.edit_disposal = false;
@@ -186,7 +192,7 @@
             },
             listen(){
                 if (this.edit){
-                    this.form = this.$store.state.disposals
+                    this.form = this.$store.state.disposals.disposal
                 }
             },
         },

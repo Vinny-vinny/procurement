@@ -17,11 +17,7 @@ class AssetDisposalController extends Controller
      */
     public function index()
     {
-        return response()->json([
-            'assets'=> Machine::all(),
-            'disposals' => AssetDisposalResource::collection(AssetDisposal::all()),
-            'bids' => Bidding::all() 
-        ]);
+        return response()->json(AssetDisposalResource::collection(AssetDisposal::all()));
     }
 
     /**
@@ -32,8 +28,8 @@ class AssetDisposalController extends Controller
      */
     public function store(Request $request)
     {
-       
-        $assets = [];      
+
+        $assets = [];
         foreach ($request->get('asset_details') as $value) {
           if ($value['picture']) {
             $image = $value['picture'];
@@ -43,14 +39,14 @@ class AssetDisposalController extends Controller
             'asset_id' => $value['asset_id'],
             'amount' => $value['amount'],
             'picture' => $name
-            ];      
-            }      
+            ];
+            }
         }
-       
+
         $disposal_no = AssetDisposal::count()+1;
         $request['asset_details'] = json_encode($assets);
         $request['disposal_no'] = 'Dis00'.$disposal_no;
-        $disposal = AssetDisposal::create($request->all());     
+        $disposal = AssetDisposal::create($request->all());
         return response()->json(new AssetDisposalResource($disposal));
     }
 
